@@ -1,6 +1,7 @@
-org: "nathan85"
-service: "serverless-boilerplate"
-frameworkVersion: "3"
+org: 'greenherbdesigns'
+service: 'ai-etsy'
+app: 'ai-etsy-app'
+frameworkVersion: '3'
 useDotenv: true
 
 plugins:
@@ -14,18 +15,53 @@ custom:
 provider:
   name: aws
   stage: ${opt:stage, 'dev'}
-  runtime: nodejs14.x
-  region: eu-west-2
+  runtime: nodejs20.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListObjectsV2
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource:
+        - arn:aws:s3:::generated-images/*
+
   environment:
-    NODE_OPTIONS: "--enable-source-maps"
+    NODE_OPTIONS: '--enable-source-maps'
     CONFIG_REGION: ${self:provider.region}
 
 functions:
-  buildCircle:
-    name: buildCircle-${self:provider.stage}
-    handler: ./src/handlers/func1/index.handler
+  generateImages:
+    name: generate-images-${self:provider.stage}
+    handler: ./src/handlers/generate/index.handler
     events:
-      - http:
-          path: /func1
-          method: GET
-          cors: true
+      - schedule:
+          name: generate-images-schedule-${self:provider.stage}
+          description: 'Generate the images at midnight'
+          rate: cron(00 00 * * ? *)
+          enabled: false
+
+resources:
+  Resources:
+    GeneratedImagesBucketPolicy:
+      Type: 'AWS::S3::BucketPolicy'
+      Properties:
+        Bucket: generated-images
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Action:
+                - 's3:ListBucket'
+              Resource: 'arn:aws:s3:::generated-images'
+              Principal:
+                AWS:
+                  - Fn::GetAtt: [IamRoleLambdaExecution, Arn]
+            - Effect: 'Allow'
+              Action:
+                - 's3:GetObject'
+                - 's3:DeleteObject'
+              Resource: 'arn:aws:s3:::generated-images/*'
+              Principal:
+                AWS:
+                  - Fn::GetAtt: [IamRoleLambdaExecution, Arn]
