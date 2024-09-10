@@ -1,6 +1,6 @@
 # Base Service
 
-Service description
+AI Generated Etsy store
 
 ## Schema
 
