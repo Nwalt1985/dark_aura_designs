@@ -44,6 +44,11 @@ functions:
 
 resources:
   Resources:
+    GeneratedImagesBucket:
+      Type: 'AWS::S3::Bucket'
+      Properties:
+        BucketName: generated-images-ai-etsy
+
     GeneratedImagesBucketPolicy:
       Type: 'AWS::S3::BucketPolicy'
       Properties:
@@ -54,6 +59,12 @@ resources:
             - Effect: 'Allow'
               Action:
                 - 's3:ListBucket'
+              Resource: 'arn:aws:s3:::generated-images-ai-etsy'
+              Principal:
+                AWS:
+                  - Fn::GetAtt: [IamRoleLambdaExecution, Arn]
+            - Effect: 'Allow'
+              Action:
                 - 's3:GetObject'
                 - 's3:DeleteObject'
               Resource: 'arn:aws:s3:::generated-images-ai-etsy/*'

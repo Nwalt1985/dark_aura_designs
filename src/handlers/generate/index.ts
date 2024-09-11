@@ -7,6 +7,12 @@ export const handler = async (): Promise<APIGatewayProxyResult> => {
   try {
     const dallEPrompts = await getDallEPrompts();
 
+    // generate images using DALL-E
+
+    // resize images
+
+    // upload images to smb server
+
     return {
       statusCode: StatusCodes.OK,
       body: JSON.stringify(dallEPrompts, null, 2),

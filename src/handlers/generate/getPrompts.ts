@@ -46,8 +46,8 @@ export async function getDallEPrompts(): Promise<
       const th = getRandomElement(theme);
       const st = getRandomElement(style);
 
-      const prompt = `give me three DALL-E ai prompts to generate images suitable for a desk mat and mouse mat design with the concept theme being based around ${th}, in the style of ${st}. 
-		Don't include the word 'desk mat' or 'mouse mat' in the prompt. Do not have any repeats. Along with the prompt generate an SEO optimized etsy description, 140 character key word heavy title and 12 long tail key words. 
+      const prompt = `give me three DALL-E ai prompts to generate images suitable for a desk mat design with the concept theme being based around ${th}, in the style of ${st}. 
+		Don't include the word 'desk mat' in the prompt. Do not have any repeats. Along with the prompt generate an SEO optimized etsy description, 140 character key word heavy title and 12 long tail key words. 
 		Optimize the key words for better SEO. Output the results in a JSON format. Structure the JSON as follows: 
 		{
 		  "prompts": [
