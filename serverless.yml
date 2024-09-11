@@ -29,6 +29,7 @@ provider:
   environment:
     NODE_OPTIONS: '--enable-source-maps'
     CONFIG_REGION: ${self:provider.region}
+    OPENAI_API_KEY: ${param:OPENAI_API_KEY, env:OPENAI_API_KEY}
 
 functions:
   generateImages:
