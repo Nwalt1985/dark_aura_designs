@@ -16,7 +16,7 @@ provider:
   name: aws
   stage: ${opt:stage, 'dev'}
   runtime: nodejs20.x
-  region: us-east-1
+  region: eu-west-2
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -24,7 +24,7 @@ provider:
         - s3:GetObject
         - s3:DeleteObject
       Resource:
-        - arn:aws:s3:::generated-images/*
+        - arn:aws:s3:::generated-images-ai-etsy/*
 
   environment:
     NODE_OPTIONS: '--enable-source-maps'
@@ -47,22 +47,16 @@ resources:
     GeneratedImagesBucketPolicy:
       Type: 'AWS::S3::BucketPolicy'
       Properties:
-        Bucket: generated-images
+        Bucket: generated-images-ai-etsy
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
             - Effect: 'Allow'
               Action:
                 - 's3:ListBucket'
-              Resource: 'arn:aws:s3:::generated-images'
-              Principal:
-                AWS:
-                  - Fn::GetAtt: [IamRoleLambdaExecution, Arn]
-            - Effect: 'Allow'
-              Action:
                 - 's3:GetObject'
                 - 's3:DeleteObject'
-              Resource: 'arn:aws:s3:::generated-images/*'
+              Resource: 'arn:aws:s3:::generated-images-ai-etsy/*'
               Principal:
                 AWS:
                   - Fn::GetAtt: [IamRoleLambdaExecution, Arn]

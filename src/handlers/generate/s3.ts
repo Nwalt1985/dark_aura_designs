@@ -2,7 +2,7 @@ import { S3 } from 'aws-sdk';
 
 const s3 = new S3();
 
-const BUCKET_NAME = 'generated-images';
+const BUCKET_NAME = 'generated-images-ai-etsy';
 
 export async function getImagesFromS3() {
   const s3Response = await s3.listObjectsV2({ Bucket: BUCKET_NAME }).promise();
