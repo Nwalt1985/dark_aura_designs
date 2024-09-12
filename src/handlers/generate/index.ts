@@ -6,7 +6,8 @@ import { generateDalleImages } from './generateImages';
 import cron from 'node-cron';
 
 // Run locally
-cron.schedule('* * * * *', async () => {
+// cron.schedule('* * * * *', async () => {
+(async () => {
   try {
     const dallEPrompts = await getDallEPrompts();
 
@@ -45,7 +46,7 @@ cron.schedule('* * * * *', async () => {
       body: JSON.stringify({ message, name: error.name }, null, 2),
     };
   }
-});
+})();
 
 // Run on Cloud
 // export const handler = async () => {
