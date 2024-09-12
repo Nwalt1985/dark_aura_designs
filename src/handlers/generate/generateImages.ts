@@ -19,34 +19,43 @@ export async function generateDalleImages(
     // const promises = [];
     let count = 0;
 
-    // for (let prompt in prompts) {
-    // count++;
+    const promises = prompts.map(async ({ prompt }) => {
+      try {
+        count++;
 
-    // promises.push(
-    await openai.images
-      .generate({
-        model: 'dall-e-3',
-        prompt: prompts[0].prompt,
-        size: '1792x1024',
-        quality: 'hd',
-        response_format: 'b64_json',
-      })
-      .then((response) => {
+        const response = await openai.images.generate({
+          model: 'dall-e-3',
+          prompt,
+          size: '1792x1024',
+          quality: 'hd',
+          response_format: 'b64_json',
+        });
+
         console.log('Uploading image');
 
         const buffer = response.data[0].b64_json;
 
         if (buffer) {
-          fs.writeFileSync(
+          fs.writeFile(
             `~/shared/etsy_images/original/${formattedDate}-${count}.png`,
             buffer,
             'base64',
+            (err) => {
+              if (err) {
+                console.error(`Error writing file: ${err}`);
+              } else {
+                console.log('File written successfully.');
+              }
+            },
           );
         }
-      });
-    // );
-    // }
-    // await Promise.all(promises);
+      } catch (error) {
+        console.error(`Error generating image for prompt ${count}:`, error);
+      }
+    });
+
+    await Promise.all(promises);
+
     return;
   } catch (err) {
     throw err;
