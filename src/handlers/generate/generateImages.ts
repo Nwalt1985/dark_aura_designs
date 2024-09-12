@@ -16,13 +16,8 @@ export async function generateDalleImages(
 
     const formattedDate = `${day}/${month}/${year}`;
 
-    // const promises = [];
-    let count = 0;
-
-    const promises = prompts.map(async ({ prompt }) => {
+    const promises = prompts.map(async ({ prompt }, index) => {
       try {
-        count++;
-
         const response = await openai.images.generate({
           model: 'dall-e-3',
           prompt,
@@ -37,7 +32,7 @@ export async function generateDalleImages(
 
         if (buffer) {
           fs.writeFile(
-            `~/shared/etsy_images/original/${formattedDate}-${count}.png`,
+            `~/shared/etsy_images/original/${formattedDate}-${index}.png`,
             buffer,
             'base64',
             (err) => {
@@ -50,7 +45,7 @@ export async function generateDalleImages(
           );
         }
       } catch (error) {
-        console.error(`Error generating image for prompt ${count}:`, error);
+        console.error(`Error generating image for prompt ${index}:`, error);
       }
     });
 
