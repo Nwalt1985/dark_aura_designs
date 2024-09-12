@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
 import OpenAI from 'openai';
 import fs from 'fs';
+import { Writable } from 'stream';
 
 const openai = new OpenAI();
 
@@ -31,18 +32,26 @@ export async function generateDalleImages(
         const buffer = response.data[0].b64_json;
 
         if (buffer) {
-          fs.writeFile(
-            `~/shared/etsy_images/original/${formattedDate}-${index}.png`,
-            buffer,
-            'base64',
-            (err) => {
-              if (err) {
-                console.error(`Error writing file: ${err}`);
-              } else {
-                console.log('File written successfully.');
-              }
-            },
-          );
+          const bufferStream = new Writable();
+		  
+          bufferStream._write = (chunk, encoding, done) => {
+            fs.writeFile(
+              `~/shared/etsy_images/original/${formattedDate}-${index}.png`,
+              chunk,
+              'base64',
+              (err) => {
+                if (err) {
+                  console.error(`Error writing file: ${err}`);
+                } else {
+                  console.log('File written successfully.');
+                }
+                done();
+              },
+            );
+          };
+
+          bufferStream.write(buffer);
+          bufferStream.end();
         }
       } catch (error) {
         console.error(`Error generating image for prompt ${index}:`, error);
