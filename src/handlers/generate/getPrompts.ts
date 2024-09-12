@@ -42,7 +42,7 @@ export async function getDallEPrompts(): Promise<
   try {
     const promises = [];
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1; i++) {
       const th = getRandomElement(theme);
       const st = getRandomElement(style);
 

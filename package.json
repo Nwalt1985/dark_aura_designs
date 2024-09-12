@@ -1,13 +1,15 @@
 {
-  "name": "serverless-boilerplate",
+  "name": "ai_etsy",
   "version": "1.0.0",
-  "description": "Serverless Boilerplate",
+  "description": "AI Etsy Store",
   "main": "serverless.ts",
   "scripts": {
     "prettier": "prettier --list-different './**/*.{js,ts}' --config '../.prettierrc.json' --ignore-path '../.prettierignore'",
     "prettier-write": "prettier --list-different './**/*.{js,ts}' --config '../.prettierrc.json' --ignore-path '../.prettierignore' --write",
     "typecheck": "tsc --noEmit",
-    "start": "clear && serverless offline start"
+    "start": "clear && serverless offline start",
+    "build": "npx tsc",
+    "exec": "npx tsc && node ./.build/handlers/generate/index.js"
   },
   "engines": {
     "node": ">=20.12.2"
@@ -15,6 +17,8 @@
   "devDependencies": {
     "@serverless/typescript": "^3.38.0",
     "@types/aws-lambda": "^8.10.142",
+    "@types/node-cron": "^3.0.11",
+    "@types/smb2": "^0.2.4",
     "prettier": "3.3.3",
     "serverless": "^3.0.0",
     "serverless-offline": "^8.8.0",
@@ -30,7 +34,9 @@
     "aws-sdk": "^2.1167.0",
     "dotenv": "^16.0.1",
     "http-status-codes": "^2.2.0",
+    "node-cron": "^3.0.3",
     "openai": "^4.58.2",
+    "smb2": "^0.2.11",
     "zod": "^3.23.8"
   }
 }

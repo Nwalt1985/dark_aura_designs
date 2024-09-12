@@ -39,8 +39,9 @@ functions:
       - schedule:
           name: generate-images-schedule-${self:provider.stage}
           description: 'Generate the images at midnight'
-          rate: cron(00 00 * * ? *)
-          enabled: false
+          # rate: cron(00 00 * * ? *)
+          rate: rate(1 minute)
+          enabled: true
 
 resources:
   Resources:
