@@ -5,6 +5,7 @@ export const PromptResponse = z.array(
     prompt: z.string(),
     description: z.string(),
     title: z.string(),
+    filename: z.string(),
     keywords: z.array(z.string()),
   }),
 );

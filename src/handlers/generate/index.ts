@@ -9,22 +9,16 @@ import cron from 'node-cron';
 // cron.schedule('* * * * *', async () => {
 (async () => {
   try {
+    // generate prompts
     const dallEPrompts = await getDallEPrompts();
 
-    await generateDalleImages(dallEPrompts);
-
     // generate images using DALL-E
+    await generateDalleImages(dallEPrompts);
 
     // resize images
 
     // upload images to smb server
-
-    // console.log(dallEPrompts);
-
-    // return {
-    //   statusCode: StatusCodes.OK,
-    //   body: JSON.stringify(dallEPrompts, null, 2),
-    // };
+    return;
   } catch (err) {
     let statusCode;
     let message;

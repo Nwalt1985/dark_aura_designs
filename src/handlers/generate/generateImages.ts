@@ -1,5 +1,6 @@
-import { set, z } from 'zod';
+import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
+import sharp from 'sharp';
 import OpenAI from 'openai';
 import fs from 'fs';
 import path from 'path';
@@ -27,8 +28,10 @@ export async function generateDalleImages(
       fs.mkdirSync(baseDir, { recursive: true });
     }
 
+    console.log(`Generating ${prompts.length} images`);
+
     for (let index = 0; index < prompts.length; index++) {
-      const { prompt } = prompts[index];
+      const { prompt, filename } = prompts[index];
 
       try {
         const response = await openai.images.generate({
@@ -39,19 +42,31 @@ export async function generateDalleImages(
           response_format: 'b64_json',
         });
 
-        console.log('Uploading image');
-
         const buffer = response.data[0].b64_json;
 
+        console.log(`Creating file: ${filename}`);
+
         if (buffer) {
-          const filePath = path.join(baseDir, `${index}.png`);
-          fs.writeFile(filePath, buffer, 'base64', (err) => {
-            if (err) {
-              console.error(`Error writing file: ${err}`);
-            } else {
-              console.log('File written successfully.');
-            }
-          });
+          const image1 = await sharp(Buffer.from(buffer, 'base64'))
+            .resize(4320, 3630)
+            .png()
+            .toBuffer();
+
+          await createFile(baseDir, `${filename}-4320x3630.png`, image1);
+
+          const image2 = await sharp(Buffer.from(buffer, 'base64'))
+            .resize(7080, 4140)
+            .png()
+            .toBuffer();
+
+          await createFile(baseDir, `${filename}-7080x4140.png`, image2);
+
+          const image3 = await sharp(Buffer.from(buffer, 'base64'))
+            .resize(9450, 4650)
+            .png()
+            .toBuffer();
+
+          await createFile(baseDir, `${filename}-9450x4650.png`, image3);
         }
       } catch (error) {
         console.error(`Error generating image for prompt ${index}:`, error);
@@ -65,4 +80,20 @@ export async function generateDalleImages(
   } catch (error) {
     console.error('Error in generateDalleImages:', error);
   }
+}
+
+async function createFile(
+  baseDir: string,
+  filename: string,
+  resizedBuffer: Buffer,
+) {
+  const filePath = path.join(baseDir, `${filename}`);
+
+  fs.writeFile(filePath, resizedBuffer.toString('base64'), 'base64', (err) => {
+    if (err) {
+      console.error(`Error writing file: ${err}`);
+    } else {
+      console.log(`${filename} written successfully.`);
+    }
+  });
 }
