@@ -9,29 +9,24 @@ const openai = new OpenAI();
 
 export async function generateDalleImages(
   prompts: z.infer<typeof PromptResponse>,
+  formattedDate: string,
 ) {
   try {
-    const date = new Date();
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const year = date.getFullYear();
-
-    const formattedDate = `${day}-${month}-${year}`;
-    const baseDir = path.resolve(
-      process.env.HOME || '',
-      `Documents/etsy_images/original/${formattedDate}`,
-    );
-
-    // Ensure the base directory exists
-    if (!fs.existsSync(baseDir)) {
-      console.log('Creating directory');
-      fs.mkdirSync(baseDir, { recursive: true });
-    }
-
     console.log(`Generating ${prompts.length} images`);
 
     for (let index = 0; index < prompts.length; index++) {
       const { prompt, filename } = prompts[index];
+
+      const baseDir = path.resolve(
+        process.env.HOME || '',
+        `Documents/etsy_images/original/${formattedDate}/${index}`,
+      );
+
+      // Ensure the base directory exists
+      if (!fs.existsSync(baseDir)) {
+        console.log('Creating directory');
+        fs.mkdirSync(baseDir, { recursive: true });
+      }
 
       try {
         const response = await openai.images.generate({
@@ -46,6 +41,7 @@ export async function generateDalleImages(
 
         console.log(`Creating file: ${filename}`);
 
+        // Resize images and create files
         if (buffer) {
           const image1 = await sharp(Buffer.from(buffer, 'base64'))
             .resize(4320, 3630)
@@ -78,7 +74,7 @@ export async function generateDalleImages(
       }
     }
   } catch (error) {
-    console.error('Error in generateDalleImages:', error);
+    throw error;
   }
 }
 

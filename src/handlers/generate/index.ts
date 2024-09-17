@@ -4,20 +4,38 @@ import { APIGatewayProxyResult } from 'aws-lambda';
 import { getDallEPrompts } from './getPrompts';
 import { generateDalleImages } from './generateImages';
 import cron from 'node-cron';
+import { createListing } from '../../service';
+import { PromptResponse } from '../../models/schemas/prompt';
 
 // Run locally
 // cron.schedule('* * * * *', async () => {
 (async () => {
   try {
+    const date = new Date();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+    const formattedDate = `${day}-${month}-${year}`;
+
     // generate prompts
     const dallEPrompts = await getDallEPrompts();
 
+    // Add createdAt field to each prompt
+    const formattedData = dallEPrompts.map((item) => ({
+      ...item,
+      createdAt: formattedDate,
+    }));
+
+    PromptResponse.parse(formattedData);
+
+    console.log(`Successfully fetched ${dallEPrompts.length} prompts`);
+
     // generate images using DALL-E
-    await generateDalleImages(dallEPrompts);
+    await generateDalleImages(formattedData, formattedDate);
 
-    // resize images
+    // create DB entry
+    await createListing(formattedData);
 
-    // upload images to smb server
     return;
   } catch (err) {
     let statusCode;
@@ -35,51 +53,6 @@ import cron from 'node-cron';
         message = error.message;
     }
 
-    return {
-      statusCode,
-      body: JSON.stringify({ message, name: error.name }, null, 2),
-    };
+    console.error({ name: error.name, statusCode, message });
   }
 })();
-
-// Run on Cloud
-// export const handler = async () => {
-//   try {
-//     const dallEPrompts = await getDallEPrompts();
-
-//     await generateDalleImages(dallEPrompts);
-
-//     // generate images using DALL-E
-
-//     // resize images
-
-//     // upload images to smb server
-
-//     console.log(dallEPrompts);
-
-//     return {
-//       statusCode: StatusCodes.OK,
-//       body: JSON.stringify(dallEPrompts, null, 2),
-//     };
-//   } catch (err) {
-//     let statusCode;
-//     let message;
-
-//     const error = err as Error;
-
-//     switch (error.name) {
-//       case 'ZodError':
-//         statusCode = StatusCodes.BAD_REQUEST;
-//         message = error.message;
-//         break;
-//       default:
-//         statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-//         message = error.message;
-//     }
-
-//     return {
-//       statusCode,
-//       body: JSON.stringify({ message, name: error.name }, null, 2),
-//     };
-//   }
-// };

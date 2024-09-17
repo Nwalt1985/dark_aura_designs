@@ -21,7 +21,7 @@ export async function getDallEPrompts(): Promise<
   try {
     const promises = [];
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < 3; i++) {
       const th = getRandomElement(themes);
       const st = getRandomElement(styles);
 
@@ -34,6 +34,8 @@ export async function getDallEPrompts(): Promise<
      		  "prompt": "Prompt 1",
      		  "description": "Description 1",
      		  "title": "Title 1",
+			  "theme": "Theme 1",
+			  "style": "Style 1",
      		  "filename": "Filename 1",
      		  "keywords": ["Keyword 1", "Keyword 2"]
      		},
@@ -68,8 +70,6 @@ export async function getDallEPrompts(): Promise<
     }
 
     await Promise.all(promises);
-
-    PromptResponse.parse(prompts);
 
     return prompts;
   } catch (err) {
