@@ -1,5 +1,4 @@
 import { StatusCodes } from 'http-status-codes';
-import { APIGatewayProxyResult } from 'aws-lambda';
 
 import { getDallEPrompts } from './getPrompts';
 import { generateDalleImages } from './generateImages';
