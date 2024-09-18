@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
+import { createDBListing } from '../../service';
 import sharp from 'sharp';
 import OpenAI from 'openai';
 import fs from 'fs';
@@ -40,6 +41,14 @@ export async function generateDalleImages(
         const buffer = response.data[0].b64_json;
 
         console.log(`Creating file: ${filename}`);
+
+        const dbData = {
+          ...prompts[index],
+          buffer: buffer || '',
+        };
+
+        // create DB entry
+        await createDBListing([dbData]);
 
         // Resize images and create files
         if (buffer) {

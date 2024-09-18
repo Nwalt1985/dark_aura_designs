@@ -10,5 +10,6 @@ export const PromptResponse = z.array(
     filename: z.string(),
     keywords: z.array(z.string()),
     createdAt: z.string(),
+    buffer: z.string().optional(),
   }),
 );

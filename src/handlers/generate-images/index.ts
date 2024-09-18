@@ -3,28 +3,35 @@ import { StatusCodes } from 'http-status-codes';
 import { getDallEPrompts } from './getPrompts';
 import { generateDalleImages } from './generateImages';
 import cron from 'node-cron';
-import { createListing } from '../../service';
 import { PromptResponse } from '../../models/schemas/prompt';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
-const argv = yargs(hideBin(process.argv))
-  .option('theme', {
-    type: 'string',
-    description: 'Theme for the DALL-E prompts',
-    demandOption: false,
+const parser = yargs(hideBin(process.argv))
+  .options({
+    theme: {
+      type: 'string',
+      description: 'Theme for the DALL-E prompts',
+      demandOption: false,
+    },
+    style: {
+      type: 'string',
+      description: 'Style for the DALL-E prompts',
+      demandOption: false,
+    },
+    keywords: {
+      type: 'string',
+      description: 'Keywords for the listing',
+      demandOption: false,
+    },
+    limit: {
+      type: 'number',
+      description: 'Limit the number of prompts',
+      default: 3,
+    },
   })
-  .option('style', {
-    type: 'string',
-    description: 'Style for the DALL-E prompts',
-    demandOption: false,
-  })
-  .option('limit', {
-    type: 'number',
-    description: 'Limit the number of prompts',
-    default: 3,
-  })
-  .parseSync();
+  .strict() // Ensure that invalid options throw an error
+  .help();
 
 // Run locally
 // cron.schedule('* * * * *', async () => {
@@ -36,10 +43,13 @@ const argv = yargs(hideBin(process.argv))
     const year = date.getFullYear();
     const formattedDate = `${day}-${month}-${year}`;
 
+    const argv = parser.parseSync();
+
     // generate prompts
     const dallEPrompts = await getDallEPrompts({
       theme: argv.theme,
       style: argv.style,
+      keywords: argv.keywords,
       limit: argv.limit,
     });
 
@@ -55,9 +65,6 @@ const argv = yargs(hideBin(process.argv))
 
     // generate images using DALL-E
     await generateDalleImages(formattedData, formattedDate);
-
-    // create DB entry
-    await createListing(formattedData);
 
     return;
   } catch (err) {

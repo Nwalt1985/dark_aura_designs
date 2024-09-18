@@ -18,10 +18,12 @@ function getRandomElement(arr: { name: string; keywords: string[] }[]) {
 export async function getDallEPrompts({
   theme,
   style,
+  keywords,
   limit,
 }: {
   theme?: string;
   style?: string;
+  keywords?: string;
   limit: number;
 }): Promise<z.infer<typeof PromptResponse>> {
   try {
@@ -31,9 +33,17 @@ export async function getDallEPrompts({
       const th = getRandomElement(themes);
       const st = getRandomElement(styles);
 
-      const prompt = `give me one DALL-E ai prompt to generate an image suitable for a desk mat design with the concept theme being based around ${theme || th.name}, in the style of ${style || st.name}.
-     	Don't include the word 'desk mat' in the prompt. Do not have any repeats. Along with the prompt generate an SEO optimized etsy description, 140 character key word heavy title, including the default keywords '${th.keywords},${st.keywords}' and a short filename, dont include the filename format.
-     	Optimize the key words for better SEO. Output the results in a JSON format. Structure the JSON as follows:
+      const keywordsArr = [];
+
+      if (keywords) {
+        keywordsArr.push(...keywords.split(','));
+      } else {
+        keywordsArr.push(...th.keywords, ...st.keywords);
+      }
+
+      const prompt = `give me one DALL-E ai prompt to generate an image suitable for a desk mat design with the concept theme being based around ${th.name}, in the style of ${st.name}.
+     	Don't include the word 'desk mat' in the prompt and also don't include any generated text in the image. Along with the prompt generate an SEO optimized etsy description, 140 character key word heavy title, and a short filename, dont include the filename format.
+     	Include the keywords ${keywordsArr}. Output the results in a JSON format. Structure the JSON as follows:
      	{
      	  "prompts": [
      		{
@@ -43,7 +53,7 @@ export async function getDallEPrompts({
 			  "theme": "Theme 1",
 			  "style": "Style 1",
      		  "filename": "Filename 1",
-     		  "keywords": ["Keyword 1", "Keyword 2"]
+     		  "keywords": [],
      		},
      	  ]
      	}`;

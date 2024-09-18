@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { mongoConnect } from '../database';
 import { PromptResponse } from '../models/schemas/prompt';
 
-export async function createListing(listing: z.infer<typeof PromptResponse>) {
+export async function createDBListing(listing: z.infer<typeof PromptResponse>) {
   const { client, collection } = await mongoConnect();
 
   const result = await collection.insertMany(listing);
