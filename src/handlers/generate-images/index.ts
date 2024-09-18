@@ -5,6 +5,26 @@ import { generateDalleImages } from './generateImages';
 import cron from 'node-cron';
 import { createListing } from '../../service';
 import { PromptResponse } from '../../models/schemas/prompt';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+
+const argv = yargs(hideBin(process.argv))
+  .option('theme', {
+    type: 'string',
+    description: 'Theme for the DALL-E prompts',
+    demandOption: false,
+  })
+  .option('style', {
+    type: 'string',
+    description: 'Style for the DALL-E prompts',
+    demandOption: false,
+  })
+  .option('limit', {
+    type: 'number',
+    description: 'Limit the number of prompts',
+    default: 3,
+  })
+  .parseSync();
 
 // Run locally
 // cron.schedule('* * * * *', async () => {
@@ -17,7 +37,11 @@ import { PromptResponse } from '../../models/schemas/prompt';
     const formattedDate = `${day}-${month}-${year}`;
 
     // generate prompts
-    const dallEPrompts = await getDallEPrompts();
+    const dallEPrompts = await getDallEPrompts({
+      theme: argv.theme,
+      style: argv.style,
+      limit: argv.limit,
+    });
 
     // Add createdAt field to each prompt
     const formattedData = dallEPrompts.map((item) => ({
