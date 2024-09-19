@@ -7,8 +7,7 @@
     "prettier-write": "prettier --list-different './**/*.{js,ts}' --config '../.prettierrc.json' --ignore-path '../.prettierignore' --write",
     "typecheck": "tsc --noEmit",
     "build": "npx tsc",
-    "generate-images": "npx tsc && node ./.build/handlers/generate-images/index.js",
-    "generate-mockups": "npx tsc && node ./.build/handlers/generate-mockups/index.js"
+    "generate-images": "npx tsc && node ./.build/handlers/generate-images/index.js"
   },
   "engines": {
     "node": ">=20.12.2"

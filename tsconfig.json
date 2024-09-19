@@ -1,6 +1,10 @@
 {
-  "include": ["src/**/*.ts", "src/handlers/generate-mockups/index.js"],
-  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts"],
+  "exclude": [
+    "node_modules",
+    "src/handlers/generate-mockups/*.ts",
+    "desk-mat-mockup.jsx"
+  ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 

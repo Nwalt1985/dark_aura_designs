@@ -20,7 +20,7 @@ export async function generateDalleImages(
 
       const baseDir = path.resolve(
         process.env.HOME || '',
-        `Documents/etsy_images/original/${formattedDate}/${index}`,
+        `Desktop/ai_etsy/etsy_assets/original/${formattedDate}/${index}`,
       );
 
       // Ensure the base directory exists
@@ -52,6 +52,13 @@ export async function generateDalleImages(
 
         // Resize images and create files
         if (buffer) {
+          const mockup = await sharp(Buffer.from(buffer, 'base64'))
+            .resize(2543, 1254)
+            .png()
+            .toBuffer();
+
+          await createFile(baseDir, `${filename}-mockup-2543x1254.png`, mockup);
+
           const image1 = await sharp(Buffer.from(buffer, 'base64'))
             .resize(4320, 3630)
             .png()
