@@ -20,6 +20,14 @@ export const themes: { name: string; keywords: string[] }[] = [
     keywords: ['frogs', 'amphibians', 'cute', 'green'],
   },
   {
+    name: 'ocean sunset',
+    keywords: ['ocean', 'sunset', 'landscape', 'nature'],
+  },
+  {
+    name: 'jungle sunset',
+    keywords: ['jungle', 'sunset', 'landscape', 'nature'],
+  },
+  {
     name: 'space',
     keywords: ['space', 'cosmic', 'galaxy'],
   },
@@ -34,10 +42,6 @@ export const themes: { name: string; keywords: string[] }[] = [
   {
     name: 'sci-fi',
     keywords: ['sci-fi', 'cyberpunk', 'futuristic'],
-  },
-  {
-    name: 'vaporwave',
-    keywords: ['vaporwave', 'retro', 'aesthetic'],
   },
   {
     name: 'abstract',

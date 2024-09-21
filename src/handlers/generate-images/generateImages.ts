@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
-import { createDBListing } from '../../service';
+import { createDBListing } from '../../service/db';
 import sharp from 'sharp';
 import OpenAI from 'openai';
 import fs from 'fs';
@@ -42,6 +42,7 @@ export async function generateDalleImages(
 
         console.log(`Creating file: ${filename}`);
 
+        // TODO: Create default parameters for the POD listing
         const dbData = {
           ...prompts[index],
           buffer: buffer || '',

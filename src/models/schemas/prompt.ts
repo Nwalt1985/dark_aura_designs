@@ -13,3 +13,5 @@ export const PromptResponse = z.array(
     buffer: z.string().optional(),
   }),
 );
+
+export type PromptResponseType = z.infer<typeof PromptResponse>;
