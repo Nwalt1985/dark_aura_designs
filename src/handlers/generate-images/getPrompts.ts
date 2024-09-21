@@ -41,9 +41,13 @@ export async function getDallEPrompts({
         keywordsArr.push(...th.keywords, ...st.keywords);
       }
 
-      const prompt = `give me one DALL-E ai prompt to generate an image suitable for a desk mat design with the concept theme being based around ${th.name}, in the style of ${st.name}.
-     	Don't include the word 'desk mat' in the prompt and also don't include any generated text in the image. Along with the prompt generate an SEO optimized etsy description, 140 character key word heavy title, and a short filename, dont include the filename format.
-     	Include the keywords ${keywordsArr}. Output the results in a JSON format. Structure the JSON as follows:
+      const prompt = `Create one DALL-E prompt to generate an image for a desk mat design, centered around the theme of ${theme || th.name}, inspired by the style of ${style || st.name}.
+	  	Do not include the words "desk mat" in the prompt.
+	  	Use vibrant colors sparingly, aligning them with the theme and style. 
+	  	Ensure the design fully occupies the canvas with no blank spaces, maintaining a cohesive and balanced composition. 
+	  	Avoid white backgrounds, and exclude any text within the generated image. 
+	  	Additionally, generate an SEO-optimized Etsy description, a keyword-rich 140-character title, and a concise filename (without the format).
+    	Include the keywords ${keywordsArr}. Output the results in a JSON format. Structure the JSON as follows:
      	{
      	  "prompts": [
      		{

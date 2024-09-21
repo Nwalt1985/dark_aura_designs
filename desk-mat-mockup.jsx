@@ -1,28 +1,23 @@
 "use strict";
-#target;
-photoshop;
+#target photoshop;
+
 // Paths
-var templatePath = '~/Desktop/ai_etsy/etsy_assets/mock_ups/template/desk_mat_branding_mockup.psd';
+var templatePath = '~/Desktop/ai_etsy/etsy_assets/mock_ups/template/desk_mat_branding_mockup_2.psd';
 var designFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/original/';
 var exportFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/mock_ups/';
-// Get today's date in the format 'dd-mm-yyyy'
-var today = new Date();
-var dd = today.getDate();
-dd = (dd < 10 ? '0' : '') + dd;
-var mm = today.getMonth() + 1; // January is 0!
-mm = (mm < 10 ? '0' : '') + mm;
-var yyyy = today.getFullYear();
-var dateString = dd + '-' + mm + '-' + yyyy;
+
 // Function to open the PSD template
 function openTemplate(templatePath) {
     var fileRef = new File(templatePath);
     if (fileRef.exists) {
         app.open(fileRef);
-    }
-    else {
+        return true;
+    } else {
         alert("Template file does not exist at the specified path.");
+        return false;
     }
 }
+
 // Function to replace the contents of the smart object
 function replaceSmartObject(newDesignPath) {
     var idplacedLayerReplaceContents = stringIDToTypeID("placedLayerReplaceContents");
@@ -31,44 +26,92 @@ function replaceSmartObject(newDesignPath) {
     desc.putPath(idnull, new File(newDesignPath));
     executeAction(idplacedLayerReplaceContents, desc, DialogModes.NO);
 }
+
+// Function to check if the mockup already exists
+function mockupExists(exportFolder, fileName) {
+    var saveFile = new File(exportFolder + "/" + fileName + ".png");
+    return saveFile.exists;
+}
+
+// Function to process each subfolder (e.g., 0, 1, 2) inside a main folder (e.g., 19-09-2024)
+function processSubfoldersInMainFolder(mainFolder, exportMainFolder) {
+    var subfolders = mainFolder.getFiles(function(f) { return f instanceof Folder; });
+    
+    if (subfolders.length === 0) {
+        alert("No subfolders found in: " + mainFolder.fsName);
+        return; // Skip if no subfolders are found
+    }
+
+    for (var i = 0; i < subfolders.length; i++) {
+        var subfolder = subfolders[i];
+        var exportFolder = new Folder(exportMainFolder + "/" + subfolder.name);
+        
+        processDesignFolder(subfolder, exportFolder); // Process design files in each subfolder
+    }
+}
+
+// Function to process each design folder
+function processDesignFolder(designFolder, exportFolder) {
+    var designFiles = designFolder.getFiles(/\d{4,4}x\d{4,4}/); // Look for files with 'xxxx' resolution patterns in the name
+    if (designFiles.length === 0) {
+        alert("No design files found in folder: " + designFolder.fsName);
+        return; // Skip if no design files are found
+    }
+
+    for (var i = 0; i < designFiles.length; i++) {
+        var designFile = designFiles[i];
+        if (designFile.name.indexOf('2543x1254') !== -1) { // Filter for specific resolution
+            var fileName = designFile.name.split('.')[0]; // Exclude file extension for the mockup file name
+            // Check if the mockup file already exists before processing
+            if (mockupExists(exportFolder, fileName)) {
+                continue; // Skip this file if the mockup already exists
+            }
+            // Replace smart object content with the design
+            replaceSmartObject(designFile.fsName);
+            // Export the mockup as PNG
+            saveMockupAsPNG(exportFolder, fileName);
+        }
+    }
+}
+
 // Function to save the image as a PNG
 function saveMockupAsPNG(exportPath, fileName) {
     var exportFolder = new Folder(exportPath);
     if (!exportFolder.exists) {
         exportFolder.create();
     }
-    var saveFile = new File(exportPath + "/" + fileName);
+    var saveFile = new File(exportPath + "/" + fileName + ".png");
     var pngOptions = new PNGSaveOptions();
     pngOptions.compression = 9; // Maximum compression
     activeDocument.saveAs(saveFile, pngOptions, true, Extension.LOWERCASE);
 }
-// Function to process each design folder
-function processDesignFolder(designFolder, exportFolder) {
-    var designFiles = designFolder.getFiles(/\d{4,4}x\d{4,4}/); // Look for files with 'xxxx' resolution patterns in the name
-    for (var i = 0; i < designFiles.length; i++) {
-        var designFile = designFiles[i];
-        if (designFile.name.indexOf('2543x1254') !== -1) { // Filter for specific resolution
-            // Replace smart object content with the design
-            replaceSmartObject(designFile.fsName);
-            // Export the mockup
-            var fileName = designFile.name;
-            saveMockupAsPNG(exportFolder, fileName);
-        }
-    }
-}
+
 // Main function
 function main() {
     // Open the template
-    openTemplate(templatePath);
-    // Loop through each index folder (e.g. 0, 1, 2)
-    var baseDesignFolder = new Folder(designFolderBasePath + dateString);
-    var indexFolders = baseDesignFolder.getFiles(function (f) { return f instanceof Folder; });
-    for (var j = 0; j < indexFolders.length; j++) {
-        var indexFolder = indexFolders[j];
-        var exportFolder = new Folder(exportFolderBasePath + dateString + "/" + indexFolder.name);
-        processDesignFolder(indexFolder, exportFolder);
+    if (!openTemplate(templatePath)) {
+        return; // Stop if the template doesn't open
     }
+
+    // Get all main folders (e.g., 19-09-2024, 20-09-2024) inside the 'original' folder
+    var baseDesignFolder = new Folder(designFolderBasePath);
+    var mainFolders = baseDesignFolder.getFiles(function (f) { return f instanceof Folder; });
+
+    if (mainFolders.length === 0) {
+        alert("No main folders found in: " + baseDesignFolder.fsName);
+        return; // Stop if no main folders are found
+    }
+
+    // Loop through each main folder (e.g., 19-09-2024, 20-09-2024)
+    for (var j = 0; j < mainFolders.length; j++) {
+        var mainFolder = mainFolders[j];
+        var exportMainFolder = new Folder(exportFolderBasePath + mainFolder.name);
+        processSubfoldersInMainFolder(mainFolder, exportMainFolder); // Process subfolders in each main folder
+    }
+
     // Close the document without saving changes
     app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
 }
+
+// Run the script
 main();

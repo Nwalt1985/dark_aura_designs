@@ -27,7 +27,7 @@ const parser = yargs(hideBin(process.argv))
     limit: {
       type: 'number',
       description: 'Limit the number of prompts',
-      default: 3,
+      default: 5,
     },
   })
   .strict() // Ensure that invalid options throw an error
