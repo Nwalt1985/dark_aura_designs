@@ -69,21 +69,23 @@ function processDesignFolder(designFolder, exportFolder) {
             // Replace smart object content with the design
             replaceSmartObject(designFile.fsName);
             // Export the mockup as PNG
-            saveMockupAsPNG(exportFolder, fileName);
+            saveMockupAsJPEG(exportFolder, fileName);
         }
     }
 }
 
 // Function to save the image as a PNG
-function saveMockupAsPNG(exportPath, fileName) {
+function saveMockupAsJPEG(exportPath, fileName) {
     var exportFolder = new Folder(exportPath);
     if (!exportFolder.exists) {
         exportFolder.create();
     }
-    var saveFile = new File(exportPath + "/" + fileName + ".png");
-    var pngOptions = new PNGSaveOptions();
-    pngOptions.compression = 9; // Maximum compression
-    activeDocument.saveAs(saveFile, pngOptions, true, Extension.LOWERCASE);
+    var saveFile = new File(exportPath + "/" + fileName + ".jpg"); // Change extension to .jpg
+
+    var jpegOptions = new JPEGSaveOptions();
+    jpegOptions.quality = 12; // Set maximum quality (1 to 12, where 12 is the highest)
+
+    activeDocument.saveAs(saveFile, jpegOptions, true, Extension.LOWERCASE);
 }
 
 // Main function
