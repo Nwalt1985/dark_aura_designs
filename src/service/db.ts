@@ -1,8 +1,11 @@
 import { z } from 'zod';
 import { mongoConnect } from '../database';
 import { PromptResponse, PromptResponseType } from '../models/schemas/prompt';
+import { DateTime } from 'luxon';
 
-export async function createDBListing(listing: z.infer<typeof PromptResponse>) {
+export async function createDBListing(
+  listing: z.infer<typeof PromptResponse>[],
+) {
   const { client, collection } = await mongoConnect();
 
   const result = await collection.insertMany(listing);
@@ -21,7 +24,7 @@ export async function getDBListings() {
     .find({
       listedAt: null,
     })
-    .toArray()) as unknown as PromptResponseType;
+    .toArray()) as unknown as PromptResponseType[];
 
   await client.close();
 
@@ -32,6 +35,21 @@ export async function deleteListingByFileName(filename: string) {
   const { client, collection } = await mongoConnect();
 
   await collection.deleteOne({ filename });
+
+  await client.close();
+}
+
+export async function updateListing(filename: string) {
+  const { client, collection } = await mongoConnect();
+
+  await collection.updateOne(
+    { filename },
+    {
+      $set: {
+        listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+      },
+    },
+  );
 
   await client.close();
 }

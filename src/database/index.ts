@@ -9,7 +9,6 @@ const dbName = 'ai_etsy';
 
 export async function mongoConnect() {
   await client.connect();
-  console.log('Connected successfully to DB');
 
   const db = client.db(dbName);
   const collection = db.collection('ai_etsy_collection');

@@ -9,7 +9,7 @@ import path from 'path';
 const openai = new OpenAI();
 
 export async function generateDalleImages(
-  prompts: z.infer<typeof PromptResponse>,
+  prompts: z.infer<typeof PromptResponse>[],
   formattedDate: string,
 ) {
   try {
@@ -34,7 +34,7 @@ export async function generateDalleImages(
           model: 'dall-e-3',
           prompt,
           size: '1792x1024',
-          quality: 'hd',
+          quality: 'standard',
           response_format: 'b64_json',
         });
 
@@ -55,31 +55,31 @@ export async function generateDalleImages(
         if (buffer) {
           const mockup = await sharp(Buffer.from(buffer, 'base64'))
             .resize(2543, 1254)
-            .png()
+            .jpeg()
             .toBuffer();
 
-          await createFile(baseDir, `${filename}-mockup-2543x1254.png`, mockup);
+          await createFile(baseDir, `${filename}-mockup-2543x1254.jpg`, mockup);
 
           const image1 = await sharp(Buffer.from(buffer, 'base64'))
             .resize(4320, 3630)
-            .png()
+            .jpeg()
             .toBuffer();
 
-          await createFile(baseDir, `${filename}-4320x3630.png`, image1);
+          await createFile(baseDir, `${filename}-4320x3630.jpg`, image1);
 
           const image2 = await sharp(Buffer.from(buffer, 'base64'))
             .resize(7080, 4140)
-            .png()
+            .jpeg()
             .toBuffer();
 
-          await createFile(baseDir, `${filename}-7080x4140.png`, image2);
+          await createFile(baseDir, `${filename}-7080x4140.jpg`, image2);
 
           const image3 = await sharp(Buffer.from(buffer, 'base64'))
             .resize(9450, 4650)
-            .png()
+            .jpeg()
             .toBuffer();
 
-          await createFile(baseDir, `${filename}-9450x4650.png`, image3);
+          await createFile(baseDir, `${filename}-9450x4650.jpg`, image3);
         }
       } catch (error) {
         console.error(`Error generating image for prompt ${index}:`, error);
