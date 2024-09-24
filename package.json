@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "build": "npx tsc",
     "generate-images": "npx tsc && node ./.build/handlers/generate-images/index.js",
-    "generate-listing": "npx tsc && node ./.build/handlers/generate-listing/index.js"
+    "generate-listing": "npx tsc && node ./.build/handlers/generate-listing/index.js",
+    "update-etsy": "npx tsc && node ./.build/handlers/update-etsy/index.js"
   },
   "engines": {
     "node": ">=20.12.2"

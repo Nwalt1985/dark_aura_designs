@@ -76,10 +76,6 @@ export const themes: { name: string; keywords: string[] }[] = [
     keywords: ['mystery', 'detective', 'whodunit', 'enigmatic'],
   },
   {
-    name: 'wild west',
-    keywords: ['wild west', 'cowboy', 'desert', 'saloon'],
-  },
-  {
     name: 'zombie apocalypse',
     keywords: ['zombie apocalypse', 'undead', 'survival', 'chaos'],
   },

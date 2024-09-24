@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { PromptResponseType } from '../models/schemas/prompt';
-import { deleteListingByFileName, getDBListings } from '../service/db';
+import { deleteListingByFileName, getUnlisted } from '../service/db';
 
 export function getGeneratedFileNames() {
   const originalDir = path.resolve(
@@ -52,19 +52,23 @@ function assetFolder(directory: string) {
 
 // Remove listings from the database that do not have a corresponding image file
 export async function dbTidy(list: PromptResponseType[]) {
-  const listings = list.map((listing) =>
-    listing.filename.replace('-mockup-2543x1254', ''),
-  );
+  const listings = list.map((listing) => {
+    const filename = listing.filename.replace('-mockup-2543x1254', '');
+    return {
+      isListed: listing.listedAt,
+      filename,
+    };
+  });
   const fileNameArray = getGeneratedFileNames();
 
   for (const listing of listings) {
-    if (!fileNameArray.includes(listing)) {
+    if (!fileNameArray.includes(listing.filename) && !listing.isListed) {
       console.log(`Deleting ${listing} from the DB`);
-      await deleteListingByFileName(listing);
+      await deleteListingByFileName(listing.filename);
     }
   }
 
-  return await getDBListings();
+  return await getUnlisted();
 }
 
 // Loop through the folders and subfolders in the original directory and return the buffer of the image

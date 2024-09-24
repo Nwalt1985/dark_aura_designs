@@ -6,6 +6,7 @@ import cron from 'node-cron';
 import { PromptResponse } from '../../models/schemas/prompt';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import { z } from 'zod';
 
 const parser = yargs(hideBin(process.argv))
   .options({
@@ -59,7 +60,7 @@ const parser = yargs(hideBin(process.argv))
       createdAt: formattedDate,
     }));
 
-    PromptResponse.parse(formattedData);
+    z.array(PromptResponse).parse(formattedData);
 
     console.log(`Successfully fetched ${dallEPrompts.length} prompts`);
 

@@ -1,28 +1,49 @@
 import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
 import { dbTidy, getBuffer } from '../../helpers';
-import { getDBListings, updateListing } from '../../service/db';
+import { getAllListings, getUnlisted, updateListing } from '../../service/db';
 import {
   createNewProduct,
   getUploadedImages,
   uploadImages,
 } from '../../service/printify';
-import dotenv from 'dotenv';
 import { PrintifyImageResponseType } from '../../models/schemas/printify';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+
+import dotenv from 'dotenv';
 
 dotenv.config();
 
+const parser = yargs(hideBin(process.argv))
+  .options({
+    limit: {
+      type: 'number',
+      description: 'Limit the number of prompts',
+      default: 5,
+    },
+  })
+  .strict() // Ensure that invalid options throw an error
+  .help();
+
 (async () => {
   try {
-    const listings = await getDBListings();
+    const argv = parser.parseSync();
+
+    const totalListings = await getAllListings();
+    console.log('Total Listings:', totalListings.length);
+
+    const unlisted = await getUnlisted();
+    console.log('Total Unlisted:', unlisted.length);
+
     const uploadedImages = await getUploadedImages();
 
     console.log('Tidying up the database');
-    const data = await dbTidy(listings);
+    const data = await dbTidy(unlisted);
 
-    console.log(`Creating 5 Printify listings`);
+    console.log(`Creating ${argv.limit} Printify listings`);
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < argv.limit; i++) {
       await createPrintifyListingsData(data[i], uploadedImages);
     }
 
@@ -46,12 +67,18 @@ export async function createPrintifyListingsData(
 
   if (bufferArray.length) {
     for (const buffer of bufferArray) {
+      if (buffer.filename.includes('mockup')) {
+        console.log(`Skipping mockup image: ${buffer.filename}`);
+        continue;
+      }
+
       const uploadedImage = uploadedImages.imageData.find(
         (image) => image.file_name === buffer.filename,
       );
 
       if (!uploadedImage) {
         console.log(`Uploading image: ${buffer.filename}`);
+
         const uploaded = await uploadImages(buffer.base64, buffer.filename);
         uploadedImagesArray.push(uploaded);
       } else {

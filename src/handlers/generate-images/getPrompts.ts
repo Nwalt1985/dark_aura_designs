@@ -41,17 +41,21 @@ export async function getDallEPrompts({
         keywordsArr.push(...th.keywords, ...st.keywords);
       }
 
-      const prompt = `Create one DALL-E prompt to generate an image for a desk mat design, centered around the theme of ${theme || th.name}, inspired by the style of ${style || st.name}.
-	  	Do not include the words "desk mat" in the prompt.
-	  	Use vibrant colors sparingly, aligning them with the theme and style. 
-	  	Ensure the design fully occupies the canvas with no blank spaces, maintaining a cohesive and balanced composition. 
-	  	Avoid white backgrounds, and exclude any text within the generated image. 
-	  	Additionally, generate an SEO-optimized Etsy description, a keyword-rich 140-character title, and a concise filename (without the format).
-		The title should contain the following default text after the dynamic content "[dynamic content] Desk Mat XL Mouse Matt For Home & Office". Don't use any special characters or emojis.
-	  	The description should contain the following default text after the dynamic content
-		"[dynamic content]
+      const prompt = `
+		Create one DALL-E prompt to design a wide rectangular image with dimensions suitable for a desk mat (9450x4650) that fully utilizes the entire canvas without any gaps or blank spaces on the sides. The theme should revolve around ${theme || th.name}, and it should be inspired by the style of ${style || st.name}. Do not include the words "desk mat" in the prompt.
 		
-		Our desk mats are designed not just to look great, but to protect your workspace and brighten up your day. Made from a high-quality 100% polyester top and a durable natural rubber backing, they offer a smooth surface that’s perfect for both optical and laser mice. The anti-fray edges and non-slip base ensure your mat stays in place and stands up to everyday use.
+		Make sure to include the following instructions in the prompt:
+		- Ensure the design fills the entire width and height of the canvas, fully occupying all available space with no borders, padding, or margins on the sides.
+		- Ensure the design is vibrant but uses bright colors sparingly to enhance the overall theme and style. 
+		- Fill the entire canvas with a cohesive and balanced composition, avoiding any blank or white spaces. 
+		- Use intricate details and textures, to create a natural, flowing design. 
+		- No text or borders should be present in the image, and ensure the design maintains visual appeal when scaled to the full size.
+	   
+	  	Additionally, generate an SEO-optimized Etsy description, a keyword-rich 140-character title, and a concise filename (without the format).
+		The title should contain the following default text "Desk Mat XL Mouse Matt For Home And Office". Don't use any special characters or emojis.
+	  	The description should contain the following default text after the SEO-optimized Etsy description. Ensure the description follows the below format:
+
+		"Our desk mats are designed not just to look great, but to protect your workspace and brighten up your day. Made from a high-quality 100% polyester top and a durable natural rubber backing, they offer a smooth surface that’s perfect for both optical and laser mice. The anti-fray edges and non-slip base ensure your mat stays in place and stands up to everyday use.
 
 		Available in three versatile sizes:
 			- 14.4" × 12.1"
@@ -59,7 +63,7 @@ export async function getDallEPrompts({
 			- 31.5" × 15.5"
 
 		Key features:
-			- **Vibrant colors**: The latest printing techniques bring your favorite designs to life in bright, crisp detail.
+			- **Vibrant colours**: The latest printing techniques bring your favorite designs to life in bright, crisp detail.
 			- **Non-slip rubber base**: Keeps the mat securely in place, providing a smooth and even surface for mouse movement.
 			- **Smooth surface**: Offers effortless gliding and is easy to clean.
 			- **Durable construction**: Polyester front and rubber back provide tear-resistant, long-lasting performance.

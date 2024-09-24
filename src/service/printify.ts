@@ -1,4 +1,4 @@
-import axios, { all } from 'axios';
+import axios from 'axios';
 import {
   PrintifyImageResponseType,
   PrintifyGetUploadsResponseType,
@@ -96,7 +96,7 @@ export async function createNewProduct(
       },
     );
 
-	return data;
+    return data;
   } catch (error: any) {
     throw new Error(error);
   }

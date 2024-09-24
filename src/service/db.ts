@@ -17,7 +17,19 @@ export async function createDBListing(
   return result;
 }
 
-export async function getDBListings() {
+export async function getAllListings() {
+  const { client, collection } = await mongoConnect();
+
+  const result = (await collection
+    .find()
+    .toArray()) as unknown as PromptResponseType[];
+
+  await client.close();
+
+  return result;
+}
+
+export async function getUnlisted() {
   const { client, collection } = await mongoConnect();
 
   const result = (await collection

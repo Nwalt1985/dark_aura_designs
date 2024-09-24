@@ -18,6 +18,8 @@ export async function generateDalleImages(
     for (let index = 0; index < prompts.length; index++) {
       const { prompt, filename } = prompts[index];
 
+      console.log(`Prompt: ${index}`);
+
       const baseDir = path.resolve(
         process.env.HOME || '',
         `Desktop/ai_etsy/etsy_assets/original/${formattedDate}/${index}`,
@@ -30,17 +32,17 @@ export async function generateDalleImages(
       }
 
       try {
+        console.log(`Creating file: ${filename}`);
+
         const response = await openai.images.generate({
           model: 'dall-e-3',
           prompt,
-          size: '1792x1024',
+          //   size: '1792x1024',
           quality: 'standard',
           response_format: 'b64_json',
         });
 
         const buffer = response.data[0].b64_json;
-
-        console.log(`Creating file: ${filename}`);
 
         // TODO: Create default parameters for the POD listing
         const dbData = {
