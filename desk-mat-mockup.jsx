@@ -29,7 +29,7 @@ function replaceSmartObject(newDesignPath) {
 
 // Function to check if the mockup already exists
 function mockupExists(exportFolder, fileName) {
-    var saveFile = new File(exportFolder + "/" + fileName + ".png");
+    var saveFile = new File(exportFolder + "/" + fileName + ".jpg");
     return saveFile.exists;
 }
 

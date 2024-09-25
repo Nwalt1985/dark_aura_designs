@@ -21,7 +21,9 @@ export async function getAllListings() {
   const { client, collection } = await mongoConnect();
 
   const result = (await collection
-    .find()
+    .find({
+      listedAt: { $ne: null },
+    })
     .toArray()) as unknown as PromptResponseType[];
 
   await client.close();

@@ -84,10 +84,6 @@ export const styles: { name: string; keywords: string[] }[] = [
     keywords: ['noir', 'black-and-white', 'mysterious', 'dark'],
   },
   {
-    name: 'fantasy',
-    keywords: ['fantasy', 'magical', 'mythical', 'epic'],
-  },
-  {
     name: 'doodle art',
     keywords: ['doodle art', 'whimsical', 'hand-drawn', 'sketchy'],
   },

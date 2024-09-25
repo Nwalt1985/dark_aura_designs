@@ -34,12 +34,13 @@ const parser = yargs(hideBin(process.argv))
     console.log('Total Listings:', totalListings.length);
 
     const unlisted = await getUnlisted();
-    console.log('Total Unlisted:', unlisted.length);
 
     const uploadedImages = await getUploadedImages();
 
     console.log('Tidying up the database');
     const data = await dbTidy(unlisted);
+
+    console.log('Total Unlisted:', data.length);
 
     console.log(`Creating ${argv.limit} Printify listings`);
 

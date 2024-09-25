@@ -18,8 +18,6 @@ export async function generateDalleImages(
     for (let index = 0; index < prompts.length; index++) {
       const { prompt, filename } = prompts[index];
 
-      console.log(`Prompt: ${index}`);
-
       const baseDir = path.resolve(
         process.env.HOME || '',
         `Desktop/ai_etsy/etsy_assets/original/${formattedDate}/${index}`,
@@ -37,14 +35,12 @@ export async function generateDalleImages(
         const response = await openai.images.generate({
           model: 'dall-e-3',
           prompt,
-          //   size: '1792x1024',
           quality: 'standard',
           response_format: 'b64_json',
         });
 
         const buffer = response.data[0].b64_json;
 
-        // TODO: Create default parameters for the POD listing
         const dbData = {
           ...prompts[index],
           buffer: buffer || '',
@@ -60,28 +56,44 @@ export async function generateDalleImages(
             .jpeg()
             .toBuffer();
 
-          await createFile(baseDir, `${filename}-mockup-2543x1254.jpg`, mockup);
+          await createFile(
+            baseDir,
+            `${filename}-${generateRandomNumber()}-mockup-2543x1254.jpg`,
+            mockup,
+          );
 
           const image1 = await sharp(Buffer.from(buffer, 'base64'))
             .resize(4320, 3630)
             .jpeg()
             .toBuffer();
 
-          await createFile(baseDir, `${filename}-4320x3630.jpg`, image1);
+          await createFile(
+            baseDir,
+            `${filename}-${generateRandomNumber()}-4320x3630.jpg`,
+            image1,
+          );
 
           const image2 = await sharp(Buffer.from(buffer, 'base64'))
             .resize(7080, 4140)
             .jpeg()
             .toBuffer();
 
-          await createFile(baseDir, `${filename}-7080x4140.jpg`, image2);
+          await createFile(
+            baseDir,
+            `${filename}-${generateRandomNumber()}-7080x4140.jpg`,
+            image2,
+          );
 
           const image3 = await sharp(Buffer.from(buffer, 'base64'))
             .resize(9450, 4650)
             .jpeg()
             .toBuffer();
 
-          await createFile(baseDir, `${filename}-9450x4650.jpg`, image3);
+          await createFile(
+            baseDir,
+            `${filename}-${generateRandomNumber()}-9450x4650.jpg`,
+            image3,
+          );
         }
       } catch (error) {
         console.error(`Error generating image for prompt ${index}:`, error);
@@ -111,4 +123,12 @@ async function createFile(
       console.log(`${filename} written successfully.`);
     }
   });
+}
+
+function generateRandomNumber(): number {
+  let randomNumber = Math.floor(Math.random() * 10000);
+  if (randomNumber < 1000) {
+    randomNumber += 1000;
+  }
+  return randomNumber;
 }

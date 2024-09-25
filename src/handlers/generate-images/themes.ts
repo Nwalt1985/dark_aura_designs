@@ -20,6 +20,10 @@ export const themes: { name: string; keywords: string[] }[] = [
     keywords: ['frogs', 'amphibians', 'cute', 'green'],
   },
   {
+    name: 'cars',
+    keywords: ['cars', 'motors', 'racing', 'vehicles'],
+  },
+  {
     name: 'ocean sunset',
     keywords: ['ocean', 'sunset', 'landscape', 'nature'],
   },
@@ -47,18 +51,18 @@ export const themes: { name: string; keywords: string[] }[] = [
     name: 'abstract',
     keywords: ['abstract', 'modern', 'minimalist'],
   },
-  {
-    name: 'horror',
-    keywords: ['horror', 'creepy', 'ghost', 'dark'],
-  },
-  {
-    name: 'urban',
-    keywords: ['urban', 'cityscape', 'street', 'modern'],
-  },
-  {
-    name: 'dystopian',
-    keywords: ['dystopian', 'post-apocalyptic', 'bleak', 'ruins'],
-  },
+  //   {
+  //     name: 'horror',
+  //     keywords: ['horror', 'creepy', 'ghost', 'dark'],
+  //   },
+  //   {
+  //     name: 'urban',
+  //     keywords: ['urban', 'cityscape', 'street', 'modern'],
+  //   },
+  //   {
+  //     name: 'dystopian',
+  //     keywords: ['dystopian', 'post-apocalyptic', 'bleak', 'ruins'],
+  //   },
   {
     name: 'underwater',
     keywords: ['underwater', 'ocean', 'sea', 'marine life'],
@@ -75,10 +79,10 @@ export const themes: { name: string; keywords: string[] }[] = [
     name: 'mystery',
     keywords: ['mystery', 'detective', 'whodunit', 'enigmatic'],
   },
-  {
-    name: 'zombie apocalypse',
-    keywords: ['zombie apocalypse', 'undead', 'survival', 'chaos'],
-  },
+  //   {
+  //     name: 'zombie apocalypse',
+  //     keywords: ['zombie apocalypse', 'undead', 'survival', 'chaos'],
+  //   },
   {
     name: 'tropical',
     keywords: ['tropical', 'beach', 'palm trees', 'paradise'],
@@ -103,14 +107,14 @@ export const themes: { name: string; keywords: string[] }[] = [
     name: 'fairytale',
     keywords: ['fairytale', 'princess', 'magic', 'storybook'],
   },
-  {
-    name: 'urban jungle',
-    keywords: ['urban jungle', 'skyscrapers', 'concrete', 'wild'],
-  },
-  {
-    name: 'haunted house',
-    keywords: ['haunted house', 'ghosts', 'spooky', 'paranormal'],
-  },
+  //   {
+  //     name: 'urban jungle',
+  //     keywords: ['urban jungle', 'skyscrapers', 'concrete', 'wild'],
+  //   },
+  //   {
+  //     name: 'haunted house',
+  //     keywords: ['haunted house', 'ghosts', 'spooky', 'paranormal'],
+  //   },
   {
     name: 'space opera',
     keywords: ['space opera', 'epic', 'galactic', 'adventure'],
