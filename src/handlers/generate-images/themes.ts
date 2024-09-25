@@ -1,39 +1,74 @@
 export const themes: { name: string; keywords: string[] }[] = [
   {
     name: 'mushrooms',
-    keywords: ['psychedelic', 'trippy', 'colorful', 'vibrant'],
+    keywords: [
+      'Mushroon lovers gift',
+      'witchy decor',
+      'dark academia',
+      'Cottagecore desk mat',
+    ],
   },
   {
     name: 'mountain sunset',
-    keywords: ['mountain', 'sunset', 'landscape', 'nature'],
+    keywords: [
+      'sunset artwork',
+      'sunset print',
+      'sunset decor',
+      'sunset mouse mat',
+    ],
   },
   {
     name: 'botanical',
-    keywords: ['botanical', 'flowers', 'plants', 'leaves'],
+    keywords: [
+      'Floral desk mat',
+      'william morris',
+      'Cottagecore desk mat',
+      'forestcore',
+    ],
   },
   {
     name: 'celestial',
-    keywords: ['celestial', 'stars', 'moon', 'galaxy'],
+    keywords: [
+      'Mystical gifts',
+      'Fantasy desk mat',
+      'Magical',
+      'spiritual art',
+    ],
   },
   {
-    name: 'frogs',
-    keywords: ['frogs', 'amphibians', 'cute', 'green'],
+    name: 'frog',
+    keywords: ['man i love frogs', 'japanese frog', 'frog hat', 'frog gift'],
   },
   {
-    name: 'cars',
-    keywords: ['cars', 'motors', 'racing', 'vehicles'],
+    name: 'car',
+    keywords: ['car', 'motors', 'racing', 'vehicles'],
   },
   {
     name: 'ocean sunset',
-    keywords: ['ocean', 'sunset', 'landscape', 'nature'],
+    keywords: [
+      'Sunset artwork',
+      'sunset print',
+      'sunset decor',
+      'sunset mouse mat',
+    ],
   },
   {
     name: 'jungle sunset',
-    keywords: ['jungle', 'sunset', 'landscape', 'nature'],
+    keywords: [
+      'Sunset artwork',
+      'sunset print',
+      'sunset decor',
+      'sunset mouse mat',
+    ],
   },
   {
     name: 'space',
-    keywords: ['space', 'cosmic', 'galaxy'],
+    keywords: [
+      'Space gifts',
+      'space themed gifts',
+      'gifts for scientists',
+      'sci fi mouse pad',
+    ],
   },
   {
     name: 'nature',
@@ -41,7 +76,12 @@ export const themes: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'fantasy',
-    keywords: ['fantasy', 'mythical', 'medieval', 'dragon'],
+    keywords: [
+      'Mystical gifts',
+      'Fantasy desk mat',
+      'Magical',
+      'spiritual art',
+    ],
   },
   {
     name: 'sci-fi',
@@ -69,7 +109,7 @@ export const themes: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'retro',
-    keywords: ['retro', 'vintage', 'old-school', 'classic'],
+    keywords: ['Retro gaming', 'arcade', 'Retro mouse mat', 'Retro decor'],
   },
   {
     name: 'superhero',
@@ -97,15 +137,30 @@ export const themes: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'outer space exploration',
-    keywords: ['outer space exploration', 'stars', 'planets', 'spaceship'],
+    keywords: [
+      'Space gifts',
+      'space themed gifts',
+      'gifts for scientists',
+      'sci fi mouse pad',
+    ],
   },
   {
     name: 'medieval',
-    keywords: ['medieval', 'knights', 'castles', 'kingdom'],
+    keywords: [
+      'medeival gifts',
+      'dark academia',
+      'medeival tapestry',
+      'black mouse pad',
+    ],
   },
   {
     name: 'fairytale',
-    keywords: ['fairytale', 'princess', 'magic', 'storybook'],
+    keywords: [
+      'Mystical gifts',
+      'Fantasy desk mat',
+      'Magical',
+      'spiritual art',
+    ],
   },
   //   {
   //     name: 'urban jungle',
@@ -117,10 +172,11 @@ export const themes: { name: string; keywords: string[] }[] = [
   //   },
   {
     name: 'space opera',
-    keywords: ['space opera', 'epic', 'galactic', 'adventure'],
-  },
-  {
-    name: 'noir',
-    keywords: ['noir', 'film noir', 'detective', 'dark'],
+    keywords: [
+      'Space gifts',
+      'space themed gifts',
+      'gifts for scientists',
+      'sci fi mouse pad',
+    ],
   },
 ];

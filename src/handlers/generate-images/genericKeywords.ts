@@ -1,0 +1,18 @@
+export const genericKeywords = [
+  'extended mouse pad',
+  'mouse pad',
+  'new job gift',
+  'tech accessories',
+  'gaming mouse mat',
+  'large mouse pad',
+  'desk pad',
+  'gaming mouse pad',
+  'mouse mat',
+  'desk mat',
+  'desk accessories',
+  'work from home gifts',
+  'mousepad',
+  'keyboard mat',
+  'deskmat',
+  'xxl mouse pad',
+];

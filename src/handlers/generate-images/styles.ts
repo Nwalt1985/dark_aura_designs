@@ -1,19 +1,39 @@
 export const styles: { name: string; keywords: string[] }[] = [
   {
     name: 'kawaii',
-    keywords: ['kawaii', 'cute', 'adorable', 'sweet'],
+    keywords: [
+      'cute desk decor',
+      'desk mat cute',
+      'japanese desk mat',
+      'cute mouse pad',
+    ],
   },
   {
     name: 'cottagecore',
-    keywords: ['cottagecore', 'rural', 'pastoral', 'rustic'],
+    keywords: [
+      'Cottagecore desk mat',
+      'witchy gifts',
+      'dark academia',
+      'cottagecore decor',
+    ],
   },
   {
     name: 'dark academia',
-    keywords: ['dark academia', 'scholarly', 'vintage', 'mysterious'],
+    keywords: [
+      'gothic gifts for gf',
+      'whimsigoth',
+      'dark academia',
+      'dark academia decor',
+    ],
   },
   {
     name: 'lofi',
-    keywords: ['lofi', 'chill', 'retro', 'relaxed'],
+    keywords: [
+      'lofi desk mat',
+      'landscape desk mat',
+      'anime deskmat',
+      'desk decor',
+    ],
   },
   {
     name: 'minimalist',
@@ -33,11 +53,21 @@ export const styles: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'anime',
-    keywords: ['anime', 'manga', 'japanese', 'animated'],
+    keywords: [
+      'anime desk mat',
+      'Japanese desk mat',
+      'anime gifts',
+      'anime mouse pad',
+    ],
   },
   {
     name: 'pixel art',
-    keywords: ['pixel art', '8-bit', 'retro', 'blocky'],
+    keywords: [
+      'pixel art desk mat',
+      'Retro gaming',
+      'arcade',
+      'stocking stuffer',
+    ],
   },
   {
     name: 'watercolor',
@@ -57,15 +87,25 @@ export const styles: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'steampunk',
-    keywords: ['steampunk', 'vintage', 'industrial', 'retro-futuristic'],
+    keywords: ['steampunk decor', 'steampunk gift', 'Steampunk', 'laptop mat'],
   },
   {
     name: 'gothic',
-    keywords: ['gothic', 'dark', 'moody', 'dramatic'],
+    keywords: [
+      'gothic gifts for gf',
+      'whimsigoth',
+      'dark academia',
+      'derk academia decor',
+    ],
   },
   {
     name: 'cyberpunk',
-    keywords: ['cyberpunk', 'futuristic', 'neon', 'high-tech'],
+    keywords: [
+      'neon lights',
+      'cyberpunk mouse pad',
+      'cyberpunk 2077',
+      'desk decor',
+    ],
   },
   {
     name: 'art deco',
@@ -81,11 +121,21 @@ export const styles: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'noir',
-    keywords: ['noir', 'black-and-white', 'mysterious', 'dark'],
+    keywords: [
+      'black desk mat',
+      'black mouse pad',
+      'dark mouse pad',
+      'desk decor',
+    ],
   },
   {
     name: 'doodle art',
-    keywords: ['doodle art', 'whimsical', 'hand-drawn', 'sketchy'],
+    keywords: [
+      'abstract desk mat',
+      'desk decor',
+      'vintage desk decor',
+      'spiritual art',
+    ],
   },
   {
     name: 'graffiti',
@@ -93,7 +143,7 @@ export const styles: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'retro',
-    keywords: ['retro', 'vintage', 'classic', 'old-school'],
+    keywords: ['Retro gaming', 'arcade', 'Retro mouse mat', 'Retro decor'],
   },
   {
     name: 'low poly',
@@ -101,15 +151,25 @@ export const styles: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'sketch',
-    keywords: ['sketch', 'hand-drawn', 'rough', 'pencil'],
+    keywords: [
+      'abstract desk mat',
+      'desk decor',
+      'vintage desk decor',
+      'spiritual art',
+    ],
   },
   {
     name: 'neon',
-    keywords: ['neon', 'glow', 'vibrant', 'electric'],
+    keywords: ['neon lights', 'neon desk mat', 'vapourwave', 'desk decor'],
   },
   {
     name: 'flat design',
-    keywords: ['flat design', 'minimalist', '2D', 'simple'],
+    keywords: [
+      'lofi desk mat',
+      'landscape desk mat',
+      'anime deskmat',
+      'desk decor',
+    ],
   },
   {
     name: 'fantastic realism',
@@ -117,7 +177,12 @@ export const styles: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'psychedelic',
-    keywords: ['psychedelic', 'trippy', 'colorful', 'abstract'],
+    keywords: [
+      'psychedelic mouse mat',
+      'magic mushrooms',
+      'psychedelic art',
+      'groovy desk mat',
+    ],
   },
   {
     name: 'geometric',

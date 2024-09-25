@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import { themes } from './themes';
 import { styles } from './styles';
+import { genericKeywords } from './genericKeywords';
 
 const openai = new OpenAI();
 
@@ -13,6 +14,17 @@ function getRandomElement(arr: { name: string; keywords: string[] }[]) {
   const index = Math.floor(Math.random() * arr.length);
 
   return arr[index];
+}
+
+function generateKeywordArray(keywords: string[]): string[] {
+  const selectedKeywords = new Set<string>();
+
+  while (selectedKeywords.size < 5) {
+    const randomIndex = Math.floor(Math.random() * genericKeywords.length);
+    selectedKeywords.add(genericKeywords[randomIndex]);
+  }
+
+  return keywords.concat(Array.from(selectedKeywords));
 }
 
 export async function getDallEPrompts({
@@ -41,21 +53,38 @@ export async function getDallEPrompts({
         keywordsArr.push(...th.keywords, ...st.keywords);
       }
 
+      const keywordsWithGeneric = generateKeywordArray(keywordsArr);
+
       const prompt = `
-		Create one DALL-E prompt to design a wide rectangular image with dimensions suitable for a desk mat (9450x4650) that fully utilizes the entire canvas without any gaps or blank spaces on the sides. The theme should revolve around ${theme || th.name}, and it should be inspired by the style of ${style || st.name}. Do not include the words "desk mat" in the prompt.
+		Create one DALL-E prompt to design a wide rectangular image with dimensions suitable for a desk mat (9450x4650). The theme should revolve around ${theme || th.name}, and it should be inspired by the style of ${style || st.name}. Do not include the words "desk mat" in the prompt.
 		
+		Key points for the prompt:
+		- Be specific. The prompt should ideally encompass various elements of the desired image. For instance, if you’re envisioning a landscape, describe not just the basic elements like trees and rivers, but also the type of trees, the state of the water (calm or turbulent), the time of day, the weather conditions, and the overall atmosphere you wish to capture.
+	  	- use descriptive language to convey the mood, tone, and style you want to achieve. For example, if you’re aiming for a serene and tranquil image, mention the colors, lighting, and composition that would help create that effect.
+	  	- Minimize ambiguity. Avoid vague or open-ended prompts that could lead to a wide range of interpretations. Instead, provide clear and detailed instructions to guide the AI in generating the desired image.
+	  	- Keep the design fairly simple and uncluttered to ensure that it translates well to a physical product.
+
 		Make sure to include the following instructions in the prompt:
 		- Ensure the design fills the entire width and height of the canvas, fully occupying all available space with no borders, padding, or margins on the sides.
-		- Ensure the design is vibrant but uses bright colors sparingly to enhance the overall theme and style. 
-		- Fill the entire canvas with a cohesive and balanced composition, avoiding any blank or white spaces. 
-		- Use intricate details and textures, to create a natural, flowing design. 
+		- Ensure to use bright colors sparingly to enhance the overall theme and style. 
+		- Fill the entire canvas with a cohesive and balanced composition, avoiding any blank or white spaces.  
 		- No text or borders should be present in the image, and ensure the design maintains visual appeal when scaled to the full size.
 	   
-	  	Additionally, generate an SEO-optimized Etsy description, a keyword-rich 140-character title, and a concise filename (without the format).
-		The title should contain the following default text "Desk Mat XL Mouse Matt For Home And Office". Don't use any special characters or emojis.
-	  	The description should contain the following default text after the SEO-optimized Etsy description. Ensure the description follows the below format:
+		Title: generate a keyword-rich 140-character title. The title should contain the following default text "Desk Mat XL Mouse Matt For Home And Office". Don't use any special characters or emojis.
+		
+		Filename: generate a concise filename without the format.
+		
+		Decription: SEO-optimized Etsy description and then add the default description below with a return to seperate the paragraphs.
+		
 
-		"Our desk mats are designed not just to look great, but to protect your workspace and brighten up your day. Made from a high-quality 100% polyester top and a durable natural rubber backing, they offer a smooth surface that’s perfect for both optical and laser mice. The anti-fray edges and non-slip base ensure your mat stays in place and stands up to everyday use.
+    	Include the keywords ${keywordsWithGeneric}. Output the results in a JSON format. Structure the JSON as follows:
+     	{
+     	  "prompts": [
+     		{
+     		  "prompt": "Prompt 1",
+     		  "description": "[add the Decription]
+			  
+			  Our desk mats are designed not just to look great, but to protect your workspace and brighten up your day. Made from a high-quality 100% polyester top and a durable natural rubber backing, they offer a smooth surface that’s perfect for both optical and laser mice. The anti-fray edges and non-slip base ensure your mat stays in place and stands up to everyday use.
 
 		Available in three versatile sizes:
 			- 14.4" × 12.1"
@@ -68,14 +97,7 @@ export async function getDallEPrompts({
 			- **Smooth surface**: Offers effortless gliding and is easy to clean.
 			- **Durable construction**: Polyester front and rubber back provide tear-resistant, long-lasting performance.
 
-		As a small family business in the Cotswolds, we take pride in creating unique surface designs that add character and function to your space. These mats make great gifts or a stylish addition to any home or office setup."
-
-    	Include the keywords ${keywordsArr}. Output the results in a JSON format. Structure the JSON as follows:
-     	{
-     	  "prompts": [
-     		{
-     		  "prompt": "Prompt 1",
-     		  "description": "Description 1",
+		As a small family business in the Cotswolds, we take pride in creating unique surface designs that add character and function to your space. These mats make great gifts or a stylish addition to any home or office setup.",
      		  "title": "Title 1",
 			  "theme": "Theme 1",
 			  "style": "Style 1",
