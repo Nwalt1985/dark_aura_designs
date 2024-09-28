@@ -103,10 +103,10 @@ export const themes: { name: string; keywords: string[] }[] = [
   //     name: 'dystopian',
   //     keywords: ['dystopian', 'post-apocalyptic', 'bleak', 'ruins'],
   //   },
-  {
-    name: 'underwater',
-    keywords: ['underwater', 'ocean', 'sea', 'marine life'],
-  },
+//   {
+//     name: 'underwater',
+//     keywords: ['underwater', 'ocean', 'sea', 'marine life'],
+//   },
   {
     name: 'retro',
     keywords: ['Retro gaming', 'arcade', 'Retro mouse mat', 'Retro decor'],

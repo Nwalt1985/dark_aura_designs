@@ -16,7 +16,7 @@ export async function generateDalleImages(
     console.log(`Generating ${prompts.length} images`);
 
     for (let index = 0; index < prompts.length; index++) {
-      const { prompt, filename } = prompts[index];
+      const { prompt, filename, description } = prompts[index];
 
       const baseDir = path.resolve(
         process.env.HOME || '',
@@ -41,8 +41,27 @@ export async function generateDalleImages(
 
         const buffer = response.data[0].b64_json;
 
+        const fileId = generateRandomNumber();
+
         const dbData = {
           ...prompts[index],
+          filename: `${filename}-${fileId}`,
+          description: `${description}
+		  
+		Our desk mats are designed not just to look great, but to protect your workspace and brighten up your day. Made from a high-quality 100% polyester top and a durable natural rubber backing, they offer a smooth surface that’s perfect for both optical and laser mice. The anti-fray edges and non-slip base ensure your mat stays in place and stands up to everyday use.
+
+		Available in three versatile sizes:
+			- 14.4" × 12.1"
+			- 23.6" × 13.8"
+			- 31.5" × 15.5"
+
+		Key features:
+			- **Vibrant colours**: The latest printing techniques bring your favorite designs to life in bright, crisp detail.
+			- **Non-slip rubber base**: Keeps the mat securely in place, providing a smooth and even surface for mouse movement.
+			- **Smooth surface**: Offers effortless gliding and is easy to clean.
+			- **Durable construction**: Polyester front and rubber back provide tear-resistant, long-lasting performance.
+
+		As a small family business in the Cotswolds, we take pride in creating unique surface designs that add character and function to your space. These mats make great gifts or a stylish addition to any home or office setup.`,
           buffer: buffer || '',
         };
 
@@ -58,7 +77,7 @@ export async function generateDalleImages(
 
           await createFile(
             baseDir,
-            `${filename}-${generateRandomNumber()}-mockup-2543x1254.jpg`,
+            `${filename}-${fileId}-mockup-2543x1254.jpg`,
             mockup,
           );
 
@@ -69,7 +88,7 @@ export async function generateDalleImages(
 
           await createFile(
             baseDir,
-            `${filename}-${generateRandomNumber()}-4320x3630.jpg`,
+            `${filename}-${fileId}-4320x3630.jpg`,
             image1,
           );
 
@@ -80,7 +99,7 @@ export async function generateDalleImages(
 
           await createFile(
             baseDir,
-            `${filename}-${generateRandomNumber()}-7080x4140.jpg`,
+            `${filename}-${fileId}-7080x4140.jpg`,
             image2,
           );
 
@@ -91,7 +110,7 @@ export async function generateDalleImages(
 
           await createFile(
             baseDir,
-            `${filename}-${generateRandomNumber()}-9450x4650.jpg`,
+            `${filename}-${fileId}-9450x4650.jpg`,
             image3,
           );
         }

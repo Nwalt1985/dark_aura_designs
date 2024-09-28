@@ -1,23 +1,21 @@
 import { z } from 'zod';
 
-export const PrintifyImageResponse = z.array(
-  z.object({
-    id: z.string(),
-    file_name: z.string(),
-    height: z.number(),
-    width: z.number(),
-    size: z.number(),
-    mime_type: z.string(),
-    preview_url: z.string(),
-    upload_time: z.string(),
-  }),
-);
+export const PrintifyImageResponse = z.object({
+  id: z.string(),
+  file_name: z.string(),
+  height: z.number(),
+  width: z.number(),
+  size: z.number(),
+  mime_type: z.string(),
+  preview_url: z.string(),
+  upload_time: z.string(),
+});
 
 export type PrintifyImageResponseType = z.infer<typeof PrintifyImageResponse>;
 
 export const PrintifyGetUploadsResponse = z.object({
   current_page: z.number(),
-  data: PrintifyImageResponse,
+  data: PrintifyImageResponse.array(),
   first_page_url: z.string(),
   from: z.number(),
   last_page: z.number(),

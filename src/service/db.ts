@@ -37,6 +37,7 @@ export async function getUnlisted() {
   const result = (await collection
     .find({
       listedAt: null,
+      deletedAt: null,
     })
     .toArray()) as unknown as PromptResponseType[];
 
@@ -48,7 +49,14 @@ export async function getUnlisted() {
 export async function deleteListingByFileName(filename: string) {
   const { client, collection } = await mongoConnect();
 
-  await collection.deleteOne({ filename });
+  await collection.updateOne(
+    { filename },
+    {
+      $set: {
+        deletedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+      },
+    },
+  );
 
   await client.close();
 }

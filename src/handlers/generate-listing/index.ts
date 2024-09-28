@@ -35,10 +35,13 @@ const parser = yargs(hideBin(process.argv))
 
     const unlisted = await getUnlisted();
 
-    const uploadedImages = await getUploadedImages();
-
-    console.log('Tidying up the database');
+    if (!unlisted.length) {
+      console.log('No unlisted listings to create');
+      return;
+    }
     const data = await dbTidy(unlisted);
+
+    const uploadedImages = await getUploadedImages();
 
     console.log('Total Unlisted:', data.length);
 
@@ -55,145 +58,152 @@ const parser = yargs(hideBin(process.argv))
 })();
 
 export async function createPrintifyListingsData(
-  dbListing: z.infer<typeof PromptResponse>,
+  unlisted: z.infer<typeof PromptResponse>,
   uploadedImages: {
-    imageData: PrintifyImageResponseType;
+    imageData: PrintifyImageResponseType[];
     length: number;
     totalImages: number;
   },
 ) {
-  const bufferArray = await getBuffer(dbListing.filename);
+  try {
+    const bufferArray = await getBuffer(unlisted.filename);
 
-  const uploadedImagesArray: PrintifyImageResponseType[] = [];
+    const uploadedImagesArray: {
+      fileId: string | null;
+      response: PrintifyImageResponseType;
+    }[] = [];
 
-  if (bufferArray.length) {
-    for (const buffer of bufferArray) {
-      if (buffer.filename.includes('mockup')) {
-        console.log(`Skipping mockup image: ${buffer.filename}`);
-        continue;
-      }
+    if (bufferArray.length) {
+      for (const buffer of bufferArray) {
+        if (buffer.filename.includes('mockup')) {
+          console.log(`Skipping mockup image: ${buffer.filename}`);
+          continue;
+        }
 
-      const uploadedImage = uploadedImages.imageData.find(
-        (image) => image.file_name === buffer.filename,
-      );
+        const uploadedImage = uploadedImages.imageData.find(
+          (image) => image.file_name === buffer.filename,
+        );
 
-      if (!uploadedImage) {
-        console.log(`Uploading image: ${buffer.filename}`);
+        if (!uploadedImage) {
+          console.log(`Uploading image: ${buffer.filename}`);
 
-        const uploaded = await uploadImages(buffer.base64, buffer.filename);
-        uploadedImagesArray.push(uploaded);
-      } else {
-        console.log(`Image already uploaded: ${buffer.filename}`);
-        return;
+          const uploaded = await uploadImages(buffer.base64, buffer.filename);
+          uploadedImagesArray.push({
+            response: uploaded,
+            fileId: buffer.fileId,
+          });
+        } else {
+          console.log(`Image already uploaded: ${buffer.filename}`);
+          return;
+        }
       }
     }
+
+    const variants = [
+      {
+        id: 81075,
+        sku: '21734943883745480231',
+        price: 3190,
+        is_enabled: true,
+        is_default: false,
+      },
+      {
+        id: 103806,
+        sku: '74676489247340010998',
+        price: 1645,
+        is_enabled: true,
+        is_default: false,
+      },
+      {
+        id: 103807,
+        sku: '82680705350038580718',
+        price: 2410,
+        is_enabled: true,
+        is_default: true,
+      },
+    ];
+
+    const data = {
+      title: unlisted.title,
+      description: unlisted.description,
+      blueprint_id: Number(process.env.PRINTIFY_BLUEPRINT_ID) || 0,
+      print_provider_id: Number(process.env.PRINT_PROVIDER_ID) || 0,
+      tags: unlisted.keywords,
+      variants,
+      print_areas: [
+        {
+          variant_ids: [81075],
+          placeholders: [
+            {
+              position: 'front',
+              images: [
+                {
+                  id: uploadedImagesArray.find((image) => {
+                    const file = `${unlisted.filename}-9450x4650.jpg`;
+
+                    return image.response.file_name === file;
+                  })!.response.id,
+                  x: 0.5,
+                  y: 0.5,
+                  scale: 1,
+                  angle: 0,
+                },
+              ],
+            },
+          ],
+          background: '#ffffff',
+        },
+        {
+          variant_ids: [103806],
+          placeholders: [
+            {
+              position: 'front',
+              images: [
+                {
+                  id: uploadedImagesArray.find((image) => {
+                    const file = `${unlisted.filename}-4320x3630.jpg`;
+
+                    return image.response.file_name === file;
+                  })!.response.id,
+                  x: 0.5,
+                  y: 0.5,
+                  scale: 1,
+                  angle: 0,
+                },
+              ],
+            },
+          ],
+          background: '#ffffff',
+        },
+        {
+          variant_ids: [103807],
+          placeholders: [
+            {
+              position: 'front',
+              images: [
+                {
+                  id: uploadedImagesArray.find((image) => {
+                    const file = `${unlisted.filename}-7080x4140.jpg`;
+
+                    return image.response.file_name === file;
+                  })!.response.id,
+                  x: 0.5,
+                  y: 0.5,
+                  scale: 1,
+                  angle: 0,
+                },
+              ],
+            },
+          ],
+          background: '#ffffff',
+        },
+      ],
+    };
+
+    await createNewProduct(data);
+
+    await updateListing(unlisted.filename);
+  } catch (error) {
+    throw error;
   }
-
-  const variants = [
-    {
-      id: 81075,
-      sku: '21734943883745480231',
-      price: 3190,
-      is_enabled: true,
-      is_default: false,
-    },
-    {
-      id: 103806,
-      sku: '74676489247340010998',
-      price: 1645,
-      is_enabled: true,
-      is_default: false,
-    },
-    {
-      id: 103807,
-      sku: '82680705350038580718',
-      price: 2410,
-      is_enabled: true,
-      is_default: true,
-    },
-  ];
-
-  const data = {
-    title: dbListing.title,
-    description: dbListing.description,
-    blueprint_id: Number(process.env.PRINTIFY_BLUEPRINT_ID) || 0,
-    print_provider_id: Number(process.env.PRINT_PROVIDER_ID) || 0,
-    tags: dbListing.keywords,
-    variants,
-    print_areas: [
-      {
-        variant_ids: [81075],
-        placeholders: [
-          {
-            position: 'front',
-            images: [
-              {
-                id: uploadedImagesArray
-                  .flat()
-                  .find(
-                    (image) =>
-                      image.file_name === `${dbListing.filename}-9450x4650.jpg`,
-                  )!.id,
-                x: 0.5,
-                y: 0.5,
-                scale: 1,
-                angle: 0,
-              },
-            ],
-          },
-        ],
-        background: '#ffffff',
-      },
-      {
-        variant_ids: [103806],
-        placeholders: [
-          {
-            position: 'front',
-            images: [
-              {
-                id: uploadedImagesArray
-                  .flat()
-                  .find(
-                    (image) =>
-                      image.file_name === `${dbListing.filename}-4320x3630.jpg`,
-                  )!.id,
-                x: 0.5,
-                y: 0.5,
-                scale: 1,
-                angle: 0,
-              },
-            ],
-          },
-        ],
-        background: '#ffffff',
-      },
-      {
-        variant_ids: [103807],
-        placeholders: [
-          {
-            position: 'front',
-            images: [
-              {
-                id: uploadedImagesArray
-                  .flat()
-                  .find(
-                    (image) =>
-                      image.file_name === `${dbListing.filename}-7080x4140.jpg`,
-                  )!.id,
-                x: 0.5,
-                y: 0.5,
-                scale: 1,
-                angle: 0,
-              },
-            ],
-          },
-        ],
-        background: '#ffffff',
-      },
-    ],
-  };
-
-  await createNewProduct(data);
-
-  await updateListing(dbListing.filename);
 }

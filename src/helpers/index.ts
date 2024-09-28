@@ -11,8 +11,13 @@ export function getGeneratedFileNames() {
   const fileNameArray = assetFolder(originalDir);
 
   return fileNameArray
-    .filter((fileName) => fileName.includes('mockup-2543x1254'))
-    .map((fileName) => fileName.replace('-mockup-2543x1254', ''));
+    .filter((fileName) => {
+      if (fileName.includes('-9450x4650')) {
+        return fileName;
+      }
+    })
+    .map((fileName) => fileName.replace('-9450x4650', ''));
+  // .map((name) => name.replace(/-\d+$/, ''));
 }
 
 export async function getMockups() {
@@ -51,20 +56,21 @@ function assetFolder(directory: string) {
 }
 
 // Remove listings from the database that do not have a corresponding image file
-export async function dbTidy(list: PromptResponseType[]) {
-  const listings = list.map((listing) => {
-    const filename = listing.filename.replace('-mockup-2543x1254', '');
-    return {
-      isListed: listing.listedAt,
-      filename,
-    };
-  });
-  const fileNameArray = getGeneratedFileNames();
+export async function dbTidy(unlisted: PromptResponseType[]) {
+  const unlistedFileNames = unlisted.map((listing) => {
+    if (!listing.filename) {
+      console.log('No filename found for listing', listing);
+    }
 
-  for (const listing of listings) {
-    if (!fileNameArray.includes(listing.filename) && !listing.isListed) {
+    return listing.filename.replace(/(-\d+x\d+)?$/, '');
+  });
+
+  const generatedImagesFilenames = getGeneratedFileNames();
+
+  for (const listing of unlistedFileNames) {
+    if (!generatedImagesFilenames.includes(listing)) {
       console.log(`Deleting ${listing} from the DB`);
-      await deleteListingByFileName(listing.filename);
+      await deleteListingByFileName(listing);
     }
   }
 
@@ -80,6 +86,7 @@ export async function getBuffer(fileName: string) {
 
   const buffer: {
     filename: string;
+    fileId: string | null;
     base64: Buffer;
   }[] = [];
 
@@ -98,6 +105,7 @@ export async function getBuffer(fileName: string) {
           if (subfile.includes(fileName)) {
             buffer.push({
               filename: subfile,
+              fileId: extractImageId(subfile),
               base64: fs.readFileSync(path.resolve(subfolderPath, subfile)),
             });
           }
@@ -107,4 +115,10 @@ export async function getBuffer(fileName: string) {
   });
 
   return buffer;
+}
+
+function extractImageId(filename: string): string | null {
+  const regex = /\b\d{4}\b/;
+  const match = filename.match(regex);
+  return match![0] || null;
 }
