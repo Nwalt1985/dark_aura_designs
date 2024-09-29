@@ -150,6 +150,22 @@ export const styles: { name: string; keywords: string[] }[] = [
     keywords: ['low poly', 'geometric', 'simplified', '3D'],
   },
   {
+    name: 'japandi',
+    keywords: ['japandi', 'scandinavian', 'minimalist', 'japanese'],
+  },
+  {
+    name: 'ukiyo-e painting',
+    keywords: [
+      'ukiyo-e painting, japanese art, traditional japanese art, japanese painting',
+    ],
+  },
+  {
+    name: 'historical japanese woodblock print',
+    keywords: [
+      'woodblock print, japanese art, traditional japanese art, japanese painting',
+    ],
+  },
+  {
     name: 'sketch',
     keywords: [
       'abstract desk mat',

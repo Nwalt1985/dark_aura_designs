@@ -9,7 +9,7 @@ export const themes: { name: string; keywords: string[] }[] = [
     ],
   },
   {
-    name: 'mountain sunset',
+    name: 'sunset',
     keywords: [
       'sunset artwork',
       'sunset print',
@@ -36,30 +36,16 @@ export const themes: { name: string; keywords: string[] }[] = [
     ],
   },
   {
+    name: '70s retro',
+    keywords: ['70s retro', '70s decor', 'retro mouse pad', 'retro gifts'],
+  },
+  {
     name: 'frog',
     keywords: ['man i love frogs', 'japanese frog', 'frog hat', 'frog gift'],
   },
   {
     name: 'car',
     keywords: ['car', 'motors', 'racing', 'vehicles'],
-  },
-  {
-    name: 'ocean sunset',
-    keywords: [
-      'Sunset artwork',
-      'sunset print',
-      'sunset decor',
-      'sunset mouse mat',
-    ],
-  },
-  {
-    name: 'jungle sunset',
-    keywords: [
-      'Sunset artwork',
-      'sunset print',
-      'sunset decor',
-      'sunset mouse mat',
-    ],
   },
   {
     name: 'space',
@@ -91,38 +77,22 @@ export const themes: { name: string; keywords: string[] }[] = [
     name: 'abstract',
     keywords: ['abstract', 'modern', 'minimalist'],
   },
-  //   {
-  //     name: 'horror',
-  //     keywords: ['horror', 'creepy', 'ghost', 'dark'],
-  //   },
-  //   {
-  //     name: 'urban',
-  //     keywords: ['urban', 'cityscape', 'street', 'modern'],
-  //   },
-  //   {
-  //     name: 'dystopian',
-  //     keywords: ['dystopian', 'post-apocalyptic', 'bleak', 'ruins'],
-  //   },
-//   {
-//     name: 'underwater',
-//     keywords: ['underwater', 'ocean', 'sea', 'marine life'],
-//   },
+  {
+    name: 'dystopian',
+    keywords: ['dystopian', 'post-apocalyptic', 'bleak', 'ruins'],
+  },
   {
     name: 'retro',
     keywords: ['Retro gaming', 'arcade', 'Retro mouse mat', 'Retro decor'],
   },
   {
-    name: 'superhero',
-    keywords: ['superhero', 'action', 'powers', 'heroic'],
-  },
-  {
     name: 'mystery',
     keywords: ['mystery', 'detective', 'whodunit', 'enigmatic'],
   },
-  //   {
-  //     name: 'zombie apocalypse',
-  //     keywords: ['zombie apocalypse', 'undead', 'survival', 'chaos'],
-  //   },
+  {
+    name: 'street scene',
+    keywords: ['street scene', 'cityscape', 'urban', 'city'],
+  },
   {
     name: 'tropical',
     keywords: ['tropical', 'beach', 'palm trees', 'paradise'],
@@ -151,32 +121,6 @@ export const themes: { name: string; keywords: string[] }[] = [
       'dark academia',
       'medeival tapestry',
       'black mouse pad',
-    ],
-  },
-  {
-    name: 'fairytale',
-    keywords: [
-      'Mystical gifts',
-      'Fantasy desk mat',
-      'Magical',
-      'spiritual art',
-    ],
-  },
-  //   {
-  //     name: 'urban jungle',
-  //     keywords: ['urban jungle', 'skyscrapers', 'concrete', 'wild'],
-  //   },
-  //   {
-  //     name: 'haunted house',
-  //     keywords: ['haunted house', 'ghosts', 'spooky', 'paranormal'],
-  //   },
-  {
-    name: 'space opera',
-    keywords: [
-      'Space gifts',
-      'space themed gifts',
-      'gifts for scientists',
-      'sci fi mouse pad',
     ],
   },
 ];
