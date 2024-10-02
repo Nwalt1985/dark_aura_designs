@@ -32,11 +32,17 @@ export async function getDallEPrompts({
   style,
   keywords,
   limit,
+  product,
 }: {
   theme?: string;
   style?: string;
   keywords?: string;
   limit: number;
+  product: {
+    name: string;
+    title: string;
+    dimensions: string;
+  };
 }): Promise<z.infer<typeof PromptResponse>[]> {
   try {
     const promises = [];
@@ -56,7 +62,7 @@ export async function getDallEPrompts({
       const keywordsWithGeneric = generateKeywordArray(keywordsArr);
 
       const prompt = `
-		Create one DALL-E prompt to design a wide rectangular image with dimensions suitable for a desk mat (9450x4650). The theme should revolve around ${theme || th.name}, and it should be inspired by the style of ${style || st.name}. Do not include the words "desk mat" in the prompt.
+		Create one DALL-E prompt to design a wide rectangular image with dimensions suitable for a ${product.name} (${product.dimensions}). The theme should revolve around ${theme || th.name}, and it should be inspired by the style of ${style || st.name}. Do not include the words ${product.name} in the prompt.
 		
 		Key points for the prompt:
 		- Be specific. The prompt should ideally encompass various elements of the desired image. For instance, if you’re envisioning a landscape, describe not just the basic elements like trees and rivers, but also the type of trees, the state of the water (calm or turbulent), the time of day, the weather conditions, and the overall atmosphere you wish to capture.
@@ -70,7 +76,7 @@ export async function getDallEPrompts({
 		- Fill the entire canvas with a cohesive and balanced composition, avoiding any blank or white spaces.  
 		- No text or borders should be present in the image, and ensure the design maintains visual appeal when scaled to the full size.
 	   
-		Title: generate a keyword-rich 140-character title. The title should contain the following default text "Desk Mat XL Mouse Matt For Home And Office". Don't use any special characters or emojis.
+		Title: generate a keyword-rich 140-character title. The title should contain the following default text "${product.title} For Home And Office". Don't use any special characters or emojis.
 		
 		Filename: generate a concise filename without the format.
 		
@@ -82,6 +88,7 @@ export async function getDallEPrompts({
      	  "prompts": [
      		{
      		  "prompt": "Prompt 1",
+			  productType: "${product.name}",
      		  "description": "Description 1",
      		  "title": "Title 1",
 			  "theme": "Theme 1",

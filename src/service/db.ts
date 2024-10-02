@@ -17,12 +17,15 @@ export async function createDBListing(
   return result;
 }
 
-export async function getAllListings() {
+export async function getAllListings(product: string) {
   const { client, collection } = await mongoConnect();
 
   const result = (await collection
     .find({
       listedAt: { $ne: null },
+      productType: {
+        $eq: product,
+      },
     })
     .toArray()) as unknown as PromptResponseType[];
 
@@ -31,13 +34,16 @@ export async function getAllListings() {
   return result;
 }
 
-export async function getUnlisted() {
+export async function getUnlisted(product: string) {
   const { client, collection } = await mongoConnect();
 
   const result = (await collection
     .find({
       listedAt: null,
       deletedAt: null,
+      productType: {
+        $eq: product,
+      },
     })
     .toArray()) as unknown as PromptResponseType[];
 
@@ -61,11 +67,11 @@ export async function deleteListingByFileName(filename: string) {
   await client.close();
 }
 
-export async function updateListing(filename: string) {
+export async function updateListing(filename: string, productType: string) {
   const { client, collection } = await mongoConnect();
 
   await collection.updateOne(
-    { filename },
+    { filename, productType },
     {
       $set: {
         listedAt: DateTime.now().toFormat('dd-MM-yyyy'),

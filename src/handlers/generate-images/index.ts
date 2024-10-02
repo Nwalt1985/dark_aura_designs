@@ -1,15 +1,20 @@
 import { StatusCodes } from 'http-status-codes';
-
 import { getDallEPrompts } from './getPrompts';
 import { generateDalleImages } from './generateImages';
-import cron from 'node-cron';
 import { PromptResponse } from '../../models/schemas/prompt';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { z } from 'zod';
+import { getformattedDate, getProductDetails } from '../../helpers';
 
 const parser = yargs(hideBin(process.argv))
   .options({
+    product: {
+      type: 'string',
+      description: 'Product type for the listing',
+      demandOption: true,
+      choices: ['desk mat', 'laptop sleeve'],
+    },
     theme: {
       type: 'string',
       description: 'Theme for the DALL-E prompts',
@@ -34,17 +39,13 @@ const parser = yargs(hideBin(process.argv))
   .strict() // Ensure that invalid options throw an error
   .help();
 
-// Run locally
-// cron.schedule('* * * * *', async () => {
 (async () => {
   try {
-    const date = new Date();
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const year = date.getFullYear();
-    const formattedDate = `${day}-${month}-${year}`;
+    const formattedDate = getformattedDate();
 
     const argv = parser.parseSync();
+
+    const product = getProductDetails(argv.product, formattedDate);
 
     // generate prompts
     const dallEPrompts = await getDallEPrompts({
@@ -52,6 +53,7 @@ const parser = yargs(hideBin(process.argv))
       style: argv.style,
       keywords: argv.keywords,
       limit: argv.limit,
+      product,
     });
 
     // Add createdAt field to each prompt
@@ -65,7 +67,7 @@ const parser = yargs(hideBin(process.argv))
     console.log(`Successfully fetched ${dallEPrompts.length} prompts`);
 
     // generate images using DALL-E
-    await generateDalleImages(formattedData, formattedDate);
+    await generateDalleImages(formattedData, product, formattedDate);
 
     return;
   } catch (err) {

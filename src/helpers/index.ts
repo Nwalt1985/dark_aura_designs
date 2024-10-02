@@ -2,22 +2,94 @@ import fs from 'fs';
 import path from 'path';
 import { PromptResponseType } from '../models/schemas/prompt';
 import { deleteListingByFileName, getUnlisted } from '../service/db';
+import sharp from 'sharp';
+import {
+  deskMatDefaultDescription,
+  laptopSleeveDefaultDescription,
+} from '../handlers/generate-images/defaultDescription';
 
-export function getGeneratedFileNames() {
-  const originalDir = path.resolve(
-    process.env.HOME || '',
-    `Desktop/ai_etsy/etsy_assets/original`,
-  );
-  const fileNameArray = assetFolder(originalDir);
+export function getformattedDate() {
+  const date = new Date();
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+  const year = date.getFullYear();
+  const formattedDate = `${day}-${month}-${year}`;
 
-  return fileNameArray
-    .filter((fileName) => {
-      if (fileName.includes('-9450x4650')) {
-        return fileName;
-      }
-    })
-    .map((fileName) => fileName.replace('-9450x4650', ''));
-  // .map((name) => name.replace(/-\d+$/, ''));
+  return formattedDate;
+}
+
+export function getProductDetails(
+  arg: string,
+  formattedDate: string,
+): {
+  name: string;
+  title: string;
+  dimensions: string;
+  baseDir: string;
+  defaultDescription: string;
+} {
+  let product: {
+    name: string;
+    title: string;
+    dimensions: string;
+    baseDir: string;
+    defaultDescription: string;
+  } = {
+    name: '',
+    title: '',
+    dimensions: '',
+    baseDir: '',
+    defaultDescription: '',
+  };
+
+  switch (arg) {
+    case 'desk mat':
+      product.name = 'desk mat';
+      product.title = 'Desk Mat XL Mouse Matt';
+      product.dimensions = '9450x4650';
+      product.baseDir = path.resolve(
+        process.env.HOME || '',
+        `Desktop/ai_etsy/etsy_assets/desk_mats`,
+      );
+      product.defaultDescription = deskMatDefaultDescription;
+      break;
+    case 'laptop sleeve':
+      product.name = 'laptop sleeve';
+      product.title = 'Laptop Sleeve Computer';
+      product.dimensions = '4125x3000';
+      product.baseDir = path.resolve(
+        process.env.HOME || '',
+        `Desktop/ai_etsy/etsy_assets/laptop_sleeves`,
+      );
+      product.defaultDescription = laptopSleeveDefaultDescription;
+      break;
+  }
+
+  return product;
+}
+
+export function getGeneratedFileNames(dir: string, productType: string) {
+  const fileNameArray = assetFolder(dir);
+
+  switch (productType) {
+    case 'desk mat':
+      return fileNameArray
+        .filter((fileName) => {
+          if (fileName.includes('-9450x4650')) {
+            return fileName;
+          }
+        })
+        .map((fileName) => fileName.replace('-9450x4650', ''));
+
+    case 'laptop sleeve':
+      return fileNameArray
+        .filter((fileName) => {
+          if (fileName.includes('-4125x3000')) {
+            return fileName;
+          }
+        })
+        .map((fileName) => fileName.replace('-4125x3000', ''));
+  }
 }
 
 export async function getMockups() {
@@ -42,12 +114,7 @@ function assetFolder(directory: string) {
         if (file.includes('.DS_Store')) {
           return;
         }
-
-        const subfolderPath = path.resolve(folderPath, file);
-
-        fs.readdirSync(subfolderPath).forEach((subfile) => {
-          fileArray.push(subfile.replace('.jpg', ''));
-        });
+        fileArray.push(file.replace('.jpg', ''));
       });
     }
   });
@@ -56,7 +123,16 @@ function assetFolder(directory: string) {
 }
 
 // Remove listings from the database that do not have a corresponding image file
-export async function dbTidy(unlisted: PromptResponseType[]) {
+export async function dbTidy(
+  unlisted: PromptResponseType[],
+  product: {
+    name: string;
+    title: string;
+    dimensions: string;
+    baseDir: string;
+    defaultDescription: string;
+  },
+) {
   const unlistedFileNames = unlisted.map((listing) => {
     if (!listing.filename) {
       console.log('No filename found for listing', listing);
@@ -65,51 +141,47 @@ export async function dbTidy(unlisted: PromptResponseType[]) {
     return listing.filename.replace(/(-\d+x\d+)?$/, '');
   });
 
-  const generatedImagesFilenames = getGeneratedFileNames();
+  const generatedImagesFilenames = getGeneratedFileNames(
+    product.baseDir,
+    product.name,
+  );
 
   for (const listing of unlistedFileNames) {
-    if (!generatedImagesFilenames.includes(listing)) {
+    if (!generatedImagesFilenames!.includes(listing)) {
       console.log(`Deleting ${listing} from the DB`);
       await deleteListingByFileName(listing);
     }
   }
 
-  return await getUnlisted();
+  return await getUnlisted(product.name);
 }
 
 // Loop through the folders and subfolders in the original directory and return the buffer of the image
-export async function getBuffer(fileName: string) {
-  const originalDir = path.resolve(
-    process.env.HOME || '',
-    `Desktop/ai_etsy/etsy_assets/original`,
-  );
-
+export async function getBuffer(fileName: string, baseDir: string) {
   const buffer: {
     filename: string;
     fileId: string | null;
     base64: Buffer;
   }[] = [];
 
-  fs.readdirSync(originalDir).forEach((folder) => {
-    if (folder.match(/\d{2}-\d{2}-\d{4}/)) {
-      const folderPath = path.resolve(originalDir, folder);
+  fs.readdirSync(baseDir).forEach((dir) => {
+    if (dir.match(/\d{2}-\d{2}-\d{4}/)) {
+      const folder = path.resolve(baseDir, dir);
 
-      fs.readdirSync(folderPath).forEach((file) => {
+      fs.readdirSync(folder).forEach((file) => {
         if (file.includes('.DS_Store')) {
           return;
         }
 
-        const subfolderPath = path.resolve(folderPath, file);
+        const filePath = path.resolve(folder, file);
 
-        fs.readdirSync(subfolderPath).forEach((subfile) => {
-          if (subfile.includes(fileName)) {
-            buffer.push({
-              filename: subfile,
-              fileId: extractImageId(subfile),
-              base64: fs.readFileSync(path.resolve(subfolderPath, subfile)),
-            });
-          }
-        });
+        if (file.includes(fileName)) {
+          buffer.push({
+            filename: file,
+            fileId: extractImageId(file),
+            base64: fs.readFileSync(filePath),
+          });
+        }
       });
     }
   });
@@ -121,4 +193,113 @@ function extractImageId(filename: string): string | null {
   const regex = /\b\d{4}\b/;
   const match = filename.match(regex);
   return match![0] || null;
+}
+
+export async function resizeDeskmats(
+  buffer: string,
+  filename: string,
+  fileId: number,
+  baseDir: string,
+  formattedDate: string,
+) {
+  const directoryPath = `${baseDir}/${formattedDate}`;
+
+  if (!fs.existsSync(directoryPath)) {
+    fs.mkdirSync(directoryPath, { recursive: true });
+  }
+
+  const mockup = await sharp(Buffer.from(buffer, 'base64'))
+    .resize(2543, 1254)
+    .jpeg()
+    .toBuffer();
+
+  await createFile(
+    directoryPath,
+    `${filename}-${fileId}-mockup-2543x1254.jpg`,
+    mockup,
+  );
+
+  const image1 = await sharp(Buffer.from(buffer, 'base64'))
+    .resize(4320, 3630)
+    .jpeg()
+    .toBuffer();
+
+  await createFile(
+    directoryPath,
+    `${filename}-${fileId}-4320x3630.jpg`,
+    image1,
+  );
+
+  const image2 = await sharp(Buffer.from(buffer, 'base64'))
+    .resize(7080, 4140)
+    .jpeg()
+    .toBuffer();
+
+  await createFile(
+    directoryPath,
+    `${filename}-${fileId}-7080x4140.jpg`,
+    image2,
+  );
+
+  const image3 = await sharp(Buffer.from(buffer, 'base64'))
+    .resize(9450, 4650)
+    .jpeg()
+    .toBuffer();
+
+  await createFile(
+    directoryPath,
+    `${filename}-${fileId}-9450x4650.jpg`,
+    image3,
+  );
+}
+
+export async function resizeLaptopSleeve(
+  buffer: string,
+  filename: string,
+  fileId: number,
+  baseDir: string,
+  formattedDate: string,
+) {
+  const directoryPath = `${baseDir}/${formattedDate}`;
+
+  if (!fs.existsSync(directoryPath)) {
+    fs.mkdirSync(directoryPath, { recursive: true });
+  }
+  const mockup = await sharp(Buffer.from(buffer, 'base64'))
+    .resize(1502, 1145)
+    .jpeg()
+    .toBuffer();
+
+  await createFile(
+    directoryPath,
+    `${filename}-${fileId}-mockup-1502x1145.jpg`,
+    mockup,
+  );
+
+  const image1 = await sharp(Buffer.from(buffer, 'base64'))
+    .resize(4125, 3000)
+    .jpeg()
+    .toBuffer();
+
+  await createFile(
+    directoryPath,
+    `${filename}-${fileId}-4125x3000.jpg`,
+    image1,
+  );
+}
+
+async function createFile(
+  baseDir: string,
+  filename: string,
+  resizedBuffer: Buffer,
+) {
+  const filePath = path.join(`${baseDir}`, `${filename}`);
+
+  fs.writeFile(filePath, resizedBuffer.toString('base64'), 'base64', (err) => {
+    if (err) {
+      console.error(`Error writing file: ${err}`);
+    } else {
+      console.log(`${filename} written successfully.`);
+    }
+  });
 }

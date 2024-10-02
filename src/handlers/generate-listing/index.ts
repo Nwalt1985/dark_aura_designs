@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
-import { dbTidy, getBuffer } from '../../helpers';
+import {
+  dbTidy,
+  getBuffer,
+  getformattedDate,
+  getProductDetails,
+} from '../../helpers';
 import { getAllListings, getUnlisted, updateListing } from '../../service/db';
 import {
   createNewProduct,
@@ -12,11 +17,22 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import dotenv from 'dotenv';
+import {
+  deskMatConfig,
+  generateListingConfig,
+  laptopSleeveConfig,
+} from './listingConfig';
 
 dotenv.config();
 
 const parser = yargs(hideBin(process.argv))
   .options({
+    product: {
+      type: 'string',
+      description: 'Product type for the listing',
+      demandOption: true,
+      choices: ['desk mat', 'laptop sleeve'],
+    },
     limit: {
       type: 'number',
       description: 'Limit the number of prompts',
@@ -29,26 +45,29 @@ const parser = yargs(hideBin(process.argv))
 (async () => {
   try {
     const argv = parser.parseSync();
+    const formattedDate = getformattedDate();
 
-    const totalListings = await getAllListings();
+    const product = getProductDetails(argv.product, formattedDate);
+
+    const totalListings = await getAllListings(argv.product);
     console.log('Total Listings:', totalListings.length);
 
-    const unlisted = await getUnlisted();
+    const unlisted = await getUnlisted(product.name);
 
     if (!unlisted.length) {
       console.log('No unlisted listings to create');
       return;
     }
-    const data = await dbTidy(unlisted);
+    const data = await dbTidy(unlisted, product);
 
     const uploadedImages = await getUploadedImages();
 
     console.log('Total Unlisted:', data.length);
 
-    console.log(`Creating ${argv.limit} Printify listings`);
+    console.log(`${product.name} - Creating ${argv.limit} Printify listings`);
 
     for (let i = 0; i < argv.limit; i++) {
-      await createPrintifyListingsData(data[i], uploadedImages);
+      await createPrintifyListingsData(data[i], uploadedImages, product);
     }
 
     return;
@@ -64,9 +83,16 @@ export async function createPrintifyListingsData(
     length: number;
     totalImages: number;
   },
+  product: {
+    name: string;
+    title: string;
+    dimensions: string;
+    baseDir: string;
+    defaultDescription: string;
+  },
 ) {
   try {
-    const bufferArray = await getBuffer(unlisted.filename);
+    const bufferArray = await getBuffer(unlisted.filename, product.baseDir);
 
     const uploadedImagesArray: {
       fileId: string | null;
@@ -99,110 +125,21 @@ export async function createPrintifyListingsData(
       }
     }
 
-    const variants = [
-      {
-        id: 81075,
-        sku: '21734943883745480231',
-        price: 3190,
-        is_enabled: true,
-        is_default: false,
-      },
-      {
-        id: 103806,
-        sku: '74676489247340010998',
-        price: 1645,
-        is_enabled: true,
-        is_default: false,
-      },
-      {
-        id: 103807,
-        sku: '82680705350038580718',
-        price: 2410,
-        is_enabled: true,
-        is_default: true,
-      },
-    ];
+    const config = generateListingConfig(uploadedImagesArray, product.name);
 
     const data = {
       title: unlisted.title,
       description: unlisted.description,
-      blueprint_id: Number(process.env.PRINTIFY_BLUEPRINT_ID) || 0,
-      print_provider_id: Number(process.env.PRINT_PROVIDER_ID) || 0,
+      blueprint_id: config.blueprint_id,
+      print_provider_id: config.print_provider_id,
       tags: unlisted.keywords,
-      variants,
-      print_areas: [
-        {
-          variant_ids: [81075],
-          placeholders: [
-            {
-              position: 'front',
-              images: [
-                {
-                  id: uploadedImagesArray.find((image) => {
-                    const file = `${unlisted.filename}-9450x4650.jpg`;
-
-                    return image.response.file_name === file;
-                  })!.response.id,
-                  x: 0.5,
-                  y: 0.5,
-                  scale: 1,
-                  angle: 0,
-                },
-              ],
-            },
-          ],
-          background: '#ffffff',
-        },
-        {
-          variant_ids: [103806],
-          placeholders: [
-            {
-              position: 'front',
-              images: [
-                {
-                  id: uploadedImagesArray.find((image) => {
-                    const file = `${unlisted.filename}-4320x3630.jpg`;
-
-                    return image.response.file_name === file;
-                  })!.response.id,
-                  x: 0.5,
-                  y: 0.5,
-                  scale: 1,
-                  angle: 0,
-                },
-              ],
-            },
-          ],
-          background: '#ffffff',
-        },
-        {
-          variant_ids: [103807],
-          placeholders: [
-            {
-              position: 'front',
-              images: [
-                {
-                  id: uploadedImagesArray.find((image) => {
-                    const file = `${unlisted.filename}-7080x4140.jpg`;
-
-                    return image.response.file_name === file;
-                  })!.response.id,
-                  x: 0.5,
-                  y: 0.5,
-                  scale: 1,
-                  angle: 0,
-                },
-              ],
-            },
-          ],
-          background: '#ffffff',
-        },
-      ],
+      variants: config.variants,
+      print_areas: config.print_areas,
     };
 
     await createNewProduct(data);
 
-    await updateListing(unlisted.filename);
+    await updateListing(unlisted.filename, product.name);
   } catch (error) {
     throw error;
   }

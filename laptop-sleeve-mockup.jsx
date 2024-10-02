@@ -2,9 +2,9 @@
 #target photoshop;
 
 // Paths
-var templatePath = '~/Desktop/ai_etsy/etsy_assets/desk_mat_template/desk_mat_branding_mockup_2.psd';
-var designFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/desk_mats/';
-var exportFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/desk_mats/mock_ups/';
+var templatePath = '~/Desktop/ai_etsy/etsy_assets/laptop_sleeve_template/sleeve_laptop_mockup.psd';
+var designFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/laptop_sleeves/';
+var exportFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/laptop_sleeves/mock_ups/';
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
@@ -53,7 +53,6 @@ function mockupExists(exportFolder, fileName) {
 // Function to process each design folder
 function processDesignFolder(designFolder, exportFolder) {
     var designFiles = designFolder.getFiles(/\d{4,4}x\d{4,4}/); // Look for files with 'xxxx' resolution patterns in the name
-
     if (designFiles.length === 0) {
         alert("No design files found in folder: " + designFolder.fsName);
         return; // Skip if no design files are found
@@ -61,7 +60,7 @@ function processDesignFolder(designFolder, exportFolder) {
 
     for (var i = 0; i < designFiles.length; i++) {
         var designFile = designFiles[i];
-        if (designFile.name.indexOf('2543x1254') !== -1) { // Filter for specific resolution
+        if (designFile.name.indexOf('1502x1145') !== -1) { // Filter for specific resolution
             var fileName = designFile.name.split('.')[0]; // Exclude file extension for the mockup file name
             // Check if the mockup file already exists before processing
             if (mockupExists(exportFolder, fileName)) {
