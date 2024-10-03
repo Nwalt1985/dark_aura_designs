@@ -2,19 +2,19 @@ export const styles: { name: string; keywords: string[] }[] = [
   {
     name: 'kawaii',
     keywords: [
-      'cute desk decor',
-      'desk mat cute',
-      'japanese desk mat',
-      'cute mouse pad',
+      'kawaii gaming',
+      'kawaii gamer accessories',
+      'kawaii mouse pad',
+      'kawaii gaming setup',
     ],
   },
   {
     name: 'cottagecore',
     keywords: [
-      'Cottagecore desk mat',
-      'witchy gifts',
-      'dark academia',
-      'cottagecore decor',
+      'cottagecore desk mat',
+      'fairy desk mat',
+      'fairy core',
+      'fairy garden',
     ],
   },
   {
@@ -92,10 +92,10 @@ export const styles: { name: string; keywords: string[] }[] = [
   {
     name: 'gothic',
     keywords: [
+      'gothic gifts for him',
       'gothic gifts for gf',
-      'whimsigoth',
-      'dark academia',
-      'derk academia decor',
+      'hp lovecraft',
+      'eldritch horror',
     ],
   },
   {
@@ -151,7 +151,7 @@ export const styles: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'japandi',
-    keywords: ['japandi', 'scandinavian', 'minimalist', 'japanese'],
+    keywords: ['Japandi', 'Japandi decor', 'japanese landscape', 'zen art'],
   },
   {
     name: 'ukiyo-e painting',

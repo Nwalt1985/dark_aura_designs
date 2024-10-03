@@ -41,11 +41,16 @@ export const themes: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'frog',
-    keywords: ['man i love frogs', 'japanese frog', 'frog hat', 'frog gift'],
+    keywords: ['japanese frog', 'frog print', 'frog gift', 'man i love frogs'],
   },
   {
     name: 'car',
-    keywords: ['car', 'motors', 'racing', 'vehicles'],
+    keywords: [
+      'car lover gifts',
+      'gift for nephew',
+      'car mouse pad',
+      'present for dad',
+    ],
   },
   {
     name: 'space',
@@ -58,7 +63,12 @@ export const themes: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'nature',
-    keywords: ['nature', 'forest', 'mountain', 'waterfall'],
+    keywords: [
+      'Landscape desk mat',
+      'Nature desk mat',
+      'Gifts for hikers',
+      'outdoorsy gifts',
+    ],
   },
   {
     name: 'fantasy',
@@ -83,7 +93,12 @@ export const themes: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'retro',
-    keywords: ['Retro gaming', 'arcade', 'Retro mouse mat', 'Retro decor'],
+    keywords: [
+      'retro',
+      'midcentury modern',
+      'mid century modern decor',
+      '70s retro art',
+    ],
   },
   {
     name: 'mystery',
