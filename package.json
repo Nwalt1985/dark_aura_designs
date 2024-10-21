@@ -10,13 +10,15 @@
     "generate-images": "npx tsc && node ./.build/handlers/generate-images/index.js",
     "generate-listing": "npx tsc && node ./.build/handlers/generate-listing/index.js",
     "update-etsy": "npx tsc && node ./.build/handlers/update-etsy/index.js",
-    "auth-server": "npx tsc && node ./.build/auth/etsy/server.js"
+    "auth-server": "npx tsc && node ./.build/auth/etsy/server.js",
+    "generate-code": "node ./src/auth/etsy/codeChallenge.js"
   },
   "engines": {
     "node": ">=20.12.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/hbs": "^4.0.4",
     "@types/node-cron": "^3.0.11",
     "@types/smb2": "^0.2.4",
     "@types/yargs": "^17.0.33",
@@ -32,8 +34,8 @@
     "@types/luxon": "^3.4.2",
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
-    "express": "4.x",
-    "hbs": "^4.1.2",
+    "express": "^4.21.1",
+    "hbs": "^4.2.0",
     "http-status-codes": "^2.2.0",
     "luxon": "^3.5.0",
     "mongodb": "^6.9.0",

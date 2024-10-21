@@ -1,5 +1,5 @@
 {
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/auth/etsy/codeChallenge.js"],
   "exclude": [
     "node_modules",
     "src/handlers/generate-mockups/*.ts",
