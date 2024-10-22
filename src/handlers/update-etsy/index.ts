@@ -55,12 +55,12 @@ const parser = yargs(hideBin(process.argv))
     for (const listing of listingsToUpdate) {
       const { listing_id, description, state, title } = listing;
 
-      const firstParagraph = description.split('\n')[0].trim();
+      const firstSentence = description.split('.')[0].trim();
 
-      const record = await updateEtsyListingId(firstParagraph, listing_id);
+      const record = await updateEtsyListingId(firstSentence, listing_id);
 
       if (!record) {
-        console.log(`No record found for description: ${firstParagraph}`);
+        console.log(`No record found for description: ${firstSentence}`);
         continue;
       }
 
@@ -109,5 +109,6 @@ const parser = yargs(hideBin(process.argv))
     return;
   } catch (error: any) {
     console.error(error);
+    return;
   }
 })();

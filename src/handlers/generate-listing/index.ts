@@ -50,7 +50,6 @@ const parser = yargs(hideBin(process.argv))
     const product = getProductDetails(argv.product, formattedDate);
 
     const totalListings = await getAllListings(argv.product);
-    console.log('Total Listings:', totalListings.length);
 
     const unlisted = await getUnlisted(product.name);
 
@@ -61,8 +60,6 @@ const parser = yargs(hideBin(process.argv))
     const data = await dbTidy(unlisted, product);
 
     const uploadedImages = await getUploadedImages();
-
-    console.log('Total Unlisted:', data.length);
 
     console.log(`${product.name} - Creating ${argv.limit} Printify listings`);
 

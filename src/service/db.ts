@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { mongoConnect } from '../database';
 import { PromptResponse, PromptResponseType } from '../models/schemas/prompt';
 import { DateTime } from 'luxon';
+import he from 'he';
 
 export async function createDBListing(
   listing: z.infer<typeof PromptResponse>[],
@@ -116,5 +117,6 @@ export async function updateEtsyListingId(
 }
 
 function escapeRegex(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special characters
+  const decodedString = he.decode(string);
+  return decodedString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special characters
 }

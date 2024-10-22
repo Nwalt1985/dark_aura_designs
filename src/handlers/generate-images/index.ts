@@ -45,6 +45,12 @@ const parser = yargs(hideBin(process.argv))
 
     const argv = parser.parseSync();
 
+    if (argv.style && argv.theme && !argv.keywords) {
+      throw new Error(
+        'Unique Keywords are required when providing a theme and style. Generic keywords will be added to the prompt automatically.',
+      );
+    }
+
     const product = getProductDetails(argv.product, formattedDate);
 
     // generate prompts
