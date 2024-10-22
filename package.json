@@ -10,8 +10,7 @@
     "generate-images": "npx tsc && node ./.build/handlers/generate-images/index.js",
     "generate-listing": "npx tsc && node ./.build/handlers/generate-listing/index.js",
     "update-etsy": "npx tsc && node ./.build/handlers/update-etsy/index.js",
-    "auth-server": "npx tsc && node ./.build/auth/etsy/server.js",
-    "generate-code": "node ./src/auth/etsy/codeChallenge.js"
+    "auth-server": "npx tsc && node ./.build/auth/etsy/server.js"
   },
   "engines": {
     "node": ">=20.12.2"

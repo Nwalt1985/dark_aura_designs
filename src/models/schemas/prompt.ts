@@ -11,6 +11,7 @@ export const PromptResponse = z.object({
   createdAt: z.string(),
   listedAt: z.string().optional(),
   buffer: z.string().optional(),
+  etsyListingId: z.number().optional(),
 });
 
 export type PromptResponseType = z.infer<typeof PromptResponse>;

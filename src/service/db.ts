@@ -81,3 +81,40 @@ export async function updateListing(filename: string, productType: string) {
 
   await client.close();
 }
+
+export async function updateEtsyListingId(
+  description: string,
+  listingId: number,
+): Promise<PromptResponseType | undefined> {
+  const { client, collection } = await mongoConnect();
+
+  const escapedSubstring = escapeRegex(description);
+
+  const query = { description: { $regex: escapedSubstring, $options: 'i' } }; // 'i' for case-insensitive
+  const document = (await collection.findOne(
+    query,
+  )) as unknown as PromptResponseType & { _id: object };
+
+  if (!document) {
+    console.log(`No document found for description: ${description}`);
+    return;
+  }
+
+  if (!document.etsyListingId) {
+    await collection.updateOne(
+      { _id: document?._id },
+      {
+        $set: {
+          etsyListingId: listingId,
+        },
+      },
+    );
+  }
+
+  await client.close();
+  return { ...document, etsyListingId: listingId };
+}
+
+function escapeRegex(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special characters
+}
