@@ -11,6 +11,7 @@ import {
   EtsyListingRequestSchema,
 } from '../../models/schemas/etsy';
 import { z } from 'zod';
+import { getAllActiveListings } from '../../service/etsy';
 
 dotenv.config();
 
@@ -22,42 +23,43 @@ const parser = yargs(hideBin(process.argv))
       demandOption: true,
       choices: ['desk mat', 'laptop sleeve'],
     },
+    limit: {
+      type: 'number',
+      description: 'Limit active listings',
+      default: 25,
+    },
   })
-  .strict() // Ensure that invalid options throw an error
+  .strict()
   .help();
 
 (async () => {
   try {
     const argv = parser.parseSync();
-    const shopId = process.env.ETSY_SHOP_ID;
+    const shopId = process.env.ETSY_SHOP_ID as string;
 
-    const { data: activeListings } = await axios.get(
-      `https://api.etsy.com/v3/application/shops/${shopId}/listings/active`,
-      {
-        headers: {
-          'x-api-key': process.env.ETSY_KEY_STRING || '',
-        },
-      },
-    );
+    const activeListings = await getAllActiveListings(shopId, argv.limit);
 
     if (!activeListings) {
       console.log('No active listings found');
       return;
     }
 
-    const listingsToUpdate: EtsyListingType[] =
-      await activeListings.results.filter(
-        (listing: any) => listing.should_auto_renew === false,
-      );
+    const listingsToUpdate: EtsyListingType[] = activeListings.filter(
+      (listing: any) => listing.should_auto_renew === false,
+    );
 
     console.log(`Listings to update: ${listingsToUpdate.length}`);
 
     for (const listing of listingsToUpdate) {
-      const { listing_id, description, state, title } = listing;
+      const { listing_id, description, title } = listing;
 
       const firstSentence = description.split('.')[0].trim();
 
-      const record = await updateEtsyListingId(firstSentence, listing_id);
+      const record = await updateEtsyListingId(
+        firstSentence,
+        listing_id,
+        title,
+      );
 
       if (!record) {
         console.log(`No record found for description: ${firstSentence}`);

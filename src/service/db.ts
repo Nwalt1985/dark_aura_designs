@@ -86,12 +86,17 @@ export async function updateListing(filename: string, productType: string) {
 export async function updateEtsyListingId(
   description: string,
   listingId: number,
+  title: string,
 ): Promise<PromptResponseType | undefined> {
   const { client, collection } = await mongoConnect();
 
   const escapedSubstring = escapeRegex(description);
 
-  const query = { description: { $regex: escapedSubstring, $options: 'i' } }; // 'i' for case-insensitive
+  const query = {
+    description: { $regex: escapedSubstring, $options: 'i' }, // 'i' for case-insensitive
+    deletedAt: null,
+  };
+
   const document = (await collection.findOne(
     query,
   )) as unknown as PromptResponseType & { _id: object };
@@ -107,6 +112,7 @@ export async function updateEtsyListingId(
       {
         $set: {
           etsyListingId: listingId,
+          title: title,
         },
       },
     );
