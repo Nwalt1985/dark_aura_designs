@@ -10,7 +10,6 @@ import {
   EtsyListingType,
   EtsyListingRequestSchema,
 } from '../../models/schemas/etsy';
-import { z } from 'zod';
 import { getAllActiveListings } from '../../service/etsy';
 
 dotenv.config();

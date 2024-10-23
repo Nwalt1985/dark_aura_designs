@@ -18,9 +18,7 @@ import { hideBin } from 'yargs/helpers';
 
 import dotenv from 'dotenv';
 import {
-  deskMatConfig,
   generateListingConfig,
-  laptopSleeveConfig,
 } from './listingConfig';
 
 dotenv.config();

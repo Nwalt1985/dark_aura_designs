@@ -1,10 +1,8 @@
 import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
 import { createDBListing } from '../../service/db';
-import sharp from 'sharp';
 import OpenAI from 'openai';
 import fs from 'fs';
-import path from 'path';
 import { resizeDeskmats, resizeLaptopSleeve } from '../../helpers';
 
 const openai = new OpenAI();

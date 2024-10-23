@@ -1,16 +1,7 @@
-import axios from 'axios';
 import dotenv from 'dotenv';
 import yargs from 'yargs';
-import qs from 'qs';
-
 import { hideBin } from 'yargs/helpers';
-
 import { updateEtsyListingId } from '../../service/db';
-import {
-  EtsyListingType,
-  EtsyListingRequestSchema,
-} from '../../models/schemas/etsy';
-import { z } from 'zod';
 import { getAllActiveListings } from '../../service/etsy';
 
 dotenv.config();
