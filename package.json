@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit",
     "build": "npx tsc",
     "generate-images": "npx tsc && node ./.build/handlers/generate-images/index.js",
-    "generate-listing": "npx tsc && node ./.build/handlers/generate-listing/index.js",
+    "generate-listings": "npx tsc && node ./.build/handlers/generate-listing/index.js",
     "update-etsy": "npx tsc && node ./.build/handlers/update-etsy/index.js",
     "auth-server": "npx tsc && node ./.build/auth/etsy/server.js",
     "update-previous": "npx tsc && node ./.build/handlers/update-etsy/update-previous.js"
