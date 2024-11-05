@@ -2,42 +2,32 @@ export const themes: { name: string; keywords: string[] }[] = [
   {
     name: 'mushrooms',
     keywords: [
-      'Mushroon lovers gift',
-      'witchy decor',
-      'dark academia',
-      'Cottagecore desk mat',
+      'mushroon lovers gift',
+      'mushroom art',
+      'mushroom print',
+      'cottagecore design',
     ],
   },
   {
     name: 'sunset',
-    keywords: [
-      'sunset artwork',
-      'sunset print',
-      'sunset decor',
-      'sunset mouse mat',
-    ],
+    keywords: ['sunset artwork', 'sunset print', 'sunset decor', 'sunset art'],
   },
   {
     name: 'botanical',
     keywords: [
-      'Floral desk mat',
+      'floral print',
       'william morris',
-      'Cottagecore desk mat',
+      'cottagecore design',
       'forestcore',
     ],
   },
   {
     name: 'celestial',
-    keywords: [
-      'Mystical gifts',
-      'Fantasy desk mat',
-      'Magical',
-      'spiritual art',
-    ],
+    keywords: ['mystical gifts', 'fantasy art', 'magical art', 'spiritual art'],
   },
   {
     name: '70s retro',
-    keywords: ['70s retro', '70s decor', 'retro mouse pad', 'retro gifts'],
+    keywords: ['70s retro', '70s decor', 'retro design', 'retro gifts'],
   },
   {
     name: 'frog',
@@ -45,51 +35,51 @@ export const themes: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'car',
-    keywords: [
-      'car lover gifts',
-      'gift for nephew',
-      'car mouse pad',
-      'present for dad',
-    ],
+    keywords: ['car lover gifts', 'car print', 'car art', 'automotive'],
   },
   {
     name: 'space',
     keywords: [
-      'Space gifts',
+      'space gifts',
       'space themed gifts',
       'gifts for scientists',
-      'sci fi mouse pad',
+      'sci-fi design',
     ],
   },
   {
     name: 'nature',
     keywords: [
-      'Landscape desk mat',
-      'Nature desk mat',
-      'Gifts for hikers',
+      'landscape art',
+      'nature lovers gift',
+      'gifts for hikers',
       'outdoorsy gifts',
     ],
   },
   {
     name: 'fantasy',
-    keywords: [
-      'Mystical gifts',
-      'Fantasy desk mat',
-      'Magical',
-      'spiritual art',
-    ],
+    keywords: ['mystical gifts', 'fantasy art', 'magical art', 'spiritual art'],
   },
   {
     name: 'sci-fi',
-    keywords: ['sci-fi', 'cyberpunk', 'futuristic'],
+    keywords: ['sci-fi', 'cyberpunk', 'futuristic design', 'space art'],
   },
   {
     name: 'abstract',
-    keywords: ['abstract', 'modern', 'minimalist'],
+    keywords: [
+      'abstract art',
+      'modern design',
+      'minimalist design',
+      'abstract',
+    ],
   },
   {
     name: 'dystopian',
-    keywords: ['dystopian', 'post-apocalyptic', 'bleak', 'ruins'],
+    keywords: [
+      'dystopian',
+      'post-apocalyptic',
+      'dystopian art',
+      'dystopian future',
+    ],
   },
   {
     name: 'retro',
@@ -102,31 +92,36 @@ export const themes: { name: string; keywords: string[] }[] = [
   },
   {
     name: 'mystery',
-    keywords: ['mystery', 'detective', 'whodunit', 'enigmatic'],
+    keywords: [
+      'mystery art',
+      'detective theme',
+      'noir design',
+      'enigmatic art',
+    ],
   },
   {
     name: 'street scene',
-    keywords: ['street scene', 'cityscape', 'urban', 'city'],
+    keywords: ['street scene', 'cityscape art', 'urban art', 'city art'],
   },
   {
     name: 'tropical',
-    keywords: ['tropical', 'beach', 'palm trees', 'paradise'],
+    keywords: ['tropical art', 'tropical prints', 'tropical', 'tropical decor'],
   },
   {
     name: 'mythology',
-    keywords: ['mythology', 'gods', 'legends', 'ancient tales'],
+    keywords: ['mythology', 'greek mythology', 'greek gods', 'ancient tales'],
   },
   {
     name: 'winter wonderland',
-    keywords: ['winter wonderland', 'snow', 'ice', 'frozen'],
+    keywords: ['winter wonderland', 'snowfall art', 'ice art', 'frozen art'],
   },
   {
     name: 'outer space exploration',
     keywords: [
-      'Space gifts',
+      'space gifts',
       'space themed gifts',
       'gifts for scientists',
-      'sci fi mouse pad',
+      'sci-fi design',
     ],
   },
   {
@@ -135,7 +130,11 @@ export const themes: { name: string; keywords: string[] }[] = [
       'medeival gifts',
       'dark academia',
       'medeival tapestry',
-      'black mouse pad',
+      'black design',
     ],
+  },
+  {
+    name: 'Abstract geology',
+    keywords: ['abstract art', 'geology art', 'geology print', 'geology'],
   },
 ];

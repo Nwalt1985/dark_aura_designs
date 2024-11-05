@@ -35,3 +35,22 @@ Spot clean your sleeve with warm water and dish soap. No need to soak the entire
 
 As a small family business in the Cotswolds, we take pride in creating unique surface designs that add character and function to your space.
 `;
+
+export const lunchBagDefaultDescription = `
+Eating healthy should be a piece of cake thanks to this personalized lunch bag for adults and kids. With a zippered closure, a convenient carrying handle, and a durable fabric made with 100% polyester, this lunch bag is made to be enjoyed on a daily basis.
+
+**Key Features**
+	- **Store your food in style**: Made from 100% polyester, this lunch bag is made to be enjoyed on a daily basis.
+	- **Fully lined and insulated**: To keep your contents cool or warm.
+	- **Smooth YKK zipper**: The bag has a durable zipper closure for easy access and safe storage, and allows for the entire top to be removed.
+	- **Carrying handle**: The handle at the top of the bag makes it easy to carry everywhere you go.
+
+**Available in one size**
+	- 9.5″ × 7" x 2.8″ (24 x 18 x 7cm)
+
+
+**Care Instructions**: 
+Use warm water and dish soap to clean any spills or stains.
+
+As a small family business in the Cotswolds, we take pride in creating unique surface designs that add character and function to your space.
+`;

@@ -6,7 +6,7 @@ import {
   getformattedDate,
   getProductDetails,
 } from '../../helpers';
-import { getAllListings, getUnlisted, updateListing } from '../../service/db';
+import { getUnlisted, updateListing } from '../../service/db';
 import {
   createNewProduct,
   getUploadedImages,
@@ -17,9 +17,8 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import dotenv from 'dotenv';
-import {
-  generateListingConfig,
-} from './listingConfig';
+import { generateListingConfig } from './listingConfig';
+import { BuildProductType, Product } from '../../models/types/listing';
 
 dotenv.config();
 
@@ -29,7 +28,7 @@ const parser = yargs(hideBin(process.argv))
       type: 'string',
       description: 'Product type for the listing',
       demandOption: true,
-      choices: ['desk mat', 'laptop sleeve'],
+      choices: Object.values(BuildProductType),
     },
     limit: {
       type: 'number',
@@ -37,18 +36,13 @@ const parser = yargs(hideBin(process.argv))
       default: 5,
     },
   })
-  .strict() // Ensure that invalid options throw an error
+  .strict()
   .help();
 
 (async () => {
   try {
     const argv = parser.parseSync();
-    const formattedDate = getformattedDate();
-
-    const product = getProductDetails(argv.product, formattedDate);
-
-    const totalListings = await getAllListings(argv.product);
-
+    const product = getProductDetails(argv.product);
     const unlisted = await getUnlisted(product.name);
 
     if (!unlisted.length) {
@@ -59,7 +53,9 @@ const parser = yargs(hideBin(process.argv))
 
     const uploadedImages = await getUploadedImages();
 
-    console.log(`${product.name} - Creating ${argv.limit} Printify listings`);
+    console.log(
+      `${product.name} - Creating ${argv.limit || data.length} Printify listings`,
+    );
 
     for (let i = 0; i < argv.limit; i++) {
       await createPrintifyListingsData(data[i], uploadedImages, product);
@@ -78,14 +74,8 @@ export async function createPrintifyListingsData(
     length: number;
     totalImages: number;
   },
-  product: {
-    name: string;
-    title: string;
-    dimensions: string;
-    baseDir: string;
-    defaultDescription: string;
-  },
-) {
+  product: Product,
+): Promise<void> {
   try {
     const bufferArray = await getBuffer(unlisted.filename, product.baseDir);
 

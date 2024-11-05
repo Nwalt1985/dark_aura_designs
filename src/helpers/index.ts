@@ -6,7 +6,13 @@ import sharp from 'sharp';
 import {
   deskMatDefaultDescription,
   laptopSleeveDefaultDescription,
+  lunchBagDefaultDescription,
 } from '../handlers/generate-images/defaultDescription';
+import {
+  Product,
+  ProductName,
+  BuildProductType,
+} from '../models/types/listing';
 
 export function getformattedDate() {
   const date = new Date();
@@ -18,24 +24,9 @@ export function getformattedDate() {
   return formattedDate;
 }
 
-export function getProductDetails(
-  arg: string,
-  formattedDate: string,
-): {
-  name: string;
-  title: string;
-  dimensions: string;
-  baseDir: string;
-  defaultDescription: string;
-} {
-  let product: {
-    name: string;
-    title: string;
-    dimensions: string;
-    baseDir: string;
-    defaultDescription: string;
-  } = {
-    name: '',
+export function getProductDetails(arg: string): Product {
+  let product: Product = {
+    name: ProductName.DESK_MAT || ProductName.LAPTOP_SLEEVE,
     title: '',
     dimensions: '',
     baseDir: '',
@@ -43,8 +34,8 @@ export function getProductDetails(
   };
 
   switch (arg) {
-    case 'desk mat':
-      product.name = 'desk mat';
+    case BuildProductType.DESK_MAT:
+      product.name = ProductName.DESK_MAT;
       product.title = 'Desk Mat XL Mouse Matt';
       product.dimensions = '9450x4650';
       product.baseDir = path.resolve(
@@ -53,8 +44,8 @@ export function getProductDetails(
       );
       product.defaultDescription = deskMatDefaultDescription;
       break;
-    case 'laptop sleeve':
-      product.name = 'laptop sleeve';
+    case BuildProductType.LAPTOP_SLEEVE:
+      product.name = ProductName.LAPTOP_SLEEVE;
       product.title = 'Laptop Sleeve Computer';
       product.dimensions = '4125x3000';
       product.baseDir = path.resolve(
@@ -63,12 +54,25 @@ export function getProductDetails(
       );
       product.defaultDescription = laptopSleeveDefaultDescription;
       break;
+    case BuildProductType.LUNCH_BAG:
+      product.name = ProductName.LUNCH_BAG;
+      product.title = 'Lunch Bag';
+      product.dimensions = '1568x1214';
+      product.baseDir = path.resolve(
+        process.env.HOME || '',
+        `Desktop/ai_etsy/etsy_assets/lunch_bags`,
+      );
+      product.defaultDescription = lunchBagDefaultDescription;
+      break;
   }
 
   return product;
 }
 
-export function getGeneratedFileNames(dir: string, productType: string) {
+export function getGeneratedFileNames(
+  dir: string,
+  productType: string,
+): string[] {
   const fileNameArray = assetFolder(dir);
 
   switch (productType) {
@@ -89,10 +93,21 @@ export function getGeneratedFileNames(dir: string, productType: string) {
           }
         })
         .map((fileName) => fileName.replace('-4125x3000', ''));
+
+    case 'lunch bag':
+      return fileNameArray
+        .filter((fileName) => {
+          if (fileName.includes('-1401x1085')) {
+            return fileName;
+          }
+        })
+        .map((fileName) => fileName.replace('-1401x1085', ''));
   }
+
+  return [];
 }
 
-export async function getMockups() {
+export async function getMockups(): Promise<string[]> {
   const mockupDir = path.resolve(
     process.env.HOME || '',
     `Desktop/ai_etsy/etsy_assets/mock_ups`,
@@ -103,7 +118,7 @@ export async function getMockups() {
   return mockupsArray;
 }
 
-function assetFolder(directory: string) {
+function assetFolder(directory: string): string[] {
   const fileArray: string[] = [];
 
   fs.readdirSync(directory).forEach((folder) => {
@@ -125,14 +140,8 @@ function assetFolder(directory: string) {
 // Remove listings from the database that do not have a corresponding image file
 export async function dbTidy(
   unlisted: PromptResponseType[],
-  product: {
-    name: string;
-    title: string;
-    dimensions: string;
-    baseDir: string;
-    defaultDescription: string;
-  },
-) {
+  product: Product,
+): Promise<PromptResponseType[]> {
   const unlistedFileNames = unlisted.map((listing) => {
     if (!listing.filename) {
       console.log('No filename found for listing', listing);
@@ -157,7 +166,16 @@ export async function dbTidy(
 }
 
 // Loop through the folders and subfolders in the original directory and return the buffer of the image
-export async function getBuffer(fileName: string, baseDir: string) {
+export async function getBuffer(
+  fileName: string,
+  baseDir: string,
+): Promise<
+  {
+    filename: string;
+    fileId: string | null;
+    base64: Buffer;
+  }[]
+> {
   const buffer: {
     filename: string;
     fileId: string | null;
@@ -201,7 +219,7 @@ export async function resizeDeskmats(
   fileId: number,
   baseDir: string,
   formattedDate: string,
-) {
+): Promise<void> {
   const directoryPath = `${baseDir}/${formattedDate}`;
 
   if (!fs.existsSync(directoryPath)) {
@@ -259,7 +277,7 @@ export async function resizeLaptopSleeve(
   fileId: number,
   baseDir: string,
   formattedDate: string,
-) {
+): Promise<void> {
   const directoryPath = `${baseDir}/${formattedDate}`;
 
   if (!fs.existsSync(directoryPath)) {
@@ -288,11 +306,46 @@ export async function resizeLaptopSleeve(
   );
 }
 
+export async function resizeLunchBag(
+  buffer: string,
+  filename: string,
+  fileId: number,
+  baseDir: string,
+  formattedDate: string,
+): Promise<void> {
+  const directoryPath = `${baseDir}/${formattedDate}`;
+
+  if (!fs.existsSync(directoryPath)) {
+    fs.mkdirSync(directoryPath, { recursive: true });
+  }
+  const mockup = await sharp(Buffer.from(buffer, 'base64'))
+    .resize(784, 607)
+    .jpeg()
+    .toBuffer();
+
+  await createFile(
+    directoryPath,
+    `${filename}-${fileId}-mockup-784x607.jpg`,
+    mockup,
+  );
+
+  const image1 = await sharp(Buffer.from(buffer, 'base64'))
+    .resize(1401, 1085)
+    .jpeg()
+    .toBuffer();
+
+  await createFile(
+    directoryPath,
+    `${filename}-${fileId}-1401x1085.jpg`,
+    image1,
+  );
+}
+
 async function createFile(
   baseDir: string,
   filename: string,
   resizedBuffer: Buffer,
-) {
+): Promise<void> {
   const filePath = path.join(`${baseDir}`, `${filename}`);
 
   fs.writeFile(filePath, resizedBuffer.toString('base64'), 'base64', (err) => {

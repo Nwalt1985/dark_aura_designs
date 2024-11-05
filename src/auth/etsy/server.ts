@@ -1,8 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import hbs from 'hbs';
 import crypto from 'crypto';
-import { access } from 'fs';
 
 dotenv.config();
 
@@ -72,35 +70,10 @@ app.get('/oauth/redirect', async (req, res) => {
 
   // Extract the access token from the response access_token data field
   if (response.ok) {
-    const tokenData = (await response.json()) as any;
+    const tokenData = (await response.json()) as TokenResponse;
+    console.log('Token Data:', tokenData);
 
-    const urlencoded = new URLSearchParams();
-
-    urlencoded.append('grant_type', 'refresh_token');
-    urlencoded.append('client_id', clientID as string);
-    urlencoded.append('refresh_token', tokenData.refresh_token as string);
-
-    const refreshRequestOptions = {
-      method: 'POST',
-      body: urlencoded,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    };
-
-    const refreshUrl = `https://api.etsy.com/v3/public/oauth/token`;
-
-    const refreshResponse = await fetch(refreshUrl, refreshRequestOptions);
-
-    if (refreshResponse.ok) {
-      const refreshData = (await refreshResponse.json()) as any;
-
-      console.log('Data:', {
-        refreshData,
-      });
-    } else {
-      await logError(response);
-    }
+    res.send('Success!');
   } else {
     await logError(response);
   }

@@ -6,6 +6,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { z } from 'zod';
 import { getformattedDate, getProductDetails } from '../../helpers';
+import { BuildProductType } from '../../models/types/listing';
 
 const parser = yargs(hideBin(process.argv))
   .options({
@@ -13,7 +14,7 @@ const parser = yargs(hideBin(process.argv))
       type: 'string',
       description: 'Product type for the listing',
       demandOption: true,
-      choices: ['desk mat', 'laptop sleeve'],
+      choices: Object.values(BuildProductType),
     },
     theme: {
       type: 'string',
@@ -51,7 +52,7 @@ const parser = yargs(hideBin(process.argv))
       );
     }
 
-    const product = getProductDetails(argv.product, formattedDate);
+    const product = getProductDetails(argv.product);
 
     // generate prompts
     const dallEPrompts = await getDallEPrompts({
@@ -60,6 +61,7 @@ const parser = yargs(hideBin(process.argv))
       keywords: argv.keywords,
       limit: argv.limit,
       product,
+      type: argv.product,
     });
 
     // Add createdAt field to each prompt

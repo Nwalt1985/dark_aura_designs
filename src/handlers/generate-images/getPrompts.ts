@@ -4,7 +4,12 @@ import { z } from 'zod';
 
 import { themes } from './themes';
 import { styles } from './styles';
-import { genericKeywords } from './genericKeywords';
+import {
+  deskMatgenericKeywords,
+  lunchBagGenericKeywords,
+  sleeveGenericKeywords,
+} from './genericKeywords';
+import { DallEPromptInput, ProductName } from '../../models/types/listing';
 
 const openai = new OpenAI();
 
@@ -16,11 +21,26 @@ function getRandomElement(arr: { name: string; keywords: string[] }[]) {
   return arr[index];
 }
 
-function generateKeywordArray(keywords: string[]): string[] {
+function generateKeywordArray(keywords: string[], product: string): string[] {
   const selectedKeywords = new Set<string>();
+
+  let genericKeywords: string[] = [];
+
+  switch (product) {
+    case ProductName.DESK_MAT:
+      genericKeywords = deskMatgenericKeywords;
+      break;
+    case ProductName.LAPTOP_SLEEVE:
+      genericKeywords = sleeveGenericKeywords;
+      break;
+    case ProductName.LUNCH_BAG:
+      genericKeywords = lunchBagGenericKeywords;
+      break;
+  }
 
   while (selectedKeywords.size < 5) {
     const randomIndex = Math.floor(Math.random() * genericKeywords.length);
+
     selectedKeywords.add(genericKeywords[randomIndex]);
   }
 
@@ -33,17 +53,8 @@ export async function getDallEPrompts({
   keywords,
   limit,
   product,
-}: {
-  theme?: string;
-  style?: string;
-  keywords?: string;
-  limit: number;
-  product: {
-    name: string;
-    title: string;
-    dimensions: string;
-  };
-}): Promise<z.infer<typeof PromptResponse>[]> {
+  type,
+}: DallEPromptInput): Promise<z.infer<typeof PromptResponse>[]> {
   try {
     const promises = [];
 
@@ -59,7 +70,7 @@ export async function getDallEPrompts({
         keywordsArr.push(...th.keywords, ...st.keywords);
       }
 
-      const keywordsWithGeneric = generateKeywordArray(keywordsArr);
+      const keywordsWithGeneric = generateKeywordArray(keywordsArr, type);
 
       const prompt = `
 		Create one DALL-E prompt to design a wide rectangular image with dimensions suitable for a ${product.name} (${product.dimensions}). The theme should revolve around ${theme || th.name}, and it should be inspired by the style of ${style || st.name}. Do not include the words ${product.name} in the prompt.

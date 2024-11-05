@@ -11,6 +11,12 @@ import {
   EtsyListingRequestSchema,
 } from '../../models/schemas/etsy';
 import { getAllActiveListings } from '../../service/etsy';
+import {
+  BuildProductType,
+  DeskMatMaterials,
+  LaptopSleeveMaterials,
+  LunchBagMaterials,
+} from '../../models/types/listing';
 
 dotenv.config();
 
@@ -20,7 +26,7 @@ const parser = yargs(hideBin(process.argv))
       type: 'string',
       description: 'Product type for the listing',
       demandOption: true,
-      choices: ['desk mat', 'laptop sleeve'],
+      choices: Object.values(BuildProductType),
     },
     limit: {
       type: 'number',
@@ -43,9 +49,30 @@ const parser = yargs(hideBin(process.argv))
       return;
     }
 
-    const listingsToUpdate: EtsyListingType[] = activeListings.filter(
-      (listing: any) => listing.should_auto_renew === false,
-    );
+    let productTitleString: string = '';
+    let materials: string = '';
+
+    switch (argv.product) {
+      case BuildProductType.DESK_MAT:
+        productTitleString = 'Desk Mat';
+        materials = Object.values(DeskMatMaterials).join(',');
+        break;
+      case BuildProductType.LAPTOP_SLEEVE:
+        productTitleString = 'Laptop Sleeve';
+        materials = Object.values(LaptopSleeveMaterials).join(',');
+        break;
+      case BuildProductType.LUNCH_BAG:
+        productTitleString = 'Lunch Bag';
+        materials = Object.values(LunchBagMaterials).join(',');
+        break;
+    }
+
+    const listingsToUpdate: EtsyListingType[] = activeListings
+      //   .filter((listing: EtsyListingType) => listing.should_auto_renew === false)
+      .filter((listing: EtsyListingType) => listing.tags.length === 0)
+      .filter((listing: EtsyListingType) =>
+        listing.title.includes(productTitleString),
+      );
 
     console.log(`Listings to update: ${listingsToUpdate.length}`);
 
@@ -82,11 +109,7 @@ const parser = yargs(hideBin(process.argv))
       const data = qs.stringify({
         should_auto_renew: true,
         tags: record.keywords.join(','),
-        shop_section_id: argv.product === 'desk mat' ? '51101821' : '51236977',
-        materials:
-          argv.product === 'desk mat'
-            ? 'Rubber, Polyester'
-            : 'Polyester, Nylon, Fleece',
+        materials,
         production_partner_ids: '4415768',
       });
 

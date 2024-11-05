@@ -135,6 +135,40 @@ export const laptopSleeveConfig = {
   ],
 };
 
+export const lunchBagConfig = {
+  print_provider_id: Number(process.env.LUNCH_BAG_PRINT_PROVIDER_ID) || 0,
+  blueprint_id: Number(process.env.LUNCH_BAG_PRINTIFY_BLUEPRINT_ID) || 0,
+  variants: [
+    {
+      id: 74699,
+      sku: '28632451203892685091',
+      price: 5968,
+      is_enabled: true,
+      is_default: true,
+    },
+  ],
+  print_areas: [
+    {
+      variant_ids: [74699],
+      placeholders: [
+        {
+          position: 'front',
+          images: [
+            {
+              id: '',
+              x: 0.5000000000000036,
+              y: 0.5,
+              scale: 0.8931980647962059,
+              angle: 0,
+            },
+          ],
+        },
+      ],
+      background: '#ffffff',
+    },
+  ],
+};
+
 export function generateListingConfig(
   uploadedImagesArray: {
     fileId: string | null;
@@ -174,9 +208,18 @@ export function generateListingConfig(
         )!.response.id;
 
       return config;
+
+    case 'lunch bag':
+      config = lunchBagConfig;
+
+      config.print_areas[0].placeholders[0].images[0].id =
+        uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('1401x1085'),
+        )!.response.id;
+
+      return config;
+
     default:
       throw new Error('Invalid product type');
   }
-
-  return config;
 }

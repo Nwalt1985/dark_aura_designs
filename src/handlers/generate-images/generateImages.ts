@@ -3,21 +3,20 @@ import { PromptResponse } from '../../models/schemas/prompt';
 import { createDBListing } from '../../service/db';
 import OpenAI from 'openai';
 import fs from 'fs';
-import { resizeDeskmats, resizeLaptopSleeve } from '../../helpers';
+import {
+  resizeDeskmats,
+  resizeLaptopSleeve,
+  resizeLunchBag,
+} from '../../helpers';
+import { Product } from '../../models/types/listing';
 
 const openai = new OpenAI();
 
 export async function generateDalleImages(
   prompts: z.infer<typeof PromptResponse>[],
-  product: {
-    name: string;
-    title: string;
-    dimensions: string;
-    baseDir: string;
-    defaultDescription: string;
-  },
+  product: Product,
   formattedDate: string,
-) {
+): Promise<void> {
   try {
     console.log(`Generating ${prompts.length} images`);
 
@@ -50,7 +49,7 @@ export async function generateDalleImages(
           filename: `${filename}-${fileId}`,
           description: `${description}
 		  ${product.defaultDescription}`,
-          buffer: buffer || '',
+          //   buffer: buffer || '',
         };
 
         // Resize images and create files
@@ -74,6 +73,14 @@ export async function generateDalleImages(
                 formattedDate,
               );
               break;
+            case 'lunch bag':
+              await resizeLunchBag(
+                buffer,
+                filename,
+                fileId,
+                product.baseDir,
+                formattedDate,
+              );
           }
         }
 

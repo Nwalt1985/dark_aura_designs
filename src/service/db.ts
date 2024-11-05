@@ -68,7 +68,10 @@ export async function deleteListingByFileName(filename: string) {
   await client.close();
 }
 
-export async function updateListing(filename: string, productType: string) {
+export async function updateListing(
+  filename: string,
+  productType: string,
+): Promise<void> {
   const { client, collection } = await mongoConnect();
 
   await collection.updateOne(
