@@ -1,6 +1,9 @@
 import { StatusCodes } from 'http-status-codes';
-import { getDallEPrompts } from './getPrompts';
-import { generateDalleImages } from './generateImages';
+import { getDallEPrompts } from './queryWithOpenAi';
+import {
+  generateDalleImages,
+  generateImagesFromRescale,
+} from './generateImages';
 import { PromptResponse } from '../../models/schemas/prompt';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -36,6 +39,11 @@ const parser = yargs(hideBin(process.argv))
       description: 'Limit the number of prompts',
       default: 5,
     },
+    exists: {
+      type: 'boolean',
+      description: 'Check if the images already exist in rescale folder',
+      default: false,
+    },
   })
   .strict() // Ensure that invalid options throw an error
   .help();
@@ -54,28 +62,32 @@ const parser = yargs(hideBin(process.argv))
 
     const product = getProductDetails(argv.product);
 
-    // generate prompts
-    const dallEPrompts = await getDallEPrompts({
-      theme: argv.theme,
-      style: argv.style,
-      keywords: argv.keywords,
-      limit: argv.limit,
-      product,
-      type: argv.product,
-    });
+    if (!argv.exists) {
+      // generate prompts
+      const dallEPrompts = await getDallEPrompts({
+        theme: argv.theme,
+        style: argv.style,
+        keywords: argv.keywords,
+        limit: argv.limit,
+        product,
+        type: argv.product,
+      });
 
-    // Add createdAt field to each prompt
-    const formattedData = dallEPrompts.map((item) => ({
-      ...item,
-      createdAt: formattedDate,
-    }));
+      // Add createdAt field to each prompt
+      const formattedData = dallEPrompts.map((item) => ({
+        ...item,
+        createdAt: formattedDate,
+      }));
 
-    z.array(PromptResponse).parse(formattedData);
+      z.array(PromptResponse).parse(formattedData);
 
-    console.log(`Successfully fetched ${dallEPrompts.length} prompts`);
+      console.log(`Successfully fetched ${dallEPrompts.length} prompts`);
 
-    // generate images using DALL-E
-    await generateDalleImages(formattedData, product, formattedDate);
+      // generate images using DALL-E
+      await generateDalleImages(formattedData, product, formattedDate);
+    } else {
+      await generateImagesFromRescale(product);
+    }
 
     return;
   } catch (err) {

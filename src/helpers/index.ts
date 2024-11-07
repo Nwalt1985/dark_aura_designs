@@ -1,7 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { PromptResponseType } from '../models/schemas/prompt';
-import { deleteListingByFileName, getUnlisted } from '../service/db';
+import {
+  createDBListing,
+  deleteListingByFileName,
+  getUnlisted,
+} from '../service/db';
 import sharp from 'sharp';
 import {
   deskMatDefaultDescription,
@@ -13,6 +17,7 @@ import {
   ProductName,
   BuildProductType,
 } from '../models/types/listing';
+import { getImageData } from '../handlers/generate-images/queryWithOpenAi';
 
 export function getformattedDate() {
   const date = new Date();
@@ -22,6 +27,14 @@ export function getformattedDate() {
   const formattedDate = `${day}-${month}-${year}`;
 
   return formattedDate;
+}
+
+export function generateRandomNumber(): number {
+  let randomNumber = Math.floor(Math.random() * 10000);
+  if (randomNumber < 1000) {
+    randomNumber += 1000;
+  }
+  return randomNumber;
 }
 
 export function getProductDetails(arg: string): Product {
@@ -211,6 +224,22 @@ function extractImageId(filename: string): string | null {
   const regex = /\b\d{4}\b/;
   const match = filename.match(regex);
   return match![0] || null;
+}
+
+export async function removeRescaleImage(fileName: string) {
+  const rescaleDir = path.resolve(
+    process.env.HOME || '',
+    `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
+  );
+
+  const filePath = path.join(
+    rescaleDir,
+    `${fileName}${fileName.includes('.png') ? '.png' : '.jpg'}`,
+  );
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+    console.log(`Removed rescale image: ${fileName}`);
+  }
 }
 
 export async function resizeDeskmats(

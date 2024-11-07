@@ -73,7 +73,7 @@ export async function getDallEPrompts({
       const keywordsWithGeneric = generateKeywordArray(keywordsArr, type);
 
       const prompt = `
-		Create one DALL-E prompt to design a wide rectangular image with dimensions suitable for a ${product.name} (${product.dimensions}). The theme should revolve around ${theme || th.name}, and it should be inspired by the style of ${style || st.name}. Do not include the words ${product.name} in the prompt.
+		Create one DALL-E prompt to design a wide rectangular image with dimensions suitable for a ${product.name} (${product.dimensions}). The theme should revolve around ${theme || th.name}, and the style should be ${style || st.name}. Do not include the words ${product.name} in the prompt.
 		
 		Key points for the prompt:
 		- Be specific. The prompt should ideally encompass various elements of the desired image. For instance, if you’re envisioning a landscape, describe not just the basic elements like trees and rivers, but also the type of trees, the state of the water (calm or turbulent), the time of day, the weather conditions, and the overall atmosphere you wish to capture.
@@ -140,6 +140,59 @@ export async function getDallEPrompts({
     await Promise.all(promises);
 
     return prompts;
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function getImageData(image: string) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: `Analyze this image and provide the following:
+		
+			Title: generate a keyword-rich 140-character title. The title should contain the following default text "For Home And Office". Don't use any special characters or emojis.
+				
+			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
+		
+			Decription: SEO-optimized Etsy description.
+
+			Keywords: generate 13 SEO-optimized keywords related to the image.
+
+    		Output the results in a JSON format. Structure the JSON as follows:
+		
+     		{
+     		  "description": "Description 1",
+     		  "title": "Title 1",
+			  "theme": "Theme 1",
+			  "style": "Style 1",
+     		  "filename": "Filename 1",
+     		  "keywords": [keyword1, keyword2, keyword3],
+     		},
+     	  
+     	`,
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:image/jpeg;base64,${image}`,
+              },
+            },
+          ],
+        },
+      ],
+      max_tokens: 1000,
+      response_format: { type: 'json_object' },
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    return result;
   } catch (err) {
     throw err;
   }

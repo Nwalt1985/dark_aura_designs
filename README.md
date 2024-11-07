@@ -40,7 +40,7 @@ File > Scripts > Browse > select the script file (desk-mat-mockup.jsx or laptop-
 To generate a listing, run the following command:
 
 ```bash
-npm run generate-listing -- --product="<product>" --limit=5
+npm run generate-listings -- --product="<product>" --limit=5
 ```
 
 This will upload the images to Printify and generate a listing for the product.

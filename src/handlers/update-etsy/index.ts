@@ -51,6 +51,7 @@ const parser = yargs(hideBin(process.argv))
 
     let productTitleString: string = '';
     let materials: string = '';
+    let shopSectionId: number = 0;
 
     switch (argv.product) {
       case BuildProductType.DESK_MAT:
@@ -60,9 +61,11 @@ const parser = yargs(hideBin(process.argv))
       case BuildProductType.LAPTOP_SLEEVE:
         productTitleString = 'Laptop Sleeve';
         materials = Object.values(LaptopSleeveMaterials).join(',');
+        shopSectionId = 51236977;
         break;
       case BuildProductType.LUNCH_BAG:
         productTitleString = 'Lunch Bag';
+        shopSectionId = 51665176;
         materials = Object.values(LunchBagMaterials).join(',');
         break;
     }
@@ -110,6 +113,7 @@ const parser = yargs(hideBin(process.argv))
         should_auto_renew: true,
         tags: record.keywords.join(','),
         materials,
+        shop_section_id: shopSectionId,
         production_partner_ids: '4415768',
       });
 

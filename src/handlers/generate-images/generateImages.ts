@@ -7,8 +7,12 @@ import {
   resizeDeskmats,
   resizeLaptopSleeve,
   resizeLunchBag,
+  getformattedDate,
+  removeRescaleImage,
 } from '../../helpers';
 import { Product } from '../../models/types/listing';
+import { getImageData } from './queryWithOpenAi';
+import path from 'path';
 
 const openai = new OpenAI();
 
@@ -95,6 +99,57 @@ export async function generateDalleImages(
         await new Promise((resolve) => setTimeout(resolve, 12000)); // 12 seconds delay
       }
     }
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function generateImagesFromRescale(product: Product) {
+  try {
+    const formattedDate = getformattedDate();
+
+    const baseDir = path.resolve(
+      process.env.HOME || '',
+      `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
+    );
+
+    const outputDir = path.resolve(
+      process.env.HOME || '',
+      `Desktop/ai_etsy/etsy_assets/desk_mats`,
+    );
+
+    fs.readdirSync(baseDir).forEach(async (file) => {
+      const fileId = generateRandomNumber();
+      const filePath = path.join(baseDir, file);
+      const buffer = fs.readFileSync(filePath);
+
+      const imageData = await getImageData(buffer.toString('base64'));
+
+      const fileName = file
+        .replace('.png', '')
+        .replace('.jpg', '')
+        .toLowerCase();
+
+      const dbData = {
+        ...imageData,
+        productType: product.name,
+        filename: `${fileName}-${fileId}`,
+        description: `${imageData.description}
+			  ${product.defaultDescription}`,
+      };
+
+      await createDBListing([dbData]);
+
+      await resizeDeskmats(
+        buffer.toString('base64'),
+        fileName,
+        fileId,
+        outputDir,
+        formattedDate,
+      );
+
+      await removeRescaleImage(fileName);
+    });
   } catch (error) {
     throw error;
   }
