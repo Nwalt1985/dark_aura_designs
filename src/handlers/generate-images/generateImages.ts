@@ -104,7 +104,10 @@ export async function generateDalleImages(
   }
 }
 
-export async function generateImagesFromRescale(product: Product) {
+export async function generateImagesFromRescale(
+  product: Product,
+  limit: number,
+) {
   try {
     const formattedDate = getformattedDate();
 
@@ -118,7 +121,10 @@ export async function generateImagesFromRescale(product: Product) {
       `Desktop/ai_etsy/etsy_assets/desk_mats`,
     );
 
-    fs.readdirSync(baseDir).forEach(async (file) => {
+    const files = fs.readdirSync(baseDir);
+
+    for (let i = 0; i <= limit; i++) {
+      const file = files[i];
       const fileId = generateRandomNumber();
       const filePath = path.join(baseDir, file);
       const buffer = fs.readFileSync(filePath);
@@ -149,7 +155,7 @@ export async function generateImagesFromRescale(product: Product) {
       );
 
       await removeRescaleImage(fileName);
-    });
+    }
   } catch (error) {
     throw error;
   }

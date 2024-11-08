@@ -86,7 +86,7 @@ const parser = yargs(hideBin(process.argv))
       // generate images using DALL-E
       await generateDalleImages(formattedData, product, formattedDate);
     } else {
-      await generateImagesFromRescale(product);
+      await generateImagesFromRescale(product, argv.limit);
     }
 
     return;

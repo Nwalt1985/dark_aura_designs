@@ -232,14 +232,19 @@ export async function removeRescaleImage(fileName: string) {
     `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
   );
 
-  const filePath = path.join(
-    rescaleDir,
-    `${fileName}${fileName.includes('.png') ? '.png' : '.jpg'}`,
-  );
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    console.log(`Removed rescale image: ${fileName}`);
-  }
+  const fileExtensions = ['.png', '.jpg'];
+
+  fileExtensions.forEach((extension) => {
+    const filePathWithExtension = path.resolve(
+      rescaleDir,
+      `${fileName}${extension}`,
+    );
+
+    if (fs.existsSync(filePathWithExtension)) {
+      fs.unlinkSync(filePathWithExtension);
+      console.log(`Removed rescale image: ${fileName}${extension}`);
+    }
+  });
 }
 
 export async function resizeDeskmats(
