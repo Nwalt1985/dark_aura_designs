@@ -5,12 +5,12 @@ import qs from 'qs';
 
 import { hideBin } from 'yargs/helpers';
 
-import { updateEtsyListingId } from '../../service/db';
+import { getEtsyAuthCredentials, updateEtsyListingId } from '../../service/db';
 import {
   EtsyListingType,
   EtsyListingRequestSchema,
 } from '../../models/schemas/etsy';
-import { getAllActiveListings } from '../../service/etsy';
+import { getAllActiveListings, updateEtsyListing } from '../../service/etsy';
 import {
   BuildProductType,
   DeskMatMaterials,
@@ -117,22 +117,7 @@ const parser = yargs(hideBin(process.argv))
         production_partner_ids: '4415768',
       });
 
-      const patchOptions = {
-        method: 'PATCH',
-        url: `https://openapi.etsy.com/v3/application/shops/${shopId}/listings/${listing_id}`,
-        data,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'x-api-key': process.env.ETSY_KEY_STRING,
-          authorization: `Bearer ${process.env.ETSY_ACCESS_TOKEN}`,
-        },
-      };
-
-      const { data: updatedListing } = await axios.request(patchOptions);
-
-      if (updatedListing) {
-        console.log(`Updated listing: ${listing_id} - ${title}`);
-      }
+      await updateEtsyListing(shopId, listing_id, title, data);
     }
     return;
   } catch (error: any) {

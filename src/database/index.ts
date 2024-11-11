@@ -7,11 +7,11 @@ const client = new MongoClient(url);
 // Database Name
 const dbName = 'ai_etsy';
 
-export async function mongoConnect() {
+export async function mongoConnect(collectionName: string = 'ai_etsy_collection') {
   await client.connect();
 
   const db = client.db(dbName);
-  const collection = db.collection('ai_etsy_collection');
+  const collection = db.collection(collectionName);
 
   return { client, collection };
 }

@@ -148,7 +148,6 @@ export async function getDallEPrompts({
 export async function getImageData(image: string, type: ProductName) {
   try {
     let title;
-    let filename;
 
     switch (type) {
       case ProductName.DESK_MAT:

@@ -56,9 +56,7 @@ npm run auth-server
 
 navigate to `http://localhost:3003` in your browser to view the auth server. Click the hyperlink and follow sign in instructions.
 
-The access token should be returned in the console. Use this for API endpoints that require Oauth authentication.
-
-Replace the ETSY_ACCESS_TOKEN in the .env file with the returned refresh token.
+The access token should be returned in the console. The token is stored in our database, it will be automatically used in any API endpoints that require Oauth authentication.
 
 # Update Etsy Listing
 

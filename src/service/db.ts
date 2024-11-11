@@ -129,3 +129,45 @@ function escapeRegex(string: string): string {
   const decodedString = he.decode(string);
   return decodedString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special characters
 }
+
+export async function updateEtsyAuthCredentials(data: {
+  accessToken: string;
+  refreshToken: string;
+}): Promise<void> {
+  const currentAuth = await getEtsyAuthCredentials();
+
+  const { client, collection } = await mongoConnect('etsy_auth');
+
+  await collection.updateOne(
+    { accessToken: currentAuth },
+    {
+      $set: {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      },
+    },
+    {
+      upsert: true,
+    },
+  );
+
+  await client.close();
+}
+
+export async function getEtsyAuthCredentials(): Promise<string> {
+  const { client, collection } = await mongoConnect('etsy_auth');
+
+  const result = (await collection.findOne<{
+    accessToken: string;
+    refreshToken: string;
+  }>({})) as
+    | {
+        accessToken: string;
+        refreshToken: string;
+      }
+    | undefined;
+
+  await client.close();
+
+  return result?.accessToken || '';
+}

@@ -126,7 +126,6 @@ export async function generateImagesFromRescale(
       const imageData = await getImageData(
         buffer.toString('base64'),
         product.name,
-        product.title,
       );
 
       const fileName = file

@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import crypto from 'crypto';
+import { updateEtsyAuthCredentials } from '../../service/db';
 
 dotenv.config();
 
@@ -72,6 +73,11 @@ app.get('/oauth/redirect', async (req, res) => {
   if (response.ok) {
     const tokenData = (await response.json()) as TokenResponse;
     console.log('Token Data:', tokenData);
+
+    await updateEtsyAuthCredentials({
+      accessToken: tokenData.access_token,
+      refreshToken: tokenData.refresh_token,
+    });
 
     res.send('Success!');
   } else {
