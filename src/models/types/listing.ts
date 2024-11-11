@@ -16,6 +16,7 @@ export type Product = {
   dimensions: string;
   baseDir: string;
   defaultDescription: string;
+  rescale: string;
 };
 
 export type DallEPromptInput = {

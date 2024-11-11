@@ -111,25 +111,23 @@ export async function generateImagesFromRescale(
   try {
     const formattedDate = getformattedDate();
 
-    const baseDir = path.resolve(
-      process.env.HOME || '',
-      `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
-    );
+    const rescaleDir = product.rescale;
 
-    const outputDir = path.resolve(
-      process.env.HOME || '',
-      `Desktop/ai_etsy/etsy_assets/desk_mats`,
-    );
+    const outputDir = product.baseDir;
 
-    const files = fs.readdirSync(baseDir);
+    const files = fs.readdirSync(rescaleDir);
 
     for (let i = 0; i <= limit; i++) {
       const file = files[i];
       const fileId = generateRandomNumber();
-      const filePath = path.join(baseDir, file);
+      const filePath = path.join(rescaleDir, file);
       const buffer = fs.readFileSync(filePath);
 
-      const imageData = await getImageData(buffer.toString('base64'));
+      const imageData = await getImageData(
+        buffer.toString('base64'),
+        product.name,
+        product.title,
+      );
 
       const fileName = file
         .replace('.png', '')

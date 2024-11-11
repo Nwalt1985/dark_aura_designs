@@ -145,8 +145,23 @@ export async function getDallEPrompts({
   }
 }
 
-export async function getImageData(image: string) {
+export async function getImageData(image: string, type: ProductName) {
   try {
+    let title;
+    let filename;
+
+    switch (type) {
+      case ProductName.DESK_MAT:
+        title = "| XL Mouse Matt | Tech Accessories For Home And Office";
+        break;
+      case ProductName.LAPTOP_SLEEVE:
+        title = "| Laptop Cover | Tech Accessories For Home And Office";
+        break;
+      case ProductName.LUNCH_BAG:
+        title = "| Lunch Box | Accessories For Home, School And Office";
+        break;
+    }
+
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -157,13 +172,13 @@ export async function getImageData(image: string) {
               type: 'text',
               text: `Analyze this image and provide the following:
 		
-			Title: generate a keyword-rich 140-character title. The title should contain the following default text "For Home And Office". Don't use any special characters or emojis.
+			Title: generate a keyword-rich 140-character title. The title should contain the following default text ${title}. Don't use any special characters or emojis.
 				
 			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
 		
 			Decription: SEO-optimized Etsy description.
 
-			Keywords: generate 13 SEO-optimized keywords related to the image.
+			Keywords: generate 8 SEO-optimized keywords related to the image.
 
     		Output the results in a JSON format. Structure the JSON as follows:
 		
@@ -192,7 +207,14 @@ export async function getImageData(image: string) {
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
-    return result;
+
+    const keywordsWithGeneric = generateKeywordArray(result.keywords, type);
+    const resultWithGenericKeywords = {
+      ...result,
+      keywords: keywordsWithGeneric,
+    };
+
+    return resultWithGenericKeywords;
   } catch (err) {
     throw err;
   }

@@ -54,7 +54,7 @@ Start the auth server with the following command:
 npm run auth-server
 ```
 
-navigate to `http://localhost:3000` in your browser to view the auth server. Click the hyperlink and follow sign in instructions.
+navigate to `http://localhost:3003` in your browser to view the auth server. Click the hyperlink and follow sign in instructions.
 
 The access token should be returned in the console. Use this for API endpoints that require Oauth authentication.
 

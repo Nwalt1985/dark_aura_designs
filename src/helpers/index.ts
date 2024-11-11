@@ -44,6 +44,7 @@ export function getProductDetails(arg: string): Product {
     dimensions: '',
     baseDir: '',
     defaultDescription: '',
+    rescale: '',
   };
 
   switch (arg) {
@@ -56,6 +57,10 @@ export function getProductDetails(arg: string): Product {
         `Desktop/ai_etsy/etsy_assets/desk_mats`,
       );
       product.defaultDescription = deskMatDefaultDescription;
+      product.rescale = path.resolve(
+		process.env.HOME || '',
+        `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
+      );
       break;
     case BuildProductType.LAPTOP_SLEEVE:
       product.name = ProductName.LAPTOP_SLEEVE;
