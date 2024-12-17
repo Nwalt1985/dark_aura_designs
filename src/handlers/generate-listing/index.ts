@@ -27,8 +27,8 @@ const parser = yargs(hideBin(process.argv))
     product: {
       type: 'string',
       description: 'Product type for the listing',
-      demandOption: true,
       choices: Object.values(BuildProductType),
+      default: 'desk mat',
     },
     limit: {
       type: 'number',
@@ -53,12 +53,10 @@ const parser = yargs(hideBin(process.argv))
 
     const uploadedImages = await getUploadedImages();
 
-    console.log(
-      `${product.name} - Creating ${argv.limit || data.length} Printify listings`,
-    );
+    console.log(`${product.name} - Creating Printify listings`);
 
-    for (let i = 0; i < argv.limit; i++) {
-      await createPrintifyListingsData(data[i], uploadedImages, product);
+    for (const item of data) {
+      await createPrintifyListingsData(item, uploadedImages, product);
     }
 
     return;

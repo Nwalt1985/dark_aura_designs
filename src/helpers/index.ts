@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { PromptResponseType } from '../models/schemas/prompt';
 import {
-  createDBListing,
   deleteListingByFileName,
   getUnlisted,
 } from '../service/db';
@@ -17,7 +16,6 @@ import {
   ProductName,
   BuildProductType,
 } from '../models/types/listing';
-import { getImageData } from '../handlers/generate-images/queryWithOpenAi';
 
 export function getformattedDate() {
   const date = new Date();

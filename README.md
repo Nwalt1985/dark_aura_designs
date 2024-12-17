@@ -3,18 +3,14 @@
 To generate images for listing, run the following command:
 
 ```bash
-npm run generate-images -- --product="<product>" --theme="<theme>" --style="<style>" --keywords="<keyword1, keyword2>" --limit=5 --exists=true
+npm run generate-images -- --product="<product>" --limit=5
 ```
 
 Options:
 | Option | Values | Required |
 | ------ | ----- | ----- |
 | product | 'desk mat', 'sleeve' | true |
-| theme | string | false |
-| style | string | false |
-| keywords | keyword1, keyword2 | false |
 | limit | number (default 5) | false |
-| exists | true, false | false |
 
 If the exists flag is set to true, the script will not generate images from Dalle-E. It will process the images that exist in the rescale folder. After it has processed the images, it will remove the file from the folder.
 
@@ -57,6 +53,12 @@ npm run auth-server
 navigate to `http://localhost:3003` in your browser to view the auth server. Click the hyperlink and follow sign in instructions.
 
 The access token should be returned in the console. The token is stored in our database, it will be automatically used in any API endpoints that require Oauth authentication.
+
+Stop the auth server:
+
+```bash
+crtl + c
+```
 
 # Update Etsy Listing
 

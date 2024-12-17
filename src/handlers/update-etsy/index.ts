@@ -25,8 +25,8 @@ const parser = yargs(hideBin(process.argv))
     product: {
       type: 'string',
       description: 'Product type for the listing',
-      demandOption: true,
       choices: Object.values(BuildProductType),
+      default: 'desk mat',
     },
     limit: {
       type: 'number',
@@ -71,7 +71,6 @@ const parser = yargs(hideBin(process.argv))
     }
 
     const listingsToUpdate: EtsyListingType[] = activeListings
-      //   .filter((listing: EtsyListingType) => listing.should_auto_renew === false)
       .filter((listing: EtsyListingType) => listing.tags.length === 0)
       .filter((listing: EtsyListingType) =>
         listing.title.includes(productTitleString),
@@ -97,9 +96,9 @@ const parser = yargs(hideBin(process.argv))
 
       delete record.buffer;
 
-      record.keywords = record.keywords.filter(
-        (keyword) => keyword.length <= 20,
-      );
+      record.keywords = record.keywords
+        .map((keyword) => keyword.toLowerCase())
+        .filter((keyword) => keyword.length <= 20);
 
       record.keywords = Array.from(new Set(record.keywords));
 

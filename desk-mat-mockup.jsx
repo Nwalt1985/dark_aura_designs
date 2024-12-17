@@ -2,7 +2,12 @@
 #target photoshop;
 
 // Paths
-var templatePath = '~/Desktop/ai_etsy/etsy_assets/desk_mat_template/desk_mat_branding_mockup_2.psd';
+var templatePaths = [
+	'~/Desktop/ai_etsy/etsy_assets/desk_mat_template/desk_mat_branding_mockup_2.psd', 
+	'~/Desktop/ai_etsy/etsy_assets/desk_mat_template/desk_mat_branding_mockup_3.psd', 
+	'~/Desktop/ai_etsy/etsy_assets/desk_mat_template/desk_mat_branding_mockup_4.psd'
+];
+
 var designFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/desk_mats/';
 var exportFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/desk_mats/mock_ups/';
 
@@ -51,7 +56,7 @@ function mockupExists(exportFolder, fileName) {
 // }
 
 // Function to process each design folder
-function processDesignFolder(designFolder, exportFolder) {
+function processDesignFolder(designFolder, exportFolder, index) {
     var designFiles = designFolder.getFiles(/\d{4,4}x\d{4,4}/); // Look for files with 'xxxx' resolution patterns in the name
 
     if (designFiles.length === 0) {
@@ -62,7 +67,7 @@ function processDesignFolder(designFolder, exportFolder) {
     for (var i = 0; i < designFiles.length; i++) {
         var designFile = designFiles[i];
         if (designFile.name.indexOf('2543x1254') !== -1) { // Filter for specific resolution
-            var fileName = designFile.name.split('.')[0]; // Exclude file extension for the mockup file name
+            var fileName = designFile.name.split('.')[0] + '_' + index; // Exclude file extension for the mockup file name
             // Check if the mockup file already exists before processing
             if (mockupExists(exportFolder, fileName)) {
                 continue; // Skip this file if the mockup already exists
@@ -91,26 +96,29 @@ function saveMockupAsJPEG(exportPath, fileName) {
 
 // Main function
 function main() {
-    // Open the template
-    if (!openTemplate(templatePath)) {
-        return; // Stop if the template doesn't open
-    }
+	for (var i = 0; i < templatePaths.length; i++) {
+		var templatePath = templatePaths[i];
+		// Open the template
+		if (!openTemplate(templatePath)) {
+			return; // Stop if the template doesn't open
+		}
 
-    // Get all main folders (e.g., 19-09-2024, 20-09-2024) inside the 'original' folder
-    var baseDesignFolder = new Folder(designFolderBasePath);
-    var mainFolders = baseDesignFolder.getFiles(function (f) { return f instanceof Folder; });
+		// Get all main folders (e.g., 19-09-2024, 20-09-2024) inside the 'original' folder
+		var baseDesignFolder = new Folder(designFolderBasePath);
+		var mainFolders = baseDesignFolder.getFiles(function (f) { return f instanceof Folder; });
 
-    if (mainFolders.length === 0) {
-        alert("No main folders found in: " + baseDesignFolder.fsName);
-        return; // Stop if no main folders are found
-    }
+		if (mainFolders.length === 0) {
+			alert("No main folders found in: " + baseDesignFolder.fsName);
+			return; // Stop if no main folders are found
+		}
 
-    // Loop through each main folder (e.g., 19-09-2024, 20-09-2024)
-    for (var j = 0; j < mainFolders.length; j++) {
-        var mainFolder = mainFolders[j];
-        var exportMainFolder = new Folder(exportFolderBasePath + mainFolder.name);
-        // processSubfoldersInMainFolder(mainFolder, exportMainFolder); // Process subfolders in each main folder
-		processDesignFolder(mainFolder, exportMainFolder);
+		// Loop through each main folder (e.g., 19-09-2024, 20-09-2024)
+		for (var j = 0; j < mainFolders.length; j++) {
+			var mainFolder = mainFolders[j];
+			var exportMainFolder = new Folder(exportFolderBasePath + mainFolder.name);
+			// processSubfoldersInMainFolder(mainFolder, exportMainFolder); // Process subfolders in each main folder
+			processDesignFolder(mainFolder, exportMainFolder, i);
+		}
     }
 
     // Close the document without saving changes

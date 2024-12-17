@@ -69,8 +69,6 @@ export async function updateEtsyListing(
 
     if (updatedListing) {
       console.log(`Updated listing: ${listingId} - ${title}`);
-    } else {
-      console.log(`Failed to update listing: ${listingId} - ${title}`);
     }
 
     return;

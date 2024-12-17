@@ -1,14 +1,8 @@
 import { StatusCodes } from 'http-status-codes';
-import { getDallEPrompts } from './queryWithOpenAi';
-import {
-  generateDalleImages,
-  generateImagesFromRescale,
-} from './generateImages';
-import { PromptResponse } from '../../models/schemas/prompt';
+import { generateImagesFromRescale } from './generateImages';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { z } from 'zod';
-import { getformattedDate, getProductDetails } from '../../helpers';
+import { getProductDetails } from '../../helpers';
 import { BuildProductType } from '../../models/types/listing';
 
 const parser = yargs(hideBin(process.argv))
@@ -16,42 +10,20 @@ const parser = yargs(hideBin(process.argv))
     product: {
       type: 'string',
       description: 'Product type for the listing',
-      demandOption: true,
       choices: Object.values(BuildProductType),
-    },
-    theme: {
-      type: 'string',
-      description: 'Theme for the DALL-E prompts',
-      demandOption: false,
-    },
-    style: {
-      type: 'string',
-      description: 'Style for the DALL-E prompts',
-      demandOption: false,
-    },
-    keywords: {
-      type: 'string',
-      description: 'Keywords for the listing',
-      demandOption: false,
+      default: 'desk mat',
     },
     limit: {
       type: 'number',
       description: 'Limit the number of prompts',
       default: 5,
     },
-    exists: {
-      type: 'boolean',
-      description: 'Check if the images already exist in rescale folder',
-      default: false,
-    },
   })
-  .strict() // Ensure that invalid options throw an error
+  .strict()
   .help();
 
 (async () => {
   try {
-    const formattedDate = getformattedDate();
-
     const argv = parser.parseSync();
 
     if (argv.style && argv.theme && !argv.keywords) {
@@ -62,32 +34,9 @@ const parser = yargs(hideBin(process.argv))
 
     const product = getProductDetails(argv.product);
 
-    if (!argv.exists) {
-      // generate prompts
-      const dallEPrompts = await getDallEPrompts({
-        theme: argv.theme,
-        style: argv.style,
-        keywords: argv.keywords,
-        limit: argv.limit,
-        product,
-        type: argv.product,
-      });
+    await generateImagesFromRescale(product, argv.limit);
 
-      // Add createdAt field to each prompt
-      const formattedData = dallEPrompts.map((item) => ({
-        ...item,
-        createdAt: formattedDate,
-      }));
-
-      z.array(PromptResponse).parse(formattedData);
-
-      console.log(`Successfully fetched ${dallEPrompts.length} prompts`);
-
-      // generate images using DALL-E
-      await generateDalleImages(formattedData, product, formattedDate);
-    } else {
-      await generateImagesFromRescale(product, argv.limit);
-    }
+    console.log('Images generation complete');
 
     return;
   } catch (err) {
