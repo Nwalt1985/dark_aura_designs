@@ -60,7 +60,13 @@ export async function getImageData(image: string, type: ProductName) {
               type: 'text',
               text: `Analyze this image and provide the following:
 		
-			Title: generate a keyword-rich 140-character title. The title should contain the following default text ${title}. Don't use any special characters or emojis.
+			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the words 'Desk Mat'.
+			
+			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. Here are some example titles:
+
+			Funky Geometric Art Desk Mat | Trendy Desk Decor | Vibrant Mouse Pad | XL Mouse Matt | Tech Accessories For Home And Office
+
+			Modern Abstract Geometric Art Desk Mat | Blue & Cream Design Desk Pad | XL Mouse Matt | Tech Accessories For Home And Office
 				
 			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
 		

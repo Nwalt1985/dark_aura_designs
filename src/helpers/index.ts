@@ -1,16 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 import { PromptResponseType } from '../models/schemas/prompt';
-import {
-  deleteListingByFileName,
-  getUnlisted,
-} from '../service/db';
+import { deleteListingByFileName, getUnlisted } from '../service/db';
 import sharp from 'sharp';
-import {
-  deskMatDefaultDescription,
-  laptopSleeveDefaultDescription,
-  lunchBagDefaultDescription,
-} from '../handlers/generate-images/defaultDescription';
+import { deskMatDefaultDescription } from '../handlers/generate-images/defaultDescription';
 import {
   Product,
   ProductName,
@@ -56,29 +49,9 @@ export function getProductDetails(arg: string): Product {
       );
       product.defaultDescription = deskMatDefaultDescription;
       product.rescale = path.resolve(
-		process.env.HOME || '',
+        process.env.HOME || '',
         `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
       );
-      break;
-    case BuildProductType.LAPTOP_SLEEVE:
-      product.name = ProductName.LAPTOP_SLEEVE;
-      product.title = 'Laptop Sleeve Computer';
-      product.dimensions = '4125x3000';
-      product.baseDir = path.resolve(
-        process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/laptop_sleeves`,
-      );
-      product.defaultDescription = laptopSleeveDefaultDescription;
-      break;
-    case BuildProductType.LUNCH_BAG:
-      product.name = ProductName.LUNCH_BAG;
-      product.title = 'Lunch Bag';
-      product.dimensions = '1568x1214';
-      product.baseDir = path.resolve(
-        process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/lunch_bags`,
-      );
-      product.defaultDescription = lunchBagDefaultDescription;
       break;
   }
 
