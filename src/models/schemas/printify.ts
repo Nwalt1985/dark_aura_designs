@@ -47,11 +47,11 @@ export const PrintifyProduct = z.object({
 });
 
 export const PrintifyProductUploadRequest = z.object({
-  title: z.string(),
+  title: z.string().max(140, 'Title must be 140 characters or less'),
   description: z.string(),
   blueprint_id: z.number(),
   print_provider_id: z.number(),
-  tags: z.array(z.string()),
+  tags: z.array(z.string()).length(13),
   variants: z.array(
     z.object({
       id: z.number(),

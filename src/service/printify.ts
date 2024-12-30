@@ -81,23 +81,19 @@ export async function getUploadedImages() {
 export async function createNewProduct(
   productData: PrintifyProductUploadRequestType,
 ) {
-  try {
-    PrintifyProductUploadRequest.parse(productData);
+  PrintifyProductUploadRequest.parse(productData);
 
-    const { data } = await axios.post<PrintifyProductUploadResponseType>(
-      `https://api.printify.com/v1/shops/${printifyShopId}/products.json`,
-      productData,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'NodeJS',
-          Authorization: `Bearer ${printifyApiKey}`,
-        },
+  const { data } = await axios.post<PrintifyProductUploadResponseType>(
+    `https://api.printify.com/v1/shops/${printifyShopId}/products.json`,
+    productData,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'NodeJS',
+        Authorization: `Bearer ${printifyApiKey}`,
       },
-    );
+    },
+  );
 
-    return data;
-  } catch (error: any) {
-    throw new Error(error);
-  }
+  return data;
 }

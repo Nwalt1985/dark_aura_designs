@@ -74,56 +74,54 @@ export async function createPrintifyListingsData(
   },
   product: Product,
 ): Promise<void> {
-  try {
-    const bufferArray = await getBuffer(unlisted.filename, product.baseDir);
+  const bufferArray = await getBuffer(unlisted.filename, product.baseDir);
 
-    const uploadedImagesArray: {
-      fileId: string | null;
-      response: PrintifyImageResponseType;
-    }[] = [];
+  const uploadedImagesArray: {
+    fileId: string | null;
+    response: PrintifyImageResponseType;
+  }[] = [];
 
-    if (bufferArray.length) {
-      for (const buffer of bufferArray) {
-        if (buffer.filename.includes('mockup')) {
-          console.log(`Skipping mockup image: ${buffer.filename}`);
-          continue;
-        }
+  if (bufferArray.length) {
+    for (const buffer of bufferArray) {
+      if (buffer.filename.includes('mockup')) {
+        console.log(`Skipping mockup image: ${buffer.filename}`);
+        continue;
+      }
 
-        const uploadedImage = uploadedImages.imageData.find(
-          (image) => image.file_name === buffer.filename,
-        );
+      const uploadedImage = uploadedImages.imageData.find(
+        (image) => image.file_name === buffer.filename,
+      );
 
-        if (!uploadedImage) {
-          console.log(`Uploading image: ${buffer.filename}`);
+      if (!uploadedImage) {
+        console.log(`Uploading image: ${buffer.filename}`);
 
-          const uploaded = await uploadImages(buffer.base64, buffer.filename);
-          uploadedImagesArray.push({
-            response: uploaded,
-            fileId: buffer.fileId,
-          });
-        } else {
-          console.log(`Image already uploaded: ${buffer.filename}`);
-          return;
-        }
+        const uploaded = await uploadImages(buffer.base64, buffer.filename);
+        uploadedImagesArray.push({
+          response: uploaded,
+          fileId: buffer.fileId,
+        });
+      } else {
+        console.log(`Image already uploaded: ${buffer.filename}`);
+        return;
       }
     }
-
-    const config = generateListingConfig(uploadedImagesArray, product.name);
-
-    const data = {
-      title: unlisted.title,
-      description: unlisted.description,
-      blueprint_id: config.blueprint_id,
-      print_provider_id: config.print_provider_id,
-      tags: unlisted.keywords,
-      variants: config.variants,
-      print_areas: config.print_areas,
-    };
-
-    await createNewProduct(data);
-
-    await updateListing(unlisted.filename, product.name);
-  } catch (error) {
-    throw error;
   }
+
+  const config = generateListingConfig(uploadedImagesArray, product.name);
+
+  const data = {
+    title: unlisted.title,
+    description: unlisted.description,
+    blueprint_id: config.blueprint_id,
+    print_provider_id: config.print_provider_id,
+    tags: unlisted.keywords,
+    variants: config.variants,
+    print_areas: config.print_areas,
+  };
+
+  await createNewProduct(data);
+
+  await updateListing(unlisted.filename, product.name);
+
+  console.log('uploaded product');
 }
