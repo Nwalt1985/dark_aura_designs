@@ -12,6 +12,7 @@ const parser = yargs(hideBin(process.argv))
       description: 'Product type for the listing',
       choices: Object.values(BuildProductType),
       default: 'desk mat',
+      demandOption: true,
     },
     limit: {
       type: 'number',

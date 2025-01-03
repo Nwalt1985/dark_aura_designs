@@ -48,12 +48,12 @@ export function getProductDetails(arg: string): Product {
       product.dimensions = '9450x4650';
       product.baseDir = path.resolve(
         process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/desk_mats`,
+        `/volumes/Shop Assets/Etsy/surface_aura_designs/assets/desk_mats`, // Upload to NAS device
       );
       product.defaultDescription = deskMatDefaultDescription;
       product.rescale = path.resolve(
         process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
+        `Desktop/surface_aura_designs/rescale`,
       );
       break;
 
@@ -63,12 +63,12 @@ export function getProductDetails(arg: string): Product {
       product.dimensions = '4050x4050';
       product.baseDir = path.resolve(
         process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/pillows`,
+        `/volumes/Shop Assets/Etsy/surface_aura_designs/assets/pillows`, // Upload to NAS device
       );
       product.defaultDescription = pillowDefaultDescription;
       product.rescale = path.resolve(
         process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/pillows/rescale`,
+        `Desktop/surface_aura_designs/rescale`,
       );
       break;
   }
@@ -122,6 +122,10 @@ function assetFolder(directory: string): string[] {
   fs.readdirSync(directory).forEach((folder) => {
     if (folder.match(/\d{2}-\d{2}-\d{4}/)) {
       const folderPath = path.resolve(directory, folder);
+
+      if (folderPath.includes('._')) {
+        return;
+      }
 
       fs.readdirSync(folderPath).forEach((file) => {
         if (file.includes('.DS_Store')) {
@@ -181,11 +185,15 @@ export async function getBuffer(
   }[] = [];
 
   fs.readdirSync(baseDir).forEach((dir) => {
+    if (dir.includes('.DS_Store') || dir.includes('._')) {
+      return;
+    }
+
     if (dir.match(/\d{2}-\d{2}-\d{4}/)) {
       const folder = path.resolve(baseDir, dir);
 
       fs.readdirSync(folder).forEach((file) => {
-        if (file.includes('.DS_Store')) {
+        if (file.includes('.DS_Store') || file.includes('._')) {
           return;
         }
 
@@ -290,8 +298,6 @@ export async function resizePillowImage(
   if (!fs.existsSync(directoryPath)) {
     fs.mkdirSync(directoryPath, { recursive: true });
   }
-
-  console.log('Creating pillow images');
 
   await Promise.all([
     createFile(

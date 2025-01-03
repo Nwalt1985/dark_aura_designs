@@ -45,6 +45,7 @@ const parser = yargs(hideBin(process.argv))
     const argv = parser.parseSync();
 
     const product = getProductDetails(argv.product);
+
     const unlisted = await getUnlisted(product.name);
 
     if (!unlisted.length) {

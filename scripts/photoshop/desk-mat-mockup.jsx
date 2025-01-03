@@ -3,13 +3,13 @@
 
 // Paths
 var templatePaths = [
-	'~/Desktop/ai_etsy/etsy_assets/desk_mat_template/desk_mat_branding_mockup_2.psd', 
-	'~/Desktop/ai_etsy/etsy_assets/desk_mat_template/desk_mat_branding_mockup_3.psd', 
-	'~/Desktop/ai_etsy/etsy_assets/desk_mat_template/desk_mat_branding_mockup_4.psd'
+	Folder.decode('/volumes/Shop Assets/Etsy/surface_aura_designs/assets/desk_mat_template/desk_mat_branding_mockup_2.psd'),
+	Folder.decode('/volumes/Shop Assets/Etsy/surface_aura_designs/assets/desk_mat_template/desk_mat_branding_mockup_3.psd'),
+	Folder.decode('/volumes/Shop Assets/Etsy/surface_aura_designs/assets/desk_mat_template/desk_mat_branding_mockup_4.psd'),
 ];
 
-var designFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/desk_mats/';
-var exportFolderBasePath = '~/Desktop/ai_etsy/etsy_assets/desk_mats/mock_ups/';
+var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/surface_aura_designs/assets/desk_mats/');
+var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/surface_aura_designs/assets/desk_mats/mock_ups/');
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
@@ -25,11 +25,17 @@ function openTemplate(templatePath) {
 
 // Function to replace the contents of the smart object
 function replaceSmartObject(newDesignPath) {
-    var idplacedLayerReplaceContents = stringIDToTypeID("placedLayerReplaceContents");
-    var desc = new ActionDescriptor();
-    var idnull = charIDToTypeID("null");
-    desc.putPath(idnull, new File(newDesignPath));
-    executeAction(idplacedLayerReplaceContents, desc, DialogModes.NO);
+    try {
+        var idplacedLayerReplaceContents = stringIDToTypeID("placedLayerReplaceContents");
+        var desc = new ActionDescriptor();
+        var idnull = charIDToTypeID("null");
+        desc.putPath(idnull, new File(newDesignPath));
+        executeAction(idplacedLayerReplaceContents, desc, DialogModes.NO);
+        return true;
+    } catch (e) {
+        alert("Error replacing smart object with file: " + newDesignPath + "\nError: " + e);
+        return false;
+    }
 }
 
 // Function to check if the mockup already exists
@@ -38,44 +44,20 @@ function mockupExists(exportFolder, fileName) {
     return saveFile.exists;
 }
 
-// Function to process each subfolder (e.g., 0, 1, 2) inside a main folder (e.g., 19-09-2024)
-// function processSubfoldersInMainFolder(mainFolder, exportMainFolder) {
-//     var subfolders = mainFolder.getFiles(function(f) { return f instanceof Folder; });
-    
-//     if (subfolders.length === 0) {
-//         alert("No subfolders found in: " + mainFolder.fsName);
-//         return; // Skip if no subfolders are found
-//     }
-
-//     for (var i = 0; i < subfolders.length; i++) {
-//         var subfolder = subfolders[i];
-//         var exportFolder = new Folder(exportMainFolder + "/" + subfolder.name);
-        
-//         processDesignFolder(subfolder, exportFolder); // Process design files in each subfolder
-//     }
-// }
-
 // Function to process each design folder
 function processDesignFolder(designFolder, exportFolder, index) {
-    var designFiles = designFolder.getFiles(/\d{4,4}x\d{4,4}/); // Look for files with 'xxxx' resolution patterns in the name
-
-    if (designFiles.length === 0) {
-        alert("No design files found in folder: " + designFolder.fsName);
-        return; // Skip if no design files are found
-    }
+    var designFiles = designFolder.getFiles(/\d{4,4}x\d{4,4}/);
 
     for (var i = 0; i < designFiles.length; i++) {
         var designFile = designFiles[i];
-        if (designFile.name.indexOf('2543x1254') !== -1) { // Filter for specific resolution
-            var fileName = designFile.name.split('.')[0] + '_' + index; // Exclude file extension for the mockup file name
-            // Check if the mockup file already exists before processing
+        if (designFile.name.indexOf('2543x1254') !== -1 && designFile.name.indexOf('._') !== 0) {
+            var fileName = designFile.name.split('.')[0] + '_' + index;
             if (mockupExists(exportFolder, fileName)) {
-                continue; // Skip this file if the mockup already exists
+                continue;
             }
-            // Replace smart object content with the design
-            replaceSmartObject(designFile.fsName);
-            // Export the mockup as PNG
-            saveMockupAsJPEG(exportFolder, fileName);
+            if (replaceSmartObject(designFile.fsName)) {
+                saveMockupAsJPEG(exportFolder, fileName);
+            }
         }
     }
 }
@@ -96,6 +78,13 @@ function saveMockupAsJPEG(exportPath, fileName) {
 
 // Main function
 function main() {
+	var testFolder = new Folder(designFolderBasePath);
+    
+	if (!testFolder.exists) {
+        alert("Cannot access path: " + designFolderBasePath);
+        return;
+    }
+
 	for (var i = 0; i < templatePaths.length; i++) {
 		var templatePath = templatePaths[i];
 		// Open the template
