@@ -5,18 +5,13 @@ import qs from 'qs';
 
 import { hideBin } from 'yargs/helpers';
 
-import { getEtsyAuthCredentials, updateEtsyListingId } from '../../service/db';
+import { updateEtsyListingId } from '../../service/db';
 import {
   EtsyListingType,
   EtsyListingRequestSchema,
 } from '../../models/schemas/etsy';
 import { getAllActiveListings, updateEtsyListing } from '../../service/etsy';
-import {
-  BuildProductType,
-  DeskMatMaterials,
-  LaptopSleeveMaterials,
-  LunchBagMaterials,
-} from '../../models/types/listing';
+import { BuildProductType, DeskMatMaterials, PillowMaterials } from '../../models/types/listing';
 
 dotenv.config();
 
@@ -58,15 +53,9 @@ const parser = yargs(hideBin(process.argv))
         productTitleString = 'Desk Mat';
         materials = Object.values(DeskMatMaterials).join(',');
         break;
-      case BuildProductType.LAPTOP_SLEEVE:
-        productTitleString = 'Laptop Sleeve';
-        materials = Object.values(LaptopSleeveMaterials).join(',');
-        shopSectionId = 51236977;
-        break;
-      case BuildProductType.LUNCH_BAG:
-        productTitleString = 'Lunch Bag';
-        shopSectionId = 51665176;
-        materials = Object.values(LunchBagMaterials).join(',');
+      case BuildProductType.PILLOW:
+        productTitleString = 'Pillow';
+        materials = Object.values(PillowMaterials).join(',');
         break;
     }
 

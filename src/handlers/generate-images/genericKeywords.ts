@@ -17,26 +17,17 @@ export const deskMatgenericKeywords = [
   'xxl mouse pad',
 ];
 
-export const sleeveGenericKeywords = [
-  'sleeve',
-  'sleeve cover',
-  'sleeve protector',
-  'macbook sleeve',
-  'laptop sleeve',
-  'macbook air case',
-  'macbook protector',
-  'laptop protector',
-  'macbook sleeve',
-];
-
-export const lunchBagGenericKeywords = [
-  'snack box',
-  'insulated lunch bag',
-  'kids lunch bag',
-  'lunch bag for women',
-  'toddler lunch bag',
-  'kids snack box',
-  'lunch box',
-  'lunch bag',
-  'first day of school',
+export const pillowGenericKeywords = [
+  'pillow',
+  'cushion',
+  'sofa cushion',
+  'sofa pillow',
+  'bed pillow',
+  'bed cushion',
+  'chair cushion',
+  'chair pillow',
+  'home decor',
+  'home accessories',
+  'house warming gift',
+  'housewarming gift',
 ];

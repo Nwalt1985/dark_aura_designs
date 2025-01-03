@@ -51,28 +51,24 @@ export async function updateEtsyListing(
   title: string,
   data: string,
 ): Promise<void> {
-  try {
-    const accessToken = await getEtsyAuthCredentials();
+  const accessToken = await getEtsyAuthCredentials();
 
-    const patchOptions = {
-      method: 'PATCH',
-      url: `https://openapi.etsy.com/v3/application/shops/${shopId}/listings/${listingId}`,
-      data,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'x-api-key': process.env.ETSY_KEY_STRING,
-        authorization: `Bearer ${accessToken}`,
-      },
-    };
+  const patchOptions = {
+    method: 'PATCH',
+    url: `https://openapi.etsy.com/v3/application/shops/${shopId}/listings/${listingId}`,
+    data,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'x-api-key': process.env.ETSY_KEY_STRING,
+      authorization: `Bearer ${accessToken}`,
+    },
+  };
 
-    const { data: updatedListing } = await axios.request(patchOptions);
+  const { data: updatedListing } = await axios.request(patchOptions);
 
-    if (updatedListing) {
-      console.log(`Updated listing: ${listingId} - ${title}`);
-    }
-
-    return;
-  } catch (err) {
-    throw new Error(err as any);
+  if (updatedListing) {
+    console.log(`Updated listing: ${listingId} - ${title}`);
   }
+
+  return;
 }

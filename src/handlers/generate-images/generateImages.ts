@@ -4,8 +4,9 @@ import {
   resizeDeskmats,
   getformattedDate,
   removeRescaleImage,
+  resizePillowImage,
 } from '../../helpers';
-import { Product } from '../../models/types/listing';
+import { Product, ProductName } from '../../models/types/listing';
 import { getImageData } from './queryWithOpenAi';
 import path from 'path';
 
@@ -50,15 +51,29 @@ export async function generateImagesFromRescale(
 
       await createDBListing([dbData]);
 
-      await resizeDeskmats(
-        buffer.toString('base64'),
-        fileName,
-        fileId,
-        outputDir,
-        formattedDate,
-      );
+      switch (product.name) {
+        case ProductName.DESK_MAT:
+          await resizeDeskmats(
+            buffer.toString('base64'),
+            fileName,
+            fileId,
+            outputDir,
+            formattedDate,
+          );
+          break;
 
-      await removeRescaleImage(fileName);
+        case ProductName.PILLOW:
+          await resizePillowImage(
+            buffer.toString('base64'),
+            fileName,
+            fileId,
+            outputDir,
+            formattedDate,
+          );
+          break;
+      }
+
+      await removeRescaleImage(product, fileName);
     }
     return;
   } catch (error) {
@@ -67,9 +82,9 @@ export async function generateImagesFromRescale(
 }
 
 function generateRandomNumber(): number {
-  let randomNumber = Math.floor(Math.random() * 10000);
-  if (randomNumber < 1000) {
-    randomNumber += 1000;
+  let randomNumber = Math.floor(Math.random() * 1000000);
+  if (randomNumber < 100000) {
+    randomNumber += 100000;
   }
   return randomNumber;
 }

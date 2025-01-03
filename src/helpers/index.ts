@@ -3,7 +3,10 @@ import path from 'path';
 import { PromptResponseType } from '../models/schemas/prompt';
 import { deleteListingByFileName, getUnlisted } from '../service/db';
 import sharp from 'sharp';
-import { deskMatDefaultDescription } from '../handlers/generate-images/defaultDescription';
+import {
+  deskMatDefaultDescription,
+  pillowDefaultDescription,
+} from '../handlers/generate-images/defaultDescription';
 import {
   Product,
   ProductName,
@@ -30,7 +33,7 @@ export function generateRandomNumber(): number {
 
 export function getProductDetails(arg: string): Product {
   let product: Product = {
-    name: ProductName.DESK_MAT || ProductName.LAPTOP_SLEEVE,
+    name: ProductName.DESK_MAT || ProductName.PILLOW,
     title: '',
     dimensions: '',
     baseDir: '',
@@ -51,6 +54,21 @@ export function getProductDetails(arg: string): Product {
       product.rescale = path.resolve(
         process.env.HOME || '',
         `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
+      );
+      break;
+
+    case BuildProductType.PILLOW:
+      product.name = ProductName.PILLOW;
+      product.title = 'Pillow';
+      product.dimensions = '4050x4050';
+      product.baseDir = path.resolve(
+        process.env.HOME || '',
+        `Desktop/ai_etsy/etsy_assets/pillows`,
+      );
+      product.defaultDescription = pillowDefaultDescription;
+      product.rescale = path.resolve(
+        process.env.HOME || '',
+        `Desktop/ai_etsy/etsy_assets/pillows/rescale`,
       );
       break;
   }
@@ -74,23 +92,14 @@ export function getGeneratedFileNames(
         })
         .map((fileName) => fileName.replace('-9450x4650', ''));
 
-    case 'laptop sleeve':
+    case 'pillow':
       return fileNameArray
         .filter((fileName) => {
-          if (fileName.includes('-4125x3000')) {
+          if (fileName.includes('-4050x4050')) {
             return fileName;
           }
         })
-        .map((fileName) => fileName.replace('-4125x3000', ''));
-
-    case 'lunch bag':
-      return fileNameArray
-        .filter((fileName) => {
-          if (fileName.includes('-1401x1085')) {
-            return fileName;
-          }
-        })
-        .map((fileName) => fileName.replace('-1401x1085', ''));
+        .map((fileName) => fileName.replace('-4050x4050', ''));
   }
 
   return [];
@@ -197,16 +206,13 @@ export async function getBuffer(
 }
 
 function extractImageId(filename: string): string | null {
-  const regex = /\b\d{4}\b/;
+  const regex = /\b\d{6}\b/;
   const match = filename.match(regex);
   return match![0] || null;
 }
 
-export async function removeRescaleImage(fileName: string) {
-  const rescaleDir = path.resolve(
-    process.env.HOME || '',
-    `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
-  );
+export async function removeRescaleImage(product: Product, fileName: string) {
+  const rescaleDir = product.rescale;
 
   const fileExtensions = ['.png', '.jpg'];
 
@@ -236,52 +242,43 @@ export async function resizeDeskmats(
     fs.mkdirSync(directoryPath, { recursive: true });
   }
 
-  const mockup = await sharp(Buffer.from(buffer, 'base64'))
-    .resize(2543, 1254)
-    .jpeg()
-    .toBuffer();
-
-  await createFile(
-    directoryPath,
-    `${filename}-${fileId}-mockup-2543x1254.jpg`,
-    mockup,
-  );
-
-  const image1 = await sharp(Buffer.from(buffer, 'base64'))
-    .resize(4320, 3630)
-    .jpeg()
-    .toBuffer();
-
-  await createFile(
-    directoryPath,
-    `${filename}-${fileId}-4320x3630.jpg`,
-    image1,
-  );
-
-  const image2 = await sharp(Buffer.from(buffer, 'base64'))
-    .resize(7080, 4140)
-    .jpeg()
-    .toBuffer();
-
-  await createFile(
-    directoryPath,
-    `${filename}-${fileId}-7080x4140.jpg`,
-    image2,
-  );
-
-  const image3 = await sharp(Buffer.from(buffer, 'base64'))
-    .resize(9450, 4650)
-    .jpeg()
-    .toBuffer();
-
-  await createFile(
-    directoryPath,
-    `${filename}-${fileId}-9450x4650.jpg`,
-    image3,
-  );
+  await Promise.all([
+    createFile(
+      directoryPath,
+      `${filename}-${fileId}-mockup-2543x1254.jpg`,
+      await sharp(Buffer.from(buffer, 'base64'))
+        .resize(2543, 1254)
+        .jpeg()
+        .toBuffer(),
+    ),
+    createFile(
+      directoryPath,
+      `${filename}-${fileId}-4320x3630.jpg`,
+      await sharp(Buffer.from(buffer, 'base64'))
+        .resize(4320, 3630)
+        .jpeg()
+        .toBuffer(),
+    ),
+    createFile(
+      directoryPath,
+      `${filename}-${fileId}-7080x4140.jpg`,
+      await sharp(Buffer.from(buffer, 'base64'))
+        .resize(7080, 4140)
+        .jpeg()
+        .toBuffer(),
+    ),
+    createFile(
+      directoryPath,
+      `${filename}-${fileId}-9450x4650.jpg`,
+      await sharp(Buffer.from(buffer, 'base64'))
+        .resize(9450, 4650)
+        .jpeg()
+        .toBuffer(),
+    ),
+  ]);
 }
 
-export async function resizeLaptopSleeve(
+export async function resizePillowImage(
   buffer: string,
   filename: string,
   fileId: number,
@@ -293,62 +290,27 @@ export async function resizeLaptopSleeve(
   if (!fs.existsSync(directoryPath)) {
     fs.mkdirSync(directoryPath, { recursive: true });
   }
-  const mockup = await sharp(Buffer.from(buffer, 'base64'))
-    .resize(1502, 1145)
-    .jpeg()
-    .toBuffer();
 
-  await createFile(
-    directoryPath,
-    `${filename}-${fileId}-mockup-1502x1145.jpg`,
-    mockup,
-  );
+  console.log('Creating pillow images');
 
-  const image1 = await sharp(Buffer.from(buffer, 'base64'))
-    .resize(4125, 3000)
-    .jpeg()
-    .toBuffer();
-
-  await createFile(
-    directoryPath,
-    `${filename}-${fileId}-4125x3000.jpg`,
-    image1,
-  );
-}
-
-export async function resizeLunchBag(
-  buffer: string,
-  filename: string,
-  fileId: number,
-  baseDir: string,
-  formattedDate: string,
-): Promise<void> {
-  const directoryPath = `${baseDir}/${formattedDate}`;
-
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true });
-  }
-  const mockup = await sharp(Buffer.from(buffer, 'base64'))
-    .resize(784, 607)
-    .jpeg()
-    .toBuffer();
-
-  await createFile(
-    directoryPath,
-    `${filename}-${fileId}-mockup-784x607.jpg`,
-    mockup,
-  );
-
-  const image1 = await sharp(Buffer.from(buffer, 'base64'))
-    .resize(1401, 1085)
-    .jpeg()
-    .toBuffer();
-
-  await createFile(
-    directoryPath,
-    `${filename}-${fileId}-1401x1085.jpg`,
-    image1,
-  );
+  await Promise.all([
+    createFile(
+      directoryPath,
+      `${filename}-${fileId}-mockup-1275x1275.jpg`,
+      await sharp(Buffer.from(buffer, 'base64'))
+        .resize(1275, 1275)
+        .jpeg()
+        .toBuffer(),
+    ),
+    createFile(
+      directoryPath,
+      `${filename}-${fileId}-4050x4050.jpg`,
+      await sharp(Buffer.from(buffer, 'base64'))
+        .resize(4050, 4050)
+        .jpeg()
+        .toBuffer(),
+    ),
+  ]);
 }
 
 async function createFile(

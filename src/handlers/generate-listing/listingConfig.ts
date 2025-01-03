@@ -1,7 +1,21 @@
 import dotenv from 'dotenv';
 import { PrintifyImageResponseType } from '../../models/schemas/printify';
+import { BuildProductType } from '../../models/types/listing';
 
 dotenv.config();
+
+const placeholdersFront = {
+  position: 'front',
+  images: [
+    {
+      id: '',
+      x: 0.5,
+      y: 0.5,
+      scale: 1,
+      angle: 0,
+    },
+  ],
+};
 
 export const deskMatConfig = {
   print_provider_id: Number(process.env.DESK_MAT_PRINT_PROVIDER_ID) || 0,
@@ -32,139 +46,67 @@ export const deskMatConfig = {
   print_areas: [
     {
       variant_ids: [81075],
-      placeholders: [
-        {
-          position: 'front',
-          images: [
-            {
-              id: '',
-              x: 0.5,
-              y: 0.5,
-              scale: 1,
-              angle: 0,
-            },
-          ],
-        },
-      ],
+      placeholders: [placeholdersFront],
       background: '#ffffff',
     },
     {
       variant_ids: [103806],
-      placeholders: [
-        {
-          position: 'front',
-          images: [
-            {
-              id: '',
-              x: 0.5,
-              y: 0.5,
-              scale: 1,
-              angle: 0,
-            },
-          ],
-        },
-      ],
+      placeholders: [placeholdersFront],
       background: '#ffffff',
     },
     {
       variant_ids: [103807],
-      placeholders: [
-        {
-          position: 'front',
-          images: [
-            {
-              id: '',
-              x: 0.5,
-              y: 0.5,
-              scale: 1,
-              angle: 0,
-            },
-          ],
-        },
-      ],
+      placeholders: [placeholdersFront],
       background: '#ffffff',
     },
   ],
 };
 
-export const laptopSleeveConfig = {
-  print_provider_id: Number(process.env.LAPTOP_SLEEVE_PRINT_PROVIDER_ID) || 0,
-  blueprint_id: Number(process.env.LAPTOP_SLEEVE_PRINTIFY_BLUEPRINT_ID) || 0,
+export const pillowConfig = {
+  print_provider_id: Number(process.env.PILLOW_PRINT_PROVIDER_ID) || 0,
+  blueprint_id: Number(process.env.PILLOW_PRINTIFY_BLUEPRINT_ID) || 0,
   variants: [
     {
-      id: 62037,
-      sku: '94066859825860771447',
-      price: 2865,
-      is_enabled: true,
-      is_default: true,
-    },
-    {
-      id: 62038,
-      sku: '22467621504024213655',
-      price: 2865,
+      id: 79311,
+      sku: '15402852538898633500',
+      price: 2500,
       is_enabled: true,
       is_default: false,
     },
     {
-      id: 62039,
-      sku: '11183115053661894802',
-      price: 2865,
+      id: 79312,
+      sku: '32922091406078559470',
+      price: 3000,
       is_enabled: true,
       is_default: false,
     },
-  ],
-  print_areas: [
     {
-      variant_ids: [62037, 62038, 62039],
-      placeholders: [
-        {
-          position: 'front',
-          images: [
-            {
-              id: '',
-              x: 0.5,
-              y: 0.5,
-              scale: 0.9854166666666666,
-              angle: 0,
-            },
-          ],
-        },
-      ],
-      background: '#ffffff',
+      id: 79313,
+      sku: '23293247215381687314',
+      price: 3500,
+      is_enabled: true,
+      is_default: false,
     },
-  ],
-};
-
-export const lunchBagConfig = {
-  print_provider_id: Number(process.env.LUNCH_BAG_PRINT_PROVIDER_ID) || 0,
-  blueprint_id: Number(process.env.LUNCH_BAG_PRINTIFY_BLUEPRINT_ID) || 0,
-  variants: [
     {
-      id: 74699,
-      sku: '28632451203892685091',
-      price: 5968,
+      id: 79314,
+      sku: '12938115724255141288',
+      price: 4000,
+      is_enabled: true,
+      is_default: false,
+    },
+    {
+      id: 79315,
+      sku: '14616426927730794653',
+      price: 4500,
       is_enabled: true,
       is_default: true,
     },
   ],
   print_areas: [
     {
-      variant_ids: [74699],
-      placeholders: [
-        {
-          position: 'front',
-          images: [
-            {
-              id: '',
-              x: 0.5000000000000036,
-              y: 0.5,
-              scale: 0.8931980647962059,
-              angle: 0,
-            },
-          ],
-        },
-      ],
-      background: '#ffffff',
+      variant_ids: [79311, 79312, 79313, 79314, 79315],
+      placeholders: [placeholdersFront],
+      background: '#000000',
     },
   ],
 };
@@ -179,7 +121,7 @@ export function generateListingConfig(
   let config;
 
   switch (productType) {
-    case 'desk mat':
+    case BuildProductType.DESK_MAT:
       config = deskMatConfig;
 
       config.print_areas[0].placeholders[0].images[0].id =
@@ -199,22 +141,12 @@ export function generateListingConfig(
 
       return config;
 
-    case 'laptop sleeve':
-      config = laptopSleeveConfig;
+    case BuildProductType.PILLOW:
+      config = pillowConfig;
 
       config.print_areas[0].placeholders[0].images[0].id =
         uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('4125x3000'),
-        )!.response.id;
-
-      return config;
-
-    case 'lunch bag':
-      config = lunchBagConfig;
-
-      config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('1401x1085'),
+          image.response.file_name.includes('4050x4050'),
         )!.response.id;
 
       return config;

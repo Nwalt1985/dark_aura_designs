@@ -1,8 +1,7 @@
 import OpenAI from 'openai';
 import {
   deskMatgenericKeywords,
-  lunchBagGenericKeywords,
-  sleeveGenericKeywords,
+  pillowGenericKeywords,
 } from './genericKeywords';
 import { ProductName } from '../../models/types/listing';
 
@@ -17,11 +16,8 @@ function generateKeywordArray(keywords: string[], product: string): string[] {
     case ProductName.DESK_MAT:
       genericKeywords = deskMatgenericKeywords;
       break;
-    case ProductName.LAPTOP_SLEEVE:
-      genericKeywords = sleeveGenericKeywords;
-      break;
-    case ProductName.LUNCH_BAG:
-      genericKeywords = lunchBagGenericKeywords;
+    case ProductName.PILLOW:
+      genericKeywords = pillowGenericKeywords;
       break;
   }
 
@@ -37,32 +33,24 @@ function generateKeywordArray(keywords: string[], product: string): string[] {
 export async function getImageData(image: string, type: ProductName) {
   try {
     let title;
+    let text;
+    const outputJsonTemplate = {
+      description: 'Description 1',
+      title: 'Title 1',
+      theme: 'Theme 1',
+      style: 'Style 1',
+      filename: 'Filename 1',
+      keywords: ['keyword1', 'keyword2', 'keyword3'],
+    };
 
     switch (type) {
       case ProductName.DESK_MAT:
         title = '| XL Mouse Matt | Tech Accessories For Home And Office';
-        break;
-      case ProductName.LAPTOP_SLEEVE:
-        title = '| Laptop Cover | Tech Accessories For Home And Office';
-        break;
-      case ProductName.LUNCH_BAG:
-        title = '| Lunch Box | Accessories For Home, School And Office';
-        break;
-    }
-
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: `Analyze this image and provide the following:
+        text = `Analyze this image and provide the following:
 		
 			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the words 'Desk Mat'.
 			
-			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. Here are some example titles:
+			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters. Here are some example titles:
 
 			Funky Geometric Art Desk Mat | Trendy Desk Decor | Vibrant Mouse Pad | XL Mouse Matt | Tech Accessories For Home And Office
 
@@ -76,16 +64,45 @@ export async function getImageData(image: string, type: ProductName) {
 
     		Output the results in a JSON format. Structure the JSON as follows:
 		
-     		{
-     		  "description": "Description 1",
-     		  "title": "Title 1",
-			  "theme": "Theme 1",
-			  "style": "Style 1",
-     		  "filename": "Filename 1",
-     		  "keywords": [keyword1, keyword2, keyword3],
-     		},
+     		${outputJsonTemplate},
      	  
-     	`,
+     	`;
+        break;
+      case ProductName.PILLOW:
+        title = '| Stylish Pillow | Accessories For Home And Office';
+        text = `Analyze this image and provide the following:
+		
+			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the words 'Pillow'.
+			
+			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters. Here are some example titles:
+
+			Modern Abstract Geometric Art Pillow | Blue & Cream Design Cushion | Stylish Pillow | Accessories For Home And Office
+
+			Gothic Geometric Pillow | Abstract Design Cushion | Stylish Pillow | Accessories For Home And Office
+				
+			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
+		
+			Description: SEO-optimized Etsy description.
+		
+			Keywords: generate 8 SEO-optimized keywords related to the image.
+		
+    		Output the results in a JSON format. Structure the JSON as follows:
+		
+     		${outputJsonTemplate},
+     	  
+     	`;
+        break;
+    }
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: text ?? '',
             },
             {
               type: 'image_url',

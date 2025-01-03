@@ -19,6 +19,7 @@ import { hideBin } from 'yargs/helpers';
 import dotenv from 'dotenv';
 import { generateListingConfig } from './listingConfig';
 import { BuildProductType, Product } from '../../models/types/listing';
+import { StatusCodes } from 'http-status-codes';
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ const parser = yargs(hideBin(process.argv))
 (async () => {
   try {
     const argv = parser.parseSync();
+
     const product = getProductDetails(argv.product);
     const unlisted = await getUnlisted(product.name);
 
@@ -51,17 +53,34 @@ const parser = yargs(hideBin(process.argv))
     }
     const data = await dbTidy(unlisted, product);
 
+    const limitedData = data.slice(0, argv.limit);
+
     const uploadedImages = await getUploadedImages();
 
-    console.log(`${product.name} - Creating Printify listings`);
+    console.log(`Creating ${limitedData.length} Printify listings`);
 
-    for (const item of data) {
+    for (const item of limitedData) {
       await createPrintifyListingsData(item, uploadedImages, product);
     }
 
     return;
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    let statusCode;
+    let message;
+
+    const error = err as Error;
+
+    switch (error.name) {
+      case 'ZodError':
+        statusCode = StatusCodes.BAD_REQUEST;
+        message = error.message;
+        break;
+      default:
+        statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+        message = error.message;
+    }
+
+    console.error({ name: error.name, statusCode, message, error });
   }
 })();
 
