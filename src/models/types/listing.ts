@@ -1,11 +1,13 @@
-export enum BuildProductType {
-  DESK_MAT = 'desk mat',
-  PILLOW = 'pillow',
-}
-
 export enum ProductName {
   DESK_MAT = 'desk mat',
   PILLOW = 'pillow',
+  BLANKET = 'blanket',
+  WOVEN_BLANKET = 'woven',
+}
+
+export enum Marketplace {
+  ETSY = 'Etsy',
+  SHOPIFY = 'Shopify',
 }
 
 export type Product = {
@@ -15,6 +17,7 @@ export type Product = {
   baseDir: string;
   defaultDescription: string;
   rescale: string;
+  shopId: string;
 };
 
 export type DallEPromptInput = {
@@ -41,4 +44,15 @@ export enum PillowMaterials {
   POLYESTER = 'Polyester Canvas',
   FILLING = 'Polyester Filling',
   ZIPPER = 'Zipper',
+}
+
+export enum BlanketMaterials {
+  POLYESTER = 'Polyester',
+  FLEECE = 'Fleece',
+}
+
+export enum WovenBlanketMaterials {
+  WOVEN = 'Woven threads',
+  COTTON = 'Cotton',
+  EDGE = 'Fringed edges',
 }

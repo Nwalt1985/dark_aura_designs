@@ -3,15 +3,21 @@ import { generateImagesFromRescale } from './generateImages';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { getProductDetails } from '../../helpers';
-import { BuildProductType } from '../../models/types/listing';
+import { Marketplace, ProductName } from '../../models/types/listing';
 
 const parser = yargs(hideBin(process.argv))
   .options({
     product: {
       type: 'string',
       description: 'Product type for the listing',
-      choices: Object.values(BuildProductType),
-      default: 'desk mat',
+      choices: Object.values(ProductName),
+      demandOption: true,
+    },
+    marketplace: {
+      type: 'string',
+      description: 'Marketplace for the listing',
+      choices: Object.values(Marketplace),
+      demandOption: true,
     },
     limit: {
       type: 'number',
@@ -26,11 +32,9 @@ const parser = yargs(hideBin(process.argv))
   try {
     const argv = parser.parseSync();
 
-    const product = getProductDetails(argv.product);
+    const product = getProductDetails(argv.product, argv.marketplace);
 
     await generateImagesFromRescale(product, argv.limit);
-
-    console.log('Images generation complete');
 
     return;
   } catch (err) {

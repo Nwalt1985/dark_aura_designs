@@ -3,6 +3,7 @@ import { mongoConnect } from '../database';
 import { PromptResponse, PromptResponseType } from '../models/schemas/prompt';
 import { DateTime } from 'luxon';
 import he from 'he';
+import { ProductData, UpdateListingData } from '../models/schemas/db';
 
 export async function createDBListing(
   listing: z.infer<typeof PromptResponse>[],
@@ -12,8 +13,6 @@ export async function createDBListing(
   const result = await collection.insertMany(listing);
 
   await client.close();
-
-  console.log(`Inserted ${result.insertedCount} listing(s)`);
 
   return result;
 }
@@ -71,15 +70,14 @@ export async function deleteListingByFileName(filename: string) {
 export async function updateListing(
   filename: string,
   productType: string,
+  data: UpdateListingData,
 ): Promise<void> {
   const { client, collection } = await mongoConnect();
 
   await collection.updateOne(
     { filename, productType },
     {
-      $set: {
-        listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
-      },
+      $set: data,
     },
   );
 

@@ -2,83 +2,104 @@ import { createDBListing } from '../../service/db';
 import fs from 'fs';
 import {
   resizeDeskmats,
-  getformattedDate,
-  removeRescaleImage,
   resizePillowImage,
-} from '../../helpers';
+  resizeBlanketImage,
+  resizeWovenBlanketImage,
+} from '../../helpers/rescaleImages';
 import { Product, ProductName } from '../../models/types/listing';
 import { getImageData } from './queryWithOpenAi';
 import path from 'path';
+import { getformattedDate, relocateRescaleImage } from '../../helpers';
 
 export async function generateImagesFromRescale(
   product: Product,
   limit: number,
 ): Promise<void> {
-  try {
-    const formattedDate = getformattedDate();
+  const formattedDate = getformattedDate();
 
-    const rescaleDir = product.rescale;
+  const rescaleDir = product.rescale;
 
-    const outputDir = product.baseDir;
+  const outputDir = product.baseDir;
 
-    const files = fs.readdirSync(rescaleDir);
+  const files = fs.readdirSync(rescaleDir);
 
-    for (let i = 0; i < limit; i++) {
-      const file = files[i];
-      const fileId = generateRandomNumber();
-      const filePath = path.join(rescaleDir, file);
-      const buffer = fs.readFileSync(filePath);
+  for (let i = 0; i <= limit; i++) {
+    if (i >= files.length) break;
 
-      if (file === '.DS_Store') continue;
+    const file = files[i];
+    const fileId = generateRandomNumber();
+    const filePath = path.join(rescaleDir, file);
+    const buffer = fs.readFileSync(filePath);
 
-      const imageData = await getImageData(
-        buffer.toString('base64'),
-        product.name,
-      );
+    if (file === '.DS_Store') continue;
 
-      const fileName = file
-        .replace('.png', '')
-        .replace('.jpg', '')
-        .toLowerCase();
+    const imageData = await getImageData(
+      buffer.toString('base64'),
+      product.name,
+    );
 
-      const dbData = {
-        ...imageData,
-        productType: product.name,
-        filename: `${fileName}-${fileId}`,
-        description: `${imageData.description}
-			  ${product.defaultDescription}`,
-      };
-
-      await createDBListing([dbData]);
-
-      switch (product.name) {
-        case ProductName.DESK_MAT:
-          await resizeDeskmats(
-            buffer.toString('base64'),
-            fileName,
-            fileId,
-            outputDir,
-            formattedDate,
-          );
-          break;
-
-        case ProductName.PILLOW:
-          await resizePillowImage(
-            buffer.toString('base64'),
-            fileName,
-            fileId,
-            outputDir,
-            formattedDate,
-          );
-          break;
-      }
-
-      await removeRescaleImage(product, fileName);
+    if (imageData.title.length > 140) {
+      console.log('Title is too long:', imageData.title);
+      return;
     }
-    return;
-  } catch (error) {
-    throw error;
+
+    const fileName = file.replace('.png', '').replace('.jpg', '').toLowerCase();
+
+    const dbData = {
+      ...imageData,
+      productType: product.name,
+      filename: `${fileName}-${fileId}`,
+      description: `${imageData.description}
+			  ${product.defaultDescription}`,
+    };
+
+    await createDBListing([dbData]);
+
+    switch (product.name) {
+      case ProductName.DESK_MAT:
+        await resizeDeskmats(
+          buffer.toString('base64'),
+          fileName,
+          fileId,
+          outputDir,
+          formattedDate,
+        );
+        break;
+
+      case ProductName.PILLOW:
+        await resizePillowImage(
+          buffer.toString('base64'),
+          fileName,
+          fileId,
+          outputDir,
+          formattedDate,
+        );
+        break;
+
+      case ProductName.BLANKET:
+        await resizeBlanketImage(
+          buffer.toString('base64'),
+          fileName,
+          fileId,
+          outputDir,
+          formattedDate,
+        );
+        break;
+
+      case ProductName.WOVEN_BLANKET:
+        await resizeWovenBlanketImage(
+          buffer.toString('base64'),
+          fileName,
+          fileId,
+          outputDir,
+          formattedDate,
+        );
+        break;
+    }
+
+    await relocateRescaleImage(product, fileName);
   }
+  return;
 }
 
 function generateRandomNumber(): number {

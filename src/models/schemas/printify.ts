@@ -55,10 +55,10 @@ export const PrintifyProductUploadRequest = z.object({
   variants: z.array(
     z.object({
       id: z.number(),
-      sku: z.string(),
       price: z.number(),
       is_enabled: z.boolean(),
       is_default: z.boolean(),
+      title: z.string().optional(),
     }),
   ),
   print_areas: z.array(

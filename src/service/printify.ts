@@ -7,11 +7,13 @@ import {
   PrintifyProductUploadRequest,
 } from '../models/schemas/printify';
 import dotenv from 'dotenv';
+import { Marketplace } from '../models/types/listing';
 
 dotenv.config();
 
 const printifyApiKey = process.env.PRINTIFY_API_KEY || '';
-const printifyShopId = process.env.PRINTIFY_SHOP_ID || '';
+const darkAuraEtsyShopId = process.env.DARK_AURA_ETSY_SHOP_ID || '';
+const darkAuraShopifyShopId = process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
 
 export async function uploadImages(buffer: Buffer, filename: string) {
   const { data } = await axios.post<PrintifyImageResponseType>(
@@ -72,11 +74,12 @@ export async function getUploadedImages() {
 
 export async function createNewProduct(
   productData: PrintifyProductUploadRequestType,
+  shopId: string,
 ) {
   PrintifyProductUploadRequest.parse(productData);
 
   const response = await axios.post<PrintifyProductUploadResponseType>(
-    `https://api.printify.com/v1/shops/${printifyShopId}/products.json`,
+    `https://api.printify.com/v1/shops/${shopId}/products.json`,
     productData,
     {
       headers: {

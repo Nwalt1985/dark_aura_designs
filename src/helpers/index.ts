@@ -2,16 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import { PromptResponseType } from '../models/schemas/prompt';
 import { deleteListingByFileName, getUnlisted } from '../service/db';
-import sharp from 'sharp';
 import {
   deskMatDefaultDescription,
   pillowDefaultDescription,
+  blanketDefaultDescription,
+  wovenBlanketDefaultDescription,
 } from '../handlers/generate-images/defaultDescription';
-import {
-  Product,
-  ProductName,
-  BuildProductType,
-} from '../models/types/listing';
+import { Marketplace, Product, ProductName } from '../models/types/listing';
 
 export function getformattedDate() {
   const date = new Date();
@@ -31,7 +28,10 @@ export function generateRandomNumber(): number {
   return randomNumber;
 }
 
-export function getProductDetails(arg: string): Product {
+export function getProductDetails(
+  arg: string,
+  marketplace: Marketplace,
+): Product {
   let product: Product = {
     name: ProductName.DESK_MAT || ProductName.PILLOW,
     title: '',
@@ -39,37 +39,84 @@ export function getProductDetails(arg: string): Product {
     baseDir: '',
     defaultDescription: '',
     rescale: '',
+    shopId: '',
   };
 
   switch (arg) {
-    case BuildProductType.DESK_MAT:
+    case ProductName.DESK_MAT:
       product.name = ProductName.DESK_MAT;
       product.title = 'Desk Mat XL Mouse Matt';
       product.dimensions = '9450x4650';
       product.baseDir = path.resolve(
         process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/desk_mats`,
+        `/volumes/Shop Assets/${marketplace}/dark_aura_designs/desk_mats`, // Upload to NAS device
       );
       product.defaultDescription = deskMatDefaultDescription;
       product.rescale = path.resolve(
         process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/desk_mats/rescale`,
+        `Desktop/dark_aura_designs/rescale_desk_mats`,
       );
+      product.shopId =
+        marketplace === Marketplace.ETSY
+          ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
+          : process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
       break;
 
-    case BuildProductType.PILLOW:
+    case ProductName.PILLOW:
       product.name = ProductName.PILLOW;
-      product.title = 'Pillow';
+      product.title = 'Cushion';
       product.dimensions = '4050x4050';
       product.baseDir = path.resolve(
         process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/pillows`,
+        `/volumes/Shop Assets/${marketplace}/dark_aura_designs/pillows`,
       );
       product.defaultDescription = pillowDefaultDescription;
       product.rescale = path.resolve(
         process.env.HOME || '',
-        `Desktop/ai_etsy/etsy_assets/pillows/rescale`,
+        `Desktop/dark_aura_designs/rescale_pillows`,
       );
+      product.shopId =
+        marketplace === Marketplace.ETSY
+          ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
+          : process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
+      break;
+
+    case ProductName.BLANKET:
+      product.name = ProductName.BLANKET;
+      product.title = 'Blanket';
+      product.dimensions = '8228x6260';
+      product.baseDir = path.resolve(
+        process.env.HOME || '',
+        `/volumes/Shop Assets/${marketplace}/dark_aura_designs/blankets`,
+      );
+      product.defaultDescription = blanketDefaultDescription;
+      product.rescale = path.resolve(
+        process.env.HOME || '',
+        `Desktop/dark_aura_designs/rescale_blankets`,
+      );
+      product.shopId =
+        marketplace === Marketplace.ETSY
+          ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
+          : process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
+      break;
+
+    case ProductName.WOVEN_BLANKET:
+      product.name = ProductName.WOVEN_BLANKET;
+      product.title = 'Woven Blanket';
+      product.dimensions = '7680x5760';
+      product.baseDir = path.resolve(
+        process.env.HOME || '',
+        `/volumes/Shop Assets/${marketplace}/dark_aura_designs/woven_blankets`,
+      );
+      product.defaultDescription = wovenBlanketDefaultDescription;
+      product.rescale = path.resolve(
+        process.env.HOME || '',
+        `Desktop/dark_aura_designs/rescale_woven_blankets`,
+      );
+      product.shopId =
+        marketplace === Marketplace.ETSY
+          ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
+          : process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
       break;
   }
 
@@ -100,20 +147,27 @@ export function getGeneratedFileNames(
           }
         })
         .map((fileName) => fileName.replace('-4050x4050', ''));
+
+    case 'blanket':
+      return fileNameArray
+        .filter((fileName) => {
+          if (fileName.includes('-8228x6260')) {
+            return fileName;
+          }
+        })
+        .map((fileName) => fileName.replace('-8228x6260', ''));
+
+    case 'woven':
+      return fileNameArray
+        .filter((fileName) => {
+          if (fileName.includes('-7680x5760')) {
+            return fileName;
+          }
+        })
+        .map((fileName) => fileName.replace('-7680x5760', ''));
   }
 
   return [];
-}
-
-export async function getMockups(): Promise<string[]> {
-  const mockupDir = path.resolve(
-    process.env.HOME || '',
-    `Desktop/ai_etsy/etsy_assets/mock_ups`,
-  );
-
-  const mockupsArray = assetFolder(mockupDir);
-
-  return mockupsArray;
 }
 
 function assetFolder(directory: string): string[] {
@@ -122,6 +176,10 @@ function assetFolder(directory: string): string[] {
   fs.readdirSync(directory).forEach((folder) => {
     if (folder.match(/\d{2}-\d{2}-\d{4}/)) {
       const folderPath = path.resolve(directory, folder);
+
+      if (folderPath.includes('._')) {
+        return;
+      }
 
       fs.readdirSync(folderPath).forEach((file) => {
         if (file.includes('.DS_Store')) {
@@ -181,11 +239,15 @@ export async function getBuffer(
   }[] = [];
 
   fs.readdirSync(baseDir).forEach((dir) => {
+    if (dir.includes('.DS_Store') || dir.includes('._')) {
+      return;
+    }
+
     if (dir.match(/\d{2}-\d{2}-\d{4}/)) {
       const folder = path.resolve(baseDir, dir);
 
       fs.readdirSync(folder).forEach((file) => {
-        if (file.includes('.DS_Store')) {
+        if (file.includes('.DS_Store') || file.includes('._')) {
           return;
         }
 
@@ -211,109 +273,31 @@ function extractImageId(filename: string): string | null {
   return match![0] || null;
 }
 
-export async function removeRescaleImage(product: Product, fileName: string) {
+export async function relocateRescaleImage(product: Product, fileName: string) {
   const rescaleDir = product.rescale;
+  const completedDir = path.resolve(rescaleDir, '../completed_rescale');
+
+  // Create completed_rescale directory if it doesn't exist
+  if (!fs.existsSync(completedDir)) {
+    fs.mkdirSync(completedDir, { recursive: true });
+  }
 
   const fileExtensions = ['.png', '.jpg'];
 
   fileExtensions.forEach((extension) => {
-    const filePathWithExtension = path.resolve(
-      rescaleDir,
-      `${fileName}${extension}`,
-    );
+    const sourceFile = path.resolve(rescaleDir, `${fileName}${extension}`);
+    const targetFile = path.resolve(completedDir, `${fileName}${extension}`);
 
-    if (fs.existsSync(filePathWithExtension)) {
-      fs.unlinkSync(filePathWithExtension);
-      console.log(`Removed rescale image: ${fileName}${extension}`);
+    if (fs.existsSync(sourceFile)) {
+      fs.renameSync(sourceFile, targetFile);
+      console.log(
+        `Moved ${fileName}${extension} to completed_rescale directory`,
+      );
     }
   });
 }
 
-export async function resizeDeskmats(
-  buffer: string,
-  filename: string,
-  fileId: number,
-  baseDir: string,
-  formattedDate: string,
-): Promise<void> {
-  const directoryPath = `${baseDir}/${formattedDate}`;
-
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true });
-  }
-
-  await Promise.all([
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-mockup-2543x1254.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(2543, 1254)
-        .jpeg()
-        .toBuffer(),
-    ),
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-4320x3630.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(4320, 3630)
-        .jpeg()
-        .toBuffer(),
-    ),
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-7080x4140.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(7080, 4140)
-        .jpeg()
-        .toBuffer(),
-    ),
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-9450x4650.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(9450, 4650)
-        .jpeg()
-        .toBuffer(),
-    ),
-  ]);
-}
-
-export async function resizePillowImage(
-  buffer: string,
-  filename: string,
-  fileId: number,
-  baseDir: string,
-  formattedDate: string,
-): Promise<void> {
-  const directoryPath = `${baseDir}/${formattedDate}`;
-
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true });
-  }
-
-  console.log('Creating pillow images');
-
-  await Promise.all([
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-mockup-1275x1275.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(1275, 1275)
-        .jpeg()
-        .toBuffer(),
-    ),
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-4050x4050.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(4050, 4050)
-        .jpeg()
-        .toBuffer(),
-    ),
-  ]);
-}
-
-async function createFile(
+export async function createFile(
   baseDir: string,
   filename: string,
   resizedBuffer: Buffer,

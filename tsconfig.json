@@ -3,7 +3,7 @@
   "exclude": [
     "node_modules",
     "src/handlers/generate-mockups/*.ts",
-    "desk-mat-mockup.jsx"
+    "scripts/photoshop/desk-mat-mockup.jsx"
   ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */

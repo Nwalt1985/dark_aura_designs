@@ -1,11 +1,6 @@
 import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
-import {
-  dbTidy,
-  getBuffer,
-  getformattedDate,
-  getProductDetails,
-} from '../../helpers';
+import { dbTidy, getBuffer, getProductDetails } from '../../helpers';
 import { getUnlisted, updateListing } from '../../service/db';
 import {
   createNewProduct,
@@ -18,8 +13,9 @@ import { hideBin } from 'yargs/helpers';
 
 import dotenv from 'dotenv';
 import { generateListingConfig } from './listingConfig';
-import { BuildProductType, Product } from '../../models/types/listing';
+import { ProductName, Product, Marketplace } from '../../models/types/listing';
 import { StatusCodes } from 'http-status-codes';
+import { DateTime } from 'luxon';
 
 dotenv.config();
 
@@ -28,13 +24,19 @@ const parser = yargs(hideBin(process.argv))
     product: {
       type: 'string',
       description: 'Product type for the listing',
-      choices: Object.values(BuildProductType),
-      default: 'desk mat',
+      choices: Object.values(ProductName),
+      demandOption: true,
+    },
+    marketplace: {
+      type: 'string',
+      description: 'Marketplace for the listing',
+      choices: Object.values(Marketplace),
+      demandOption: true,
     },
     limit: {
       type: 'number',
       description: 'Limit the number of prompts',
-      default: 5,
+      default: 10,
     },
   })
   .strict()
@@ -44,7 +46,8 @@ const parser = yargs(hideBin(process.argv))
   try {
     const argv = parser.parseSync();
 
-    const product = getProductDetails(argv.product);
+    const product = getProductDetails(argv.product, argv.marketplace);
+
     const unlisted = await getUnlisted(product.name);
 
     if (!unlisted.length) {
@@ -138,9 +141,12 @@ export async function createPrintifyListingsData(
     print_areas: config.print_areas,
   };
 
-  await createNewProduct(data);
+  const productResponse = await createNewProduct(data, product.shopId);
 
-  await updateListing(unlisted.filename, product.name);
+  await updateListing(unlisted.filename, product.name, {
+    listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+    printifyProductId: productResponse.id,
+  });
 
   console.log('uploaded product');
 }

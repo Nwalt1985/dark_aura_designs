@@ -11,7 +11,14 @@ import {
   EtsyListingRequestSchema,
 } from '../../models/schemas/etsy';
 import { getAllActiveListings, updateEtsyListing } from '../../service/etsy';
-import { BuildProductType, DeskMatMaterials, PillowMaterials } from '../../models/types/listing';
+import {
+  ProductName,
+  DeskMatMaterials,
+  PillowMaterials,
+  BlanketMaterials,
+  WovenBlanketMaterials,
+} from '../../models/types/listing';
+import { StatusCodes } from 'http-status-codes';
 
 dotenv.config();
 
@@ -20,7 +27,7 @@ const parser = yargs(hideBin(process.argv))
     product: {
       type: 'string',
       description: 'Product type for the listing',
-      choices: Object.values(BuildProductType),
+      choices: Object.values(ProductName),
       default: 'desk mat',
     },
     limit: {
@@ -49,13 +56,21 @@ const parser = yargs(hideBin(process.argv))
     let shopSectionId: number = 0;
 
     switch (argv.product) {
-      case BuildProductType.DESK_MAT:
+      case ProductName.DESK_MAT:
         productTitleString = 'Desk Mat';
         materials = Object.values(DeskMatMaterials).join(',');
         break;
-      case BuildProductType.PILLOW:
+      case ProductName.PILLOW:
         productTitleString = 'Pillow';
         materials = Object.values(PillowMaterials).join(',');
+        break;
+      case ProductName.BLANKET:
+        productTitleString = 'Blanket';
+        materials = Object.values(BlanketMaterials).join(',');
+        break;
+      case ProductName.WOVEN_BLANKET:
+        productTitleString = 'Woven Blanket';
+        materials = Object.values(WovenBlanketMaterials).join(',');
         break;
     }
 
@@ -108,8 +123,22 @@ const parser = yargs(hideBin(process.argv))
       await updateEtsyListing(shopId, listing_id, title, data);
     }
     return;
-  } catch (error: any) {
-    console.error(error);
-    return;
+  } catch (err: any) {
+    let statusCode;
+    let message;
+
+    const error = err as Error;
+
+    switch (error.name) {
+      case 'ZodError':
+        statusCode = StatusCodes.BAD_REQUEST;
+        message = error.message;
+        break;
+      default:
+        statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+        message = error.message;
+    }
+
+    console.error({ name: error.name, statusCode, message, error });
   }
 })();

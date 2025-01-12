@@ -1,13 +1,18 @@
 import OpenAI from 'openai';
 import {
+  blanketGenericKeywords,
   deskMatgenericKeywords,
   pillowGenericKeywords,
+  wovenBlanketGenericKeywords,
 } from './genericKeywords';
 import { ProductName } from '../../models/types/listing';
 
 const openai = new OpenAI();
 
-function generateKeywordArray(keywords: string[], product: string): string[] {
+function generateKeywordArray(
+  keywords: string[],
+  product: string,
+): string[] | void {
   const selectedKeywords = new Set<string>();
 
   let genericKeywords: string[] = [];
@@ -19,34 +24,46 @@ function generateKeywordArray(keywords: string[], product: string): string[] {
     case ProductName.PILLOW:
       genericKeywords = pillowGenericKeywords;
       break;
+    case ProductName.BLANKET:
+      genericKeywords = blanketGenericKeywords;
+      break;
+    case ProductName.WOVEN_BLANKET:
+      genericKeywords = wovenBlanketGenericKeywords;
+      break;
   }
 
-  while (selectedKeywords.size < 5) {
-    const randomIndex = Math.floor(Math.random() * genericKeywords.length);
+  // First deduplicate the generic keywords
+  const uniqueGenericKeywords = Array.from(new Set(genericKeywords));
 
-    selectedKeywords.add(genericKeywords[randomIndex]);
+  // Check if we have enough unique keywords
+  const numKeywordsToAdd = Math.min(5, uniqueGenericKeywords.length);
+
+  while (selectedKeywords.size < numKeywordsToAdd) {
+    const randomIndex = Math.floor(
+      Math.random() * uniqueGenericKeywords.length,
+    );
+    selectedKeywords.add(uniqueGenericKeywords[randomIndex]);
   }
 
   return keywords.concat(Array.from(selectedKeywords));
 }
 
 export async function getImageData(image: string, type: ProductName) {
-  try {
-    let title;
-    let text;
-    const outputJsonTemplate = {
-      description: 'Description 1',
-      title: 'Title 1',
-      theme: 'Theme 1',
-      style: 'Style 1',
-      filename: 'Filename 1',
-      keywords: ['keyword1', 'keyword2', 'keyword3'],
-    };
+  let title;
+  let text;
+  const outputJsonTemplate = {
+    description: 'Description 1',
+    title: 'Title 1',
+    theme: 'Theme 1',
+    style: 'Style 1',
+    filename: 'Filename 1',
+    keywords: ['keyword1', 'keyword2', 'keyword3'],
+  };
 
-    switch (type) {
-      case ProductName.DESK_MAT:
-        title = '| XL Mouse Matt | Tech Accessories For Home And Office';
-        text = `Analyze this image and provide the following:
+  switch (type) {
+    case ProductName.DESK_MAT:
+      title = '| XL Mouse Matt | Tech Accessories For Home And Office';
+      text = `Analyze this image and provide the following:
 		
 			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the words 'Desk Mat'.
 			
@@ -67,18 +84,18 @@ export async function getImageData(image: string, type: ProductName) {
      		${outputJsonTemplate},
      	  
      	`;
-        break;
-      case ProductName.PILLOW:
-        title = '| Stylish Pillow | Accessories For Home And Office';
-        text = `Analyze this image and provide the following:
+      break;
+    case ProductName.PILLOW:
+      title = '| Witchy Pillow  | Gothic Homeware | Alternative Home Decor';
+      text = `Analyze this image and provide the following:
 		
-			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the words 'Pillow'.
+			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the word 'Pillow'.
 			
 			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters. Here are some example titles:
 
-			Modern Abstract Geometric Art Pillow | Blue & Cream Design Cushion | Stylish Pillow | Accessories For Home And Office
+			Modern Abstract Geometric Art Pillow | Blue & Cream Design Cushion | Witchy Pillow  | Gothic Homeware | Alternative Home Decor
 
-			Gothic Geometric Pillow | Abstract Design Cushion | Stylish Pillow | Accessories For Home And Office
+			Gothic Geometric Pillow | Abstract Design Cushion | Witchy Pillow  | Gothic Homeware | Alternative Home Decor
 				
 			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
 		
@@ -91,42 +108,93 @@ export async function getImageData(image: string, type: ProductName) {
      		${outputJsonTemplate},
      	  
      	`;
-        break;
-    }
+      break;
+    case ProductName.BLANKET:
+      title = '| Witchy Blanket | Gothic Homeware | Alternative Home Decor';
+      text = `Analyze this image and provide the following:
+		
+			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the word 'Blanket'.
+			
+			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters. Here are some example titles:
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: text ?? '',
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:image/jpeg;base64,${image}`,
-              },
-            },
-          ],
-        },
-      ],
-      max_tokens: 1000,
-      response_format: { type: 'json_object' },
-    });
+			Modern Abstract Geometric Art Blanket | Blue & Cream Design Cushion | Witchy Blanket  | Gothic Homeware | Alternative Home Decor
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+			Gothic Geometric Blanket | Abstract Design Cushion | Witchy Blanket | Gothic Homeware | Alternative Home Decor
+				
+			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
+		
+			Description: SEO-optimized Etsy description.
+		
+			Keywords: generate 8 SEO-optimized keywords related to the image.
+		
+    		Output the results in a JSON format. Structure the JSON as follows:
+		
+     		${outputJsonTemplate},
+     	  
+     	`;
+      break;
+    case ProductName.WOVEN_BLANKET:
+      title = '| Witchy Woven Blanket | Gothic Homeware For Home And Office';
+      text = `Analyze this image and provide the following:
+		
+			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the words 'Woven Blanket'.
+			
+			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters (IMPORTANT). Here are some example titles:
 
-    const keywordsWithGeneric = generateKeywordArray(result.keywords, type);
-    const resultWithGenericKeywords = {
-      ...result,
-      keywords: keywordsWithGeneric,
-    };
+			Modern Abstract Geometric Art Woven Blanket | Witchy Woven Throw | Gothic Homeware | Accessories For Home And Office
 
-    return resultWithGenericKeywords;
-  } catch (err) {
-    throw err;
+			Gothic Geometric Woven Blanket | Abstract Design Woven Throw | Witchy Woven Blanket | Accessories For Home And Office
+				
+			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
+		
+			Description: SEO-optimized Etsy description.
+		
+			Keywords: generate 8 SEO-optimized keywords related to the image.
+		
+    		Output the results in a JSON format. Structure the JSON as follows:
+		
+     		${outputJsonTemplate},
+     	  
+     	`;
+      break;
   }
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: text ?? '',
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:image/jpeg;base64,${image}`,
+            },
+          },
+        ],
+      },
+    ],
+    max_tokens: 1000,
+    response_format: { type: 'json_object' },
+  });
+
+  const result = JSON.parse(response.choices[0].message.content || '{}');
+
+  if (result.keywords && result.keywords.length === 0) {
+    console.log('No keywords generated');
+    return;
+  }
+
+  const keywordsWithGeneric = generateKeywordArray(result.keywords, type);
+
+  const resultWithGenericKeywords = {
+    ...result,
+    keywords: keywordsWithGeneric,
+  };
+
+  return resultWithGenericKeywords;
 }
