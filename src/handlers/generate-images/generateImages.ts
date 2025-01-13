@@ -40,7 +40,7 @@ export async function generateImagesFromRescale(
 
     if (imageData.title.length > 140) {
       console.log('Title is too long:', imageData.title);
-      return;
+      continue;
     }
 
     const fileName = file.replace('.png', '').replace('.jpg', '').toLowerCase();

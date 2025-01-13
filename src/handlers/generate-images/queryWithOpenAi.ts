@@ -62,16 +62,16 @@ export async function getImageData(image: string, type: ProductName) {
 
   switch (type) {
     case ProductName.DESK_MAT:
-      title = '| XL Mouse Matt | Tech Accessories For Home And Office';
+      title = '| XL Mouse Matt | Accessories For Home & Office';
       text = `Analyze this image and provide the following:
 		
 			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the words 'Desk Mat'.
 			
-			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters. Here are some example titles:
+			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. IMPORTANT: The title cannot be more than 140 characters. Here are some example titles:
 
-			Funky Geometric Art Desk Mat | Trendy Desk Decor | Vibrant Mouse Pad | XL Mouse Matt | Tech Accessories For Home And Office
+			Geometric Art Desk Mat | Trendy Desk Decor | XL Mouse Matt | Accessories For Home & Office
 
-			Modern Abstract Geometric Art Desk Mat | Blue & Cream Design Desk Pad | XL Mouse Matt | Tech Accessories For Home And Office
+			Abstract Geometric Art Desk Mat | XL Mouse Matt | Accessories For Home & Office
 				
 			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
 		
@@ -81,7 +81,7 @@ export async function getImageData(image: string, type: ProductName) {
 
     		Output the results in a JSON format. Structure the JSON as follows:
 		
-     		${outputJsonTemplate},
+     		${outputJsonTemplate}
      	  
      	`;
       break;
@@ -89,13 +89,13 @@ export async function getImageData(image: string, type: ProductName) {
       title = '| Witchy Pillow  | Gothic Homeware | Alternative Home Decor';
       text = `Analyze this image and provide the following:
 		
-			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the word 'Pillow'.
+			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the word 'Cushion'.
 			
 			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters. Here are some example titles:
 
-			Modern Abstract Geometric Art Pillow | Blue & Cream Design Cushion | Witchy Pillow  | Gothic Homeware | Alternative Home Decor
+			Modern Abstract Geometric Art Cushion | Witchy Pillow  | Gothic Homeware | Alternative Home Decor
 
-			Gothic Geometric Pillow | Abstract Design Cushion | Witchy Pillow  | Gothic Homeware | Alternative Home Decor
+			Gothic Geometric Cushion | Witchy Pillow  | Gothic Homeware | Alternative Home Decor
 				
 			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
 		
@@ -105,7 +105,7 @@ export async function getImageData(image: string, type: ProductName) {
 		
     		Output the results in a JSON format. Structure the JSON as follows:
 		
-     		${outputJsonTemplate},
+     		${outputJsonTemplate}
      	  
      	`;
       break;
@@ -117,9 +117,9 @@ export async function getImageData(image: string, type: ProductName) {
 			
 			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters. Here are some example titles:
 
-			Modern Abstract Geometric Art Blanket | Blue & Cream Design Cushion | Witchy Blanket  | Gothic Homeware | Alternative Home Decor
+			Geometric Art Blanket | Witchy Blanket  | Gothic Homeware | Alternative Home Decor
 
-			Gothic Geometric Blanket | Abstract Design Cushion | Witchy Blanket | Gothic Homeware | Alternative Home Decor
+			Gothic Geometric Blanket | Witchy Blanket | Gothic Homeware | Alternative Home Decor
 				
 			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
 		
@@ -129,7 +129,7 @@ export async function getImageData(image: string, type: ProductName) {
 		
     		Output the results in a JSON format. Structure the JSON as follows:
 		
-     		${outputJsonTemplate},
+     		${outputJsonTemplate}
      	  
      	`;
       break;
@@ -141,9 +141,9 @@ export async function getImageData(image: string, type: ProductName) {
 			
 			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters (IMPORTANT). Here are some example titles:
 
-			Modern Abstract Geometric Art Woven Blanket | Witchy Woven Throw | Gothic Homeware | Accessories For Home And Office
+			Geometric Art Woven Blanket | Witchy Woven Throw | Gothic Homeware | Accessories For Home & Office
 
-			Gothic Geometric Woven Blanket | Abstract Design Woven Throw | Witchy Woven Blanket | Accessories For Home And Office
+			Geometric Woven Blanket | Abstract Design Woven Throw | Witchy Woven Blanket | Accessories For Home & Office
 				
 			Filename: generate a concise filename with the structure "this_is_a_filename". Don't include the file format.
 		
@@ -153,7 +153,7 @@ export async function getImageData(image: string, type: ProductName) {
 		
     		Output the results in a JSON format. Structure the JSON as follows:
 		
-     		${outputJsonTemplate},
+     		${outputJsonTemplate}
      	  
      	`;
       break;

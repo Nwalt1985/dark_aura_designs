@@ -30,13 +30,13 @@ export const deskMatConfig = {
     },
     {
       id: 103806,
-      price: 3200,
+      price: 2500,
       is_enabled: true,
       is_default: false,
     },
     {
       id: 103807,
-      price: 2500,
+      price: 3200,
       is_enabled: true,
       is_default: true,
     },

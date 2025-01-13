@@ -49,20 +49,12 @@ export function getProductDetails(
       product.dimensions = '9450x4650';
       product.baseDir = path.resolve(
         process.env.HOME || '',
-<<<<<<< HEAD
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/desk_mats`, // Upload to NAS device
-=======
-        `/volumes/Shop Assets/Etsy/surface_aura_designs/assets/desk_mats`, // Upload to NAS device
->>>>>>> 67004d5260317ae47b2144e0d9dcb198fdf11d16
       );
       product.defaultDescription = deskMatDefaultDescription;
       product.rescale = path.resolve(
         process.env.HOME || '',
-<<<<<<< HEAD
         `Desktop/dark_aura_designs/rescale_desk_mats`,
-=======
-        `Desktop/surface_aura_designs/rescale`,
->>>>>>> 67004d5260317ae47b2144e0d9dcb198fdf11d16
       );
       product.shopId =
         marketplace === Marketplace.ETSY
@@ -76,20 +68,12 @@ export function getProductDetails(
       product.dimensions = '4050x4050';
       product.baseDir = path.resolve(
         process.env.HOME || '',
-<<<<<<< HEAD
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/pillows`,
-=======
-        `/volumes/Shop Assets/Etsy/surface_aura_designs/assets/pillows`, // Upload to NAS device
->>>>>>> 67004d5260317ae47b2144e0d9dcb198fdf11d16
       );
       product.defaultDescription = pillowDefaultDescription;
       product.rescale = path.resolve(
         process.env.HOME || '',
-<<<<<<< HEAD
         `Desktop/dark_aura_designs/rescale_pillows`,
-=======
-        `Desktop/surface_aura_designs/rescale`,
->>>>>>> 67004d5260317ae47b2144e0d9dcb198fdf11d16
       );
       product.shopId =
         marketplace === Marketplace.ETSY
@@ -313,93 +297,7 @@ export async function relocateRescaleImage(product: Product, fileName: string) {
   });
 }
 
-<<<<<<< HEAD
 export async function createFile(
-=======
-export async function resizeDeskmats(
-  buffer: string,
-  filename: string,
-  fileId: number,
-  baseDir: string,
-  formattedDate: string,
-): Promise<void> {
-  const directoryPath = `${baseDir}/${formattedDate}`;
-
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true });
-  }
-
-  await Promise.all([
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-mockup-2543x1254.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(2543, 1254)
-        .jpeg()
-        .toBuffer(),
-    ),
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-4320x3630.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(4320, 3630)
-        .jpeg()
-        .toBuffer(),
-    ),
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-7080x4140.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(7080, 4140)
-        .jpeg()
-        .toBuffer(),
-    ),
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-9450x4650.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(9450, 4650)
-        .jpeg()
-        .toBuffer(),
-    ),
-  ]);
-}
-
-export async function resizePillowImage(
-  buffer: string,
-  filename: string,
-  fileId: number,
-  baseDir: string,
-  formattedDate: string,
-): Promise<void> {
-  const directoryPath = `${baseDir}/${formattedDate}`;
-
-  if (!fs.existsSync(directoryPath)) {
-    fs.mkdirSync(directoryPath, { recursive: true });
-  }
-
-  await Promise.all([
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-mockup-1275x1275.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(1275, 1275)
-        .jpeg()
-        .toBuffer(),
-    ),
-    createFile(
-      directoryPath,
-      `${filename}-${fileId}-4050x4050.jpg`,
-      await sharp(Buffer.from(buffer, 'base64'))
-        .resize(4050, 4050)
-        .jpeg()
-        .toBuffer(),
-    ),
-  ]);
-}
-
-async function createFile(
->>>>>>> 67004d5260317ae47b2144e0d9dcb198fdf11d16
   baseDir: string,
   filename: string,
   resizedBuffer: Buffer,
