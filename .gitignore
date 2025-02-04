@@ -7,3 +7,4 @@ etsy_assets
 .env
 rescale_*/*
 completed_rescale/*
+templates

@@ -7,8 +7,9 @@ var templatePaths = [
 
 ];
 
-var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/dark_aura_designs/woven_blankets/');
-var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/dark_aura_designs/woven_blankets/mock_ups/'); // <---- Change to correct marketplace
+// var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/blanket_test/');
+var designFolderBasePath = Folder.decode('~/Desktop/blanket_test/');
+var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/blanket_test/mock_ups/'); // <---- Change to correct marketplace
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
@@ -32,7 +33,7 @@ function replaceSmartObject(newDesignPath) {
         function findSmartObjectsInGroup(group) {
             for (var i = 0; i < group.layers.length; i++) {
                 var layer = group.layers[i];
-                
+
                 // If this is a layer group/folder, search inside it
                 if (layer.typename === "LayerSet") {
                     findSmartObjectsInGroup(layer);
@@ -41,10 +42,14 @@ function replaceSmartObject(newDesignPath) {
                 else if (layer.typename === "ArtLayer" && layer.kind === LayerKind.SMARTOBJECT) {
                     var lowerName = layer.name.toLowerCase();
 
-                    if (lowerName.indexOf("design: blanket") !== -1 || 
-                        lowerName.indexOf("(auto) design: blanket") !== -1) {
-                        smartObjects.push(layer);
-                    }
+					alert('layer name:' + layer.name)
+					alert('layer type:' + layer.typename)
+					alert('layer kind:' + layer.kind)
+					alert('lower name:' + lowerName)
+
+                    if (lowerName.indexOf("rectangle 1") !== -1) {
+						smartObjects.push(layer)
+					}
                 }
             }
         }
@@ -81,6 +86,7 @@ function replaceSmartObject(newDesignPath) {
 // Function to check if the mockup already exists
 function mockupExists(exportFolder, fileName) {
     var saveFile = new File(exportFolder + "/" + fileName + ".jpg");
+	alert('Save file:' + saveFile)
     return saveFile.exists;
 }
 
@@ -90,56 +96,11 @@ function isValidDesignForTemplate(designFile, templatePath) {
 	var isPortrait = designFile.name.indexOf('_portrait') !== -1;
 
 	switch (templateName) {
-		case "woven_blanket_template_1.psd":
+		case "blanket_template_1.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
+				return designFile.name.indexOf('-mockup-rotated-1063x826') !== -1;
 			} else {
-				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
-			}
-		case "woven_blanket_template_2.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
-			}
-		case "woven_blanket_template_4.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-9601x8000') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-8000x9601') !== -1;
-			}
-		case "woven_blanket_template_5.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-cropped-9601x8000') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-cropped-8000x9601') !== -1;
-			}
-		case "woven_blanket_template_6.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
-			}
-		case "woven_blanket_template_7.psd":
-			return designFile.name.indexOf('-mockup-3613x3037') !== -1;
-
-		case "woven_blanket_template_9.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-rotated-1045x743') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-1045x743') !== -1;
-			}
-		case "woven_blanket_template_10.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-rotated-1314x1097') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-1314x1097') !== -1;
-			}
-		case "woven_blanket_template_11.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-rotated-1688x1263') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-1688x1263') !== -1;
+				return designFile.name.indexOf('-mockup-1063x826') !== -1;
 			}
 	}
     
@@ -163,7 +124,8 @@ function resetTemplate(templatePath) {
 
 // Function to process each design folder
 function processDesignFolder(designFolder, exportFolder, index, templatePath) {
-    var designFiles = designFolder.getFiles(/\d{4,4}x\d{4,4}/);
+    var designFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
+
 
     for (var i = 0; i < designFiles.length; i++) {
         var designFile = designFiles[i];
