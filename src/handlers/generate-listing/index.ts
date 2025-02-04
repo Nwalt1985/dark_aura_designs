@@ -136,7 +136,8 @@ export async function createPrintifyListingsData(
     description: unlisted.description,
     blueprint_id: config.blueprint_id,
     print_provider_id: config.print_provider_id,
-    tags: unlisted.keywords,
+    // tags: unlisted.keywords,
+    tags: [],
     variants: config.variants,
     print_areas: config.print_areas,
   };

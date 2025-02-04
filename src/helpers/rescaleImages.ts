@@ -97,7 +97,7 @@ export async function resizeBlanketImage(
     fs.mkdirSync(directoryPath, { recursive: true });
   }
 
-  if (filename.includes('-portrait')) {
+  if (filename.includes('_portrait')) {
     await Promise.all([
       createFile(
         directoryPath,
@@ -195,29 +195,32 @@ export async function resizeWovenBlanketImage(
     fs.mkdirSync(directoryPath, { recursive: true });
   }
 
-  if (filename.includes('-portrait')) {
+  if (filename.includes('_portrait')) {
     await Promise.all([
       createFile(
         directoryPath,
-        `${filename}-${fileId}-3552x4992.jpg`,
+        `${filename}-${fileId}-4992x3552.jpg`,
         await sharp(Buffer.from(buffer, 'base64'))
-          .resize(3552, 4992)
+          .rotate(270)
+          .resize(4992, 3552)
           .jpeg()
           .toBuffer(),
       ),
       createFile(
         directoryPath,
-        `${filename}-${fileId}-4800x5760.jpg`,
+        `${filename}-${fileId}-5760x4800.jpg`,
         await sharp(Buffer.from(buffer, 'base64'))
-          .resize(4800, 5760)
+          .rotate(270)
+          .resize(5760, 4800)
           .jpeg()
           .toBuffer(),
       ),
       createFile(
         directoryPath,
-        `${filename}-${fileId}-5760x7680.jpg`,
+        `${filename}-${fileId}-7680x5760.jpg`,
         await sharp(Buffer.from(buffer, 'base64'))
-          .resize(5760, 7680)
+          .rotate(270)
+          .resize(7680, 5760)
           .jpeg()
           .toBuffer(),
       ),

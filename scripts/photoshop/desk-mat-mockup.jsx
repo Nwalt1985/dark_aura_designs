@@ -3,9 +3,9 @@
 
 // Paths
 var templatePaths = [
-	Folder.decode('/volumes/Shop Assets/templates/desk_mat_templates/desk_mat_branding_mockup_2.psd'),
-	Folder.decode('/volumes/Shop Assets/templates/desk_mat_templates/desk_mat_branding_mockup_3.psd'),
-	Folder.decode('/volumes/Shop Assets/templates/desk_mat_templates/desk_mat_branding_mockup_4.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/desk_mat_templates/desk_mat_branding_mockup_2.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/desk_mat_templates/desk_mat_branding_mockup_3.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/desk_mat_templates/desk_mat_branding_mockup_4.psd'),
 ];
 
 var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/dark_aura_designs/desk_mats/');  // <---- Change to correct marketplace

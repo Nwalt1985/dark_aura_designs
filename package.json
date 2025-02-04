@@ -13,6 +13,8 @@
     "auth-server": "npx tsc && node ./.build/auth/etsy/server.js",
     "generate-all-rescale-etsy": "npm run generate-images -- --product='blanket' --marketplace='Etsy' && npm run generate-images -- --product='woven' --marketplace='Etsy' && npm run generate-images -- --product='pillow' --marketplace='Etsy' && npm run generate-images -- --product='desk mat' --marketplace='Etsy'",
     "generate-all-listings-etsy": "npm run generate-listings -- --product='blanket' --marketplace='Etsy' && npm run generate-listings -- --product='woven' --marketplace='Etsy' && npm run generate-listings -- --product='pillow' --marketplace='Etsy' && npm run generate-listings -- --product='desk mat' --marketplace='Etsy'",
+    "generate-all-rescale-shopify": "npm run generate-images -- --product='blanket' --marketplace='Shopify' && npm run generate-images -- --product='woven' --marketplace='Shopify' && npm run generate-images -- --product='pillow' --marketplace='Shopify' && npm run generate-images -- --product='desk mat' --marketplace='Shopify'",
+    "generate-all-listings-shopify": "npm run generate-listings -- --product='blanket' --marketplace='Shopify' && npm run generate-listings -- --product='woven' --marketplace='Shopify' && npm run generate-listings -- --product='pillow' --marketplace='Shopify' && npm run generate-listings -- --product='desk mat' --marketplace='Shopify'",
     "update-all": "npm run update-etsy -- --product='blanket' && npm run update-etsy -- --product='woven' && npm run update-etsy -- --product='pillow' && npm run update-etsy -- --product='desk mat'"
   },
   "engines": {

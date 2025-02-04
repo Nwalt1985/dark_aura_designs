@@ -50,6 +50,7 @@ export function getProductDetails(
       product.baseDir = path.resolve(
         process.env.HOME || '',
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/desk_mats`, // Upload to NAS device
+        // `Desktop/assets/${marketplace}/deskMats`,
       );
       product.defaultDescription = deskMatDefaultDescription;
       product.rescale = path.resolve(
@@ -69,6 +70,7 @@ export function getProductDetails(
       product.baseDir = path.resolve(
         process.env.HOME || '',
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/pillows`,
+        // `Desktop/assets/${marketplace}/pillows`,
       );
       product.defaultDescription = pillowDefaultDescription;
       product.rescale = path.resolve(
@@ -88,6 +90,7 @@ export function getProductDetails(
       product.baseDir = path.resolve(
         process.env.HOME || '',
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/blankets`,
+        // `Desktop/assets/${marketplace}/blankets`,
       );
       product.defaultDescription = blanketDefaultDescription;
       product.rescale = path.resolve(
@@ -107,6 +110,7 @@ export function getProductDetails(
       product.baseDir = path.resolve(
         process.env.HOME || '',
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/woven_blankets`,
+        // `Desktop/assets/${marketplace}/wovenBlankets`,
       );
       product.defaultDescription = wovenBlanketDefaultDescription;
       product.rescale = path.resolve(
@@ -151,20 +155,34 @@ export function getGeneratedFileNames(
     case 'blanket':
       return fileNameArray
         .filter((fileName) => {
-          if (fileName.includes('-8228x6260')) {
+          if (
+            fileName.includes('-8228x6260') ||
+            fileName.includes('-6260x8228')
+          ) {
             return fileName;
           }
         })
-        .map((fileName) => fileName.replace('-8228x6260', ''));
+        .map((fileName) =>
+          fileName.includes('-8228x6260')
+            ? fileName.replace('-8228x6260', '')
+            : fileName.replace('-6260x8228', ''),
+        );
 
     case 'woven':
       return fileNameArray
         .filter((fileName) => {
-          if (fileName.includes('-7680x5760')) {
+          if (
+            fileName.includes('-7680x5760') ||
+            fileName.includes('-5760x7680')
+          ) {
             return fileName;
           }
         })
-        .map((fileName) => fileName.replace('-7680x5760', ''));
+        .map((fileName) =>
+          fileName.includes('-7680x5760')
+            ? fileName.replace('-7680x5760', '')
+            : fileName.replace('-5760x7680', ''),
+        );
   }
 
   return [];
@@ -182,7 +200,7 @@ function assetFolder(directory: string): string[] {
       }
 
       fs.readdirSync(folderPath).forEach((file) => {
-        if (file.includes('.DS_Store')) {
+        if (file.includes('.DS_Store') || file.includes('._')) {
           return;
         }
         fileArray.push(file.replace('.jpg', ''));

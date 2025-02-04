@@ -45,6 +45,10 @@ function generateKeywordArray(
     selectedKeywords.add(uniqueGenericKeywords[randomIndex]);
   }
 
+  if (Array.from(selectedKeywords).length === 0) {
+    throw new Error('No keywords generated');
+  }
+
   return keywords.concat(Array.from(selectedKeywords));
 }
 
@@ -185,8 +189,7 @@ export async function getImageData(image: string, type: ProductName) {
   const result = JSON.parse(response.choices[0].message.content || '{}');
 
   if (result.keywords && result.keywords.length === 0) {
-    console.log('No keywords generated');
-    return;
+    throw new Error('No keywords generated');
   }
 
   const keywordsWithGeneric = generateKeywordArray(result.keywords, type);

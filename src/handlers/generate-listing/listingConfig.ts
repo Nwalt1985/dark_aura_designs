@@ -24,19 +24,19 @@ export const deskMatConfig = {
   variants: [
     {
       id: 81075,
-      price: 3800,
+      price: 4200,
       is_enabled: true,
       is_default: false,
     },
     {
       id: 103806,
-      price: 2500,
+      price: 3000,
       is_enabled: true,
       is_default: false,
     },
     {
       id: 103807,
-      price: 3200,
+      price: 3700,
       is_enabled: true,
       is_default: true,
     },
@@ -66,31 +66,31 @@ export const pillowConfig = {
   variants: [
     {
       id: 79311,
-      price: 4000,
-      is_enabled: true,
-      is_default: false,
-    },
-    {
-      id: 79312,
       price: 4500,
       is_enabled: true,
       is_default: false,
     },
     {
-      id: 79313,
+      id: 79312,
       price: 5000,
       is_enabled: true,
       is_default: false,
     },
     {
-      id: 79314,
+      id: 79313,
       price: 5500,
       is_enabled: true,
       is_default: false,
     },
     {
-      id: 79315,
+      id: 79314,
       price: 6000,
+      is_enabled: true,
+      is_default: false,
+    },
+    {
+      id: 79315,
+      price: 6500,
       is_enabled: true,
       is_default: true,
     },
@@ -110,19 +110,19 @@ export const BlanketConfig = {
   variants: [
     {
       id: 102314,
-      price: 3500,
+      price: 4000,
       is_enabled: true,
       is_default: false,
     },
     {
       id: 102315,
-      price: 4500,
+      price: 5000,
       is_enabled: true,
       is_default: false,
     },
     {
       id: 102316,
-      price: 5500,
+      price: 6000,
       is_enabled: true,
       is_default: true,
     },
@@ -151,37 +151,37 @@ export const WovenBlanketConfig = {
   blueprint_id: Number(process.env.WOVEN_BLANKET_PRINTIFY_BLUEPRINT_ID) || 0,
   variants: [
     {
-      id: 112794,
-      price: 8000,
+      id: 112797,
+      price: 8500,
       is_enabled: true,
       is_default: false,
     },
     {
-      id: 112795,
-      price: 9000,
+      id: 112798,
+      price: 9500,
       is_enabled: true,
       is_default: false,
     },
     {
-      id: 112796,
-      price: 12000,
+      id: 112799,
+      price: 12500,
       is_enabled: true,
       is_default: true,
     },
   ],
   print_areas: [
     {
-      variant_ids: [112796],
+      variant_ids: [112799],
       placeholders: [createPlaceholder()],
       background: '#ffffff',
     },
     {
-      variant_ids: [112795],
+      variant_ids: [112798],
       placeholders: [createPlaceholder()],
       background: '#ffffff',
     },
     {
-      variant_ids: [112794],
+      variant_ids: [112797],
       placeholders: [createPlaceholder()],
       background: '#ffffff',
     },
@@ -232,18 +232,21 @@ export function generateListingConfig(
       config = cloneDeep(BlanketConfig);
 
       config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('8228x6260'),
+        uploadedImagesArray.find(
+          (image) =>
+            image.response.file_name.includes('8228x6260')
         )!.response.id;
 
       config.print_areas[1].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('6299x5276'),
+        uploadedImagesArray.find(
+          (image) =>
+            image.response.file_name.includes('6299x5276')
         )!.response.id;
 
       config.print_areas[2].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('4252x3307'),
+        uploadedImagesArray.find(
+          (image) =>
+            image.response.file_name.includes('4252x3307')
         )!.response.id;
 
       return config;
@@ -252,18 +255,21 @@ export function generateListingConfig(
       config = cloneDeep(WovenBlanketConfig);
 
       config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('7680x5760'),
+        uploadedImagesArray.find(
+          (image) =>
+            image.response.file_name.includes('7680x5760') 
         )!.response.id;
 
       config.print_areas[1].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('5760x4800'),
+        uploadedImagesArray.find(
+          (image) =>
+            image.response.file_name.includes('5760x4800')
         )!.response.id;
 
       config.print_areas[2].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('4992x3552'),
+        uploadedImagesArray.find(
+          (image) =>
+            image.response.file_name.includes('4992x3552')
         )!.response.id;
 
       return config;

@@ -51,7 +51,7 @@ export const PrintifyProductUploadRequest = z.object({
   description: z.string(),
   blueprint_id: z.number(),
   print_provider_id: z.number(),
-  tags: z.array(z.string()).length(13),
+  tags: z.array(z.string()).max(13),
   variants: z.array(
     z.object({
       id: z.number(),

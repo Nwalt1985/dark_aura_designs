@@ -3,15 +3,8 @@
 
 // Paths
 var templatePaths = [
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_1.psd'), 
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_2.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_4.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_5.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_6.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_7.psd'),
-	// Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_9.psd'),
-	// Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_10.psd'),
-	// Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_11.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/blanket_template_1.psd'), 
+
 ];
 
 var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/dark_aura_designs/woven_blankets/');

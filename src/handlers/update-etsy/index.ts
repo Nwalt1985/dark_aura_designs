@@ -61,7 +61,7 @@ const parser = yargs(hideBin(process.argv))
         materials = Object.values(DeskMatMaterials).join(',');
         break;
       case ProductName.PILLOW:
-        productTitleString = 'Pillow';
+        productTitleString = 'Cushion';
         materials = Object.values(PillowMaterials).join(',');
         break;
       case ProductName.BLANKET:

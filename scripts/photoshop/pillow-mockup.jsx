@@ -3,16 +3,16 @@
 
 // Paths
 var templatePaths = [
-	Folder.decode('/volumes/Shop Assets/templates/pillow_templates/mockup_1.psd'),
-	Folder.decode('/volumes/Shop Assets/templates/pillow_templates/mockup_2.psd'),
-	Folder.decode('/volumes/Shop Assets/templates/pillow_templates/mockup_3.psd'),
-	Folder.decode('/volumes/Shop Assets/templates/pillow_templates/mockup_4.psd'),
-	// Folder.decode('/volumes/Shop Assets/templates/pillow_templates/mockup_5.psd'),
-	Folder.decode('/volumes/Shop Assets/templates/pillow_templates/mockup_6.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/pillow_templates/mockup_3.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/pillow_templates/mockup_4.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/pillow_templates/mockup_5.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/pillow_templates/mockup_6.psd'),
 ];
 
 var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/dark_aura_designs/pillows/');  // <---- Change to correct marketplace
+// var designFolderBasePath = Folder.decode('~/Desktop/assets/Shopify/pillows/');  // <---- Change to correct marketplace
 var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/dark_aura_designs/pillows/mock_ups/'); // <---- Change to correct marketplace
+// var exportFolderBasePath = Folder.decode('~/Desktop/assets/Shopify/pillows/mock_ups/'); // <---- Change to correct marketplace
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
