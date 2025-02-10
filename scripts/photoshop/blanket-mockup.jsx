@@ -4,12 +4,15 @@
 // Paths
 var templatePaths = [
 	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/blanket_template_1.psd'), 
-
+	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/blanket_portrait.psd'), 
+	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/blanket_landscape.psd'), 
+	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/person_holding_blanket.psd'), 
 ];
 
-// var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/blanket_test/');
-var designFolderBasePath = Folder.decode('~/Desktop/blanket_test/');
-var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/blanket_test/mock_ups/'); // <---- Change to correct marketplace
+var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/blanket/');
+// var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/test/');
+var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/blanket/mock_ups/'); // <---- Change to correct marketplace
+// var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/test/mock_ups/'); // <---- Change to correct marketplace
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
@@ -41,11 +44,6 @@ function replaceSmartObject(newDesignPath) {
                 // If this is a smart object, check if it matches our criteria
                 else if (layer.typename === "ArtLayer" && layer.kind === LayerKind.SMARTOBJECT) {
                     var lowerName = layer.name.toLowerCase();
-
-					alert('layer name:' + layer.name)
-					alert('layer type:' + layer.typename)
-					alert('layer kind:' + layer.kind)
-					alert('lower name:' + lowerName)
 
                     if (lowerName.indexOf("rectangle 1") !== -1) {
 						smartObjects.push(layer)
@@ -86,7 +84,6 @@ function replaceSmartObject(newDesignPath) {
 // Function to check if the mockup already exists
 function mockupExists(exportFolder, fileName) {
     var saveFile = new File(exportFolder + "/" + fileName + ".jpg");
-	alert('Save file:' + saveFile)
     return saveFile.exists;
 }
 
@@ -101,6 +98,24 @@ function isValidDesignForTemplate(designFile, templatePath) {
 				return designFile.name.indexOf('-mockup-rotated-1063x826') !== -1;
 			} else {
 				return designFile.name.indexOf('-mockup-1063x826') !== -1;
+			}
+		case "blanket_portrait.psd":
+			if (isPortrait) {
+				return designFile.name.indexOf('-mockup-826x1063') !== -1;
+			} else {
+				return designFile.name.indexOf('-mockup-rotated-826x1063') !== -1;
+			}
+		case "blanket_landscape.psd":
+			if (isPortrait) {
+				return designFile.name.indexOf('-mockup-826x1063') !== -1;
+			} else {
+				return designFile.name.indexOf('-mockup-1063x826.jpg') !== -1;
+			}
+		case "person_holding_blanket.psd":
+			if (isPortrait) {
+				return designFile.name.indexOf('-mockup-826x1063') !== -1;
+			} else {
+				return designFile.name.indexOf('-mockup-rotated-826x1063') !== -1;
 			}
 	}
     

@@ -3,19 +3,18 @@
 
 // Paths
 var templatePaths = [
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_1.psd'), 
+	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_1.psd'),
 	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_2.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_3.psd'),
 	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_4.psd'),
 	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_5.psd'),
 	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_6.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_7.psd'),
-	// Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_9.psd'),
-	// Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_10.psd'),
-	// Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_11.psd'),
 ];
 
-var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/dark_aura_designs/woven_blankets/');
-var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Etsy/dark_aura_designs/woven_blankets/mock_ups/'); // <---- Change to correct marketplace
+var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/woven_blankets/');
+// var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/test/');
+var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/woven_blankets/mock_ups/'); // <---- Change to correct marketplace
+// var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/test/mock_ups/'); // <---- Change to correct marketplace
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
@@ -105,48 +104,33 @@ function isValidDesignForTemplate(designFile, templatePath) {
 			}
 		case "woven_blanket_template_2.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
-			}
-		case "woven_blanket_template_4.psd":
-			if (isPortrait) {
 				return designFile.name.indexOf('-mockup-9601x8000') !== -1;
 			} else {
 				return designFile.name.indexOf('-mockup-8000x9601') !== -1;
 			}
-		case "woven_blanket_template_5.psd":
+		case "woven_blanket_template_3.psd":
 			if (isPortrait) {
 				return designFile.name.indexOf('-mockup-cropped-9601x8000') !== -1;
 			} else {
 				return designFile.name.indexOf('-mockup-cropped-8000x9601') !== -1;
 			}
-		case "woven_blanket_template_6.psd":
+		case "woven_blanket_template_4.psd":
 			if (isPortrait) {
 				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
 			} else {
 				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
 			}
-		case "woven_blanket_template_7.psd":
-			return designFile.name.indexOf('-mockup-3613x3037') !== -1;
-
-		case "woven_blanket_template_9.psd":
+		case "woven_blanket_template_5.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-rotated-1045x743') !== -1;
+				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
 			} else {
-				return designFile.name.indexOf('-mockup-1045x743') !== -1;
+				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
 			}
-		case "woven_blanket_template_10.psd":
+		case "woven_blanket_template_6.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-rotated-1314x1097') !== -1;
+				return designFile.name.indexOf('-mockup-rotated-3613x3037') !== -1;
 			} else {
-				return designFile.name.indexOf('-mockup-1314x1097') !== -1;
-			}
-		case "woven_blanket_template_11.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-rotated-1688x1263') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-1688x1263') !== -1;
+				return designFile.name.indexOf('-mockup-3613x3037') !== -1;
 			}
 	}
     
@@ -170,7 +154,7 @@ function resetTemplate(templatePath) {
 
 // Function to process each design folder
 function processDesignFolder(designFolder, exportFolder, index, templatePath) {
-    var designFiles = designFolder.getFiles(/\d{4,4}x\d{4,4}/);
+    var designFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
 
     for (var i = 0; i < designFiles.length; i++) {
         var designFile = designFiles[i];
@@ -205,7 +189,7 @@ function saveMockupAsJPEG(exportPath, fileName) {
     var saveFile = new File(exportPath + "/" + fileName + ".jpg"); // Change extension to .jpg
 
     var jpegOptions = new JPEGSaveOptions();
-    jpegOptions.quality = 6; // Set maximum quality (1 to 12, where 12 is the highest)
+    jpegOptions.quality = 5; // Set maximum quality (1 to 12, where 12 is the highest)
 
     activeDocument.saveAs(saveFile, jpegOptions, true, Extension.LOWERCASE);
 }
