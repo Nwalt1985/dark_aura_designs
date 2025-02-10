@@ -6,5 +6,5 @@ node_modules
 etsy_assets
 .env
 rescale_*/*
-completed_rescale/*
+completed_*/*
 templates
