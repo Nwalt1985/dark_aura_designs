@@ -266,6 +266,14 @@ export async function resizeWovenBlanketImage(
       ),
       createFile(
         directoryPath,
+        `${filename}-${fileId}-mockup-9601x8000.jpg`,
+        await sharp(Buffer.from(buffer, 'base64'))
+          .resize(9601, 8000)
+          .jpeg()
+          .toBuffer(),
+      ),
+      createFile(
+        directoryPath,
         `${filename}-${fileId}-mockup-rotated-3613x3037.jpg`,
         await sharp(Buffer.from(buffer, 'base64'))
           .rotate(90)
@@ -275,18 +283,13 @@ export async function resizeWovenBlanketImage(
       ),
       createFile(
         directoryPath,
-        `${filename}-${fileId}-mockup-cropped-9601x8000.jpg`,
+        `${filename}-${fileId}-mockup-cropped-4290x2910.jpg`,
         await sharp(Buffer.from(buffer, 'base64'))
-          .resize(9601, 8000)
-          .extract({ left: 0, top: 0, width: 4290, height: 2910 })
-          .jpeg()
-          .toBuffer(),
-      ),
-      createFile(
-        directoryPath,
-        `${filename}-${fileId}-mockup-9601x8000.jpg`,
-        await sharp(Buffer.from(buffer, 'base64'))
-          .resize(9601, 8000)
+          .resize(11520, 15360, {
+            fit: 'cover',
+            position: 'north',
+          })
+          .extract({ left: 7200, top: 0, width: 4290, height: 2910 })
           .jpeg()
           .toBuffer(),
       ),
@@ -331,6 +334,14 @@ export async function resizeWovenBlanketImage(
       ),
       createFile(
         directoryPath,
+        `${filename}-${fileId}-mockup-8000x9601.jpg`,
+        await sharp(Buffer.from(buffer, 'base64'))
+          .resize(8000, 9601)
+          .jpeg()
+          .toBuffer(),
+      ),
+      createFile(
+        directoryPath,
         `${filename}-${fileId}-mockup-rotated-2868x3442.jpg`,
         await sharp(Buffer.from(buffer, 'base64'))
           .rotate(90)
@@ -340,18 +351,13 @@ export async function resizeWovenBlanketImage(
       ),
       createFile(
         directoryPath,
-        `${filename}-${fileId}-mockup-cropped-8000x9601.jpg`,
+        `${filename}-${fileId}-mockup-cropped-4290x2910.jpg`,
         await sharp(Buffer.from(buffer, 'base64'))
-          .resize(8000, 9601)
-          .extract({ left: 0, top: 0, width: 4290, height: 2910 })
-          .jpeg()
-          .toBuffer(),
-      ),
-      createFile(
-        directoryPath,
-        `${filename}-${fileId}-mockup-8000x9601.jpg`,
-        await sharp(Buffer.from(buffer, 'base64'))
-          .resize(8000, 9601)
+          .resize(15360, 11520, {
+            fit: 'cover',
+            position: 'north',
+          })
+          .extract({ left: 11000, top: 0, width: 4290, height: 2910 })
           .jpeg()
           .toBuffer(),
       ),

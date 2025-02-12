@@ -7,13 +7,10 @@ import {
   PrintifyProductUploadRequest,
 } from '../models/schemas/printify';
 import dotenv from 'dotenv';
-import { Marketplace } from '../models/types/listing';
 
 dotenv.config();
 
 const printifyApiKey = process.env.PRINTIFY_API_KEY || '';
-const darkAuraEtsyShopId = process.env.DARK_AURA_ETSY_SHOP_ID || '';
-const darkAuraShopifyShopId = process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
 
 export async function uploadImages(buffer: Buffer, filename: string) {
   const { data } = await axios.post<PrintifyImageResponseType>(

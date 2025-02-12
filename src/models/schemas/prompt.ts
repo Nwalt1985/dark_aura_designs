@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 export const PromptResponse = z.object({
+  productType: z.string(),
   prompt: z.string(),
   description: z.string(),
   theme: z.string(),

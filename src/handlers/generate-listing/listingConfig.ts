@@ -104,6 +104,50 @@ export const pillowConfig = {
   ],
 };
 
+export const pillowCoverConfig = {
+  print_provider_id: Number(process.env.PILLOW_CASE_PRINT_PROVIDER_ID) || 0,
+  blueprint_id: Number(process.env.PILLOW_CASE_PRINTIFY_BLUEPRINT_ID) || 0,
+  variants: [
+    {
+      id: 79394,
+      price: 1520,
+      is_enabled: true,
+      is_default: false,
+    },
+    {
+      id: 79395,
+      price: 1575,
+      is_enabled: true,
+      is_default: false,
+    },
+    {
+      id: 79396,
+      price: 1848,
+      is_enabled: true,
+      is_default: false,
+    },
+    {
+      id: 79397,
+      price: 2370,
+      is_enabled: true,
+      is_default: false,
+    },
+    {
+      id: 79398,
+      price: 2258,
+      is_enabled: true,
+      is_default: true,
+    },
+  ],
+  print_areas: [
+    {
+      variant_ids: [79394, 79395, 79396, 79397, 79398],
+      placeholders: [createPlaceholder()],
+      background: '#000000',
+    },
+  ],
+};
+
 export const BlanketConfig = {
   print_provider_id: Number(process.env.BLANKET_PRINT_PROVIDER_ID) || 0,
   blueprint_id: Number(process.env.BLANKET_PRINTIFY_BLUEPRINT_ID) || 0,
@@ -218,6 +262,15 @@ export function generateListingConfig(
 
       return config;
 
+    case ProductName.PILLOW_COVER:
+      config = cloneDeep(pillowCoverConfig);
+
+      config.print_areas[0].placeholders[0].images[0].id =
+        uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('4050x4050'),
+        )!.response.id;
+
+      return config;
     case ProductName.PILLOW:
       config = cloneDeep(pillowConfig);
 
@@ -232,21 +285,18 @@ export function generateListingConfig(
       config = cloneDeep(BlanketConfig);
 
       config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find(
-          (image) =>
-            image.response.file_name.includes('8228x6260')
+        uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('8228x6260'),
         )!.response.id;
 
       config.print_areas[1].placeholders[0].images[0].id =
-        uploadedImagesArray.find(
-          (image) =>
-            image.response.file_name.includes('6299x5276')
+        uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('6299x5276'),
         )!.response.id;
 
       config.print_areas[2].placeholders[0].images[0].id =
-        uploadedImagesArray.find(
-          (image) =>
-            image.response.file_name.includes('4252x3307')
+        uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('4252x3307'),
         )!.response.id;
 
       return config;
@@ -255,21 +305,18 @@ export function generateListingConfig(
       config = cloneDeep(WovenBlanketConfig);
 
       config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find(
-          (image) =>
-            image.response.file_name.includes('7680x5760') 
+        uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('7680x5760'),
         )!.response.id;
 
       config.print_areas[1].placeholders[0].images[0].id =
-        uploadedImagesArray.find(
-          (image) =>
-            image.response.file_name.includes('5760x4800')
+        uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('5760x4800'),
         )!.response.id;
 
       config.print_areas[2].placeholders[0].images[0].id =
-        uploadedImagesArray.find(
-          (image) =>
-            image.response.file_name.includes('4992x3552')
+        uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('4992x3552'),
         )!.response.id;
 
       return config;

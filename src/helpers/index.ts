@@ -33,13 +33,18 @@ export function getProductDetails(
   marketplace: Marketplace,
 ): Product {
   let product: Product = {
-    name: ProductName.DESK_MAT || ProductName.PILLOW,
+    name:
+      ProductName.DESK_MAT ||
+      ProductName.PILLOW ||
+      ProductName.BLANKET ||
+      ProductName.WOVEN_BLANKET,
     title: '',
     dimensions: '',
     baseDir: '',
     defaultDescription: '',
     rescale: '',
     shopId: '',
+    completedRescalePath: '',
   };
 
   switch (arg) {
@@ -56,6 +61,10 @@ export function getProductDetails(
       product.rescale = path.resolve(
         process.env.HOME || '',
         `Desktop/dark_aura_designs/rescale_desk_mats`,
+      );
+      product.completedRescalePath = path.resolve(
+        process.env.HOME || '',
+        `Desktop/dark_aura_designs/completed_desk_mats`,
       );
       product.shopId =
         marketplace === Marketplace.ETSY
@@ -77,6 +86,10 @@ export function getProductDetails(
         process.env.HOME || '',
         `Desktop/dark_aura_designs/rescale_pillows`,
       );
+      product.completedRescalePath = path.resolve(
+        process.env.HOME || '',
+        `Desktop/dark_aura_designs/completed_pillows`,
+      );
       product.shopId =
         marketplace === Marketplace.ETSY
           ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
@@ -96,6 +109,10 @@ export function getProductDetails(
       product.rescale = path.resolve(
         process.env.HOME || '',
         `Desktop/dark_aura_designs/rescale_blankets`,
+      );
+      product.completedRescalePath = path.resolve(
+        process.env.HOME || '',
+        `Desktop/dark_aura_designs/completed_blankets`,
       );
       product.shopId =
         marketplace === Marketplace.ETSY
@@ -117,6 +134,10 @@ export function getProductDetails(
         process.env.HOME || '',
         `Desktop/dark_aura_designs/rescale_woven_blankets`,
       );
+      product.completedRescalePath = path.resolve(
+        process.env.HOME || '',
+        `Desktop/dark_aura_designs/completed_woven_blankets`,
+      );
       product.shopId =
         marketplace === Marketplace.ETSY
           ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
@@ -134,7 +155,7 @@ export function getGeneratedFileNames(
   const fileNameArray = assetFolder(dir);
 
   switch (productType) {
-    case 'desk mat':
+    case ProductName.DESK_MAT:
       return fileNameArray
         .filter((fileName) => {
           if (fileName.includes('-9450x4650')) {
@@ -143,7 +164,7 @@ export function getGeneratedFileNames(
         })
         .map((fileName) => fileName.replace('-9450x4650', ''));
 
-    case 'pillow':
+    case ProductName.PILLOW:
       return fileNameArray
         .filter((fileName) => {
           if (fileName.includes('-4050x4050')) {
@@ -152,7 +173,7 @@ export function getGeneratedFileNames(
         })
         .map((fileName) => fileName.replace('-4050x4050', ''));
 
-    case 'blanket':
+    case ProductName.BLANKET:
       return fileNameArray
         .filter((fileName) => {
           if (
@@ -168,7 +189,7 @@ export function getGeneratedFileNames(
             : fileName.replace('-6260x8228', ''),
         );
 
-    case 'woven':
+    case ProductName.WOVEN_BLANKET:
       return fileNameArray
         .filter((fileName) => {
           if (
@@ -293,7 +314,7 @@ function extractImageId(filename: string): string | null {
 
 export async function relocateRescaleImage(product: Product, fileName: string) {
   const rescaleDir = product.rescale;
-  const completedDir = path.resolve(rescaleDir, '../completed_rescale');
+  const completedDir = product.completedRescalePath;
 
   // Create completed_rescale directory if it doesn't exist
   if (!fs.existsSync(completedDir)) {

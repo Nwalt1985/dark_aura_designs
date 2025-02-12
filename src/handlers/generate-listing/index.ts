@@ -129,25 +129,82 @@ export async function createPrintifyListingsData(
     }
   }
 
-  const config = generateListingConfig(uploadedImagesArray, product.name);
+  if (product.name === ProductName.PILLOW) {
+    const pillowCoverConfig = generateListingConfig(
+      uploadedImagesArray,
+      ProductName.PILLOW_COVER,
+    );
 
-  const data = {
-    title: unlisted.title,
-    description: unlisted.description,
-    blueprint_id: config.blueprint_id,
-    print_provider_id: config.print_provider_id,
-    // tags: unlisted.keywords,
-    tags: [],
-    variants: config.variants,
-    print_areas: config.print_areas,
-  };
+    const pillowConfig = generateListingConfig(
+      uploadedImagesArray,
+      ProductName.PILLOW,
+    );
 
-  const productResponse = await createNewProduct(data, product.shopId);
+    const pillowData = {
+      title: unlisted.title,
+      description: unlisted.description,
+      blueprint_id: pillowConfig.blueprint_id,
+      print_provider_id: pillowConfig.print_provider_id,
+      tags: [],
+      variants: pillowConfig.variants,
+      print_areas: pillowConfig.print_areas,
+    };
 
-  await updateListing(unlisted.filename, product.name, {
-    listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
-    printifyProductId: productResponse.id,
-  });
+    const pillowCoverData = {
+      title: unlisted.title.replace('Cushion', 'Cushion Cover'),
+      description: unlisted.description,
+      blueprint_id: pillowCoverConfig.blueprint_id,
+      print_provider_id: pillowCoverConfig.print_provider_id,
+      tags: [],
+      variants: pillowCoverConfig.variants,
+      print_areas: pillowCoverConfig.print_areas,
+    };
 
-  console.log('uploaded product');
+    const productResponse = await createNewProduct(pillowData, product.shopId);
+    const productResponseCover = await createNewProduct(
+      pillowCoverData,
+      product.shopId,
+    );
+
+    if (productResponse.id) {
+      await updateListing(unlisted.filename, ProductName.PILLOW, {
+        listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+        printifyProductId: productResponse.id,
+      });
+    } else {
+      console.log('failed to create pillow product');
+    }
+
+    if (productResponseCover.id) {
+      await updateListing(unlisted.filename, ProductName.PILLOW_COVER, {
+        listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+        printifyProductId: productResponseCover.id,
+      });
+    } else {
+      console.log('failed to create pillow cover product');
+    }
+
+    console.log('uploaded product & variant');
+  } else {
+    const config = generateListingConfig(uploadedImagesArray, product.name);
+
+    const data = {
+      title: unlisted.title,
+      description: unlisted.description,
+      blueprint_id: config.blueprint_id,
+      print_provider_id: config.print_provider_id,
+      tags: [],
+      variants: config.variants,
+      print_areas: config.print_areas,
+    };
+
+    const productResponse = await createNewProduct(data, product.shopId);
+
+    await updateListing(unlisted.filename, product.name, {
+      listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+      printifyProductId: productResponse.id,
+    });
+
+    console.log('uploaded product');
+  }
 }

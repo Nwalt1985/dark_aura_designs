@@ -3,6 +3,7 @@ export enum ProductName {
   PILLOW = 'pillow',
   BLANKET = 'blanket',
   WOVEN_BLANKET = 'woven',
+  PILLOW_COVER = 'pillow cover',
 }
 
 export enum Marketplace {
@@ -18,6 +19,7 @@ export type Product = {
   defaultDescription: string;
   rescale: string;
   shopId: string;
+  completedRescalePath: string;
 };
 
 export type DallEPromptInput = {

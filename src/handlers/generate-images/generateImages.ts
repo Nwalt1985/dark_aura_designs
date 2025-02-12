@@ -50,7 +50,7 @@ export async function generateImagesFromRescale(
       productType: product.name,
       filename: `${fileName}-${fileId}`,
       description: `${imageData.description}
-			  ${product.defaultDescription}`,
+				  ${product.defaultDescription}`,
     };
 
     await createDBListing([dbData]);

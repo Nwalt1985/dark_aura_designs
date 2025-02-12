@@ -110,9 +110,9 @@ function isValidDesignForTemplate(designFile, templatePath) {
 			}
 		case "woven_blanket_template_3.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-cropped-9601x8000') !== -1;
+				return designFile.name.indexOf('-mockup-cropped-4290x2910') !== -1;
 			} else {
-				return designFile.name.indexOf('-mockup-cropped-8000x9601') !== -1;
+				return designFile.name.indexOf('-mockup-cropped-4290x2910') !== -1;
 			}
 		case "woven_blanket_template_4.psd":
 			if (isPortrait) {

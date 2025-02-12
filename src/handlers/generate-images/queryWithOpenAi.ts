@@ -90,10 +90,10 @@ export async function getImageData(image: string, type: ProductName) {
      	`;
       break;
     case ProductName.PILLOW:
-      title = '| Witchy Pillow  | Gothic Homeware | Alternative Home Decor';
+      title = `| Witchy Cushion | Gothic Homeware | Alternative Home Decor`;
       text = `Analyze this image and provide the following:
 		
-			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the word 'Cushion'.
+			Title: generate a keyword-rich 140-character title. The format should be descritption 1 | description 2 | description 3 etc. Description 1 should end with the word Cushion.
 			
 			The title should contain the following default text ${title}. The title can not contain the characters %,&,: more than once. The title cannot be more than 140 characters. Here are some example titles:
 
