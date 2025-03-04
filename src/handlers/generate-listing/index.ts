@@ -46,6 +46,7 @@ void (async (): Promise<void> => {
 
     if (!unlisted.length) {
       Logger.info('No unlisted listings to create');
+      process.exit(0);
       return;
     }
 
@@ -58,6 +59,8 @@ void (async (): Promise<void> => {
     for (const item of limitedData) {
       await createPrintifyListingsData(item, uploadedImages, product);
     }
+
+    process.exit(0);
   } catch (error: unknown) {
     const handledError = handleError(error);
     Logger.error(handledError);
@@ -114,6 +117,8 @@ export async function createPrintifyListingsData(
       );
       const pillowConfig = generateListingConfig(uploadedImagesArray, ProductName.PILLOW);
 
+      const pillowCoverTitle = 'VARIATION ' + unlisted.title.replace('Cushion', 'Cushion Cover');
+
       const [productResponse, productResponseCover] = await Promise.all([
         createNewProduct(
           {
@@ -129,7 +134,7 @@ export async function createPrintifyListingsData(
         ),
         createNewProduct(
           {
-            title: `VARIATION ${unlisted.title.replace('Cushion', 'Cushion Cover')}`,
+            title: pillowCoverTitle,
             description: unlisted.description,
             blueprint_id: pillowCoverConfig.blueprint_id,
             print_provider_id: pillowCoverConfig.print_provider_id,
@@ -149,16 +154,10 @@ export async function createPrintifyListingsData(
         throw new ExternalServiceError('Failed to create pillow cover product');
       }
 
-      await Promise.all([
-        updateListing(unlisted.filename, ProductName.PILLOW, {
-          listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
-          printifyProductId: productResponse.id,
-        }),
-        updateListing(unlisted.filename, ProductName.PILLOW_COVER, {
-          listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
-          printifyProductId: productResponseCover.id,
-        }),
-      ]);
+      await updateListing(unlisted.filename, ProductName.PILLOW, {
+        listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+        printifyProductId: productResponse.id,
+      });
 
       Logger.info('Uploaded product & variant');
       return;

@@ -47,7 +47,8 @@ async function executeDbOperation<T>(
     if (session) {
       await session.endSession();
     }
-    await client.close();
+    // Don't close the client after each operation
+    // await client.close();
   }
 }
 
@@ -138,7 +139,7 @@ export async function updateListing(
       }
     },
     'Failed to update listing',
-    true,
+    false,
   );
 }
 
