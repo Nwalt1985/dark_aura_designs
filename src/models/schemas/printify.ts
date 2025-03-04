@@ -28,9 +28,7 @@ export const PrintifyGetUploadsResponse = z.object({
   total: z.number(),
 });
 
-export type PrintifyGetUploadsResponseType = z.infer<
-  typeof PrintifyGetUploadsResponse
->;
+export type PrintifyGetUploadsResponseType = z.infer<typeof PrintifyGetUploadsResponse>;
 
 export const PrintifyProduct = z.object({
   title: z.string(),
@@ -83,9 +81,7 @@ export const PrintifyProductUploadRequest = z.object({
   ),
 });
 
-export type PrintifyProductUploadRequestType = z.infer<
-  typeof PrintifyProductUploadRequest
->;
+export type PrintifyProductUploadRequestType = z.infer<typeof PrintifyProductUploadRequest>;
 
 export const PrintifyProductUploadResponse = z.object({
   id: z.string(),
@@ -172,6 +168,4 @@ export const PrintifyProductUploadResponse = z.object({
   sales_channel_properties: z.array(z.unknown()),
 });
 
-export type PrintifyProductUploadResponseType = z.infer<
-  typeof PrintifyProductUploadResponse
->;
+export type PrintifyProductUploadResponseType = z.infer<typeof PrintifyProductUploadResponse>;

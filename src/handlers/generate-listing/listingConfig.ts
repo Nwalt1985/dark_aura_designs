@@ -5,7 +5,10 @@ import { cloneDeep } from 'lodash';
 
 dotenv.config();
 
-const createPlaceholder = () => ({
+const createPlaceholder = (): {
+  position: string;
+  images: Array<{ id: string; x: number; y: number; scale: number; angle: number }>;
+} => ({
   position: 'front',
   images: [
     {
@@ -237,87 +240,81 @@ export function generateListingConfig(
     fileId: string | null;
     response: PrintifyImageResponseType;
   }[],
-  productType: string,
-) {
+  productType: ProductName,
+):
+  | typeof deskMatConfig
+  | typeof pillowConfig
+  | typeof pillowCoverConfig
+  | typeof BlanketConfig
+  | typeof WovenBlanketConfig {
   let config;
 
   switch (productType) {
     case ProductName.DESK_MAT:
       config = cloneDeep(deskMatConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('9450x4650'),
-        )!.response.id;
+      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('9450x4650'),
+      )!.response.id;
 
-      config.print_areas[1].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('4320x3630'),
-        )!.response.id;
+      config.print_areas[1].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('4320x3630'),
+      )!.response.id;
 
-      config.print_areas[2].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('7080x4140'),
-        )!.response.id;
+      config.print_areas[2].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('7080x4140'),
+      )!.response.id;
 
       return config;
 
     case ProductName.PILLOW_COVER:
       config = cloneDeep(pillowCoverConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('4050x4050'),
-        )!.response.id;
+      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('4050x4050'),
+      )!.response.id;
 
       return config;
     case ProductName.PILLOW:
       config = cloneDeep(pillowConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('4050x4050'),
-        )!.response.id;
+      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('4050x4050'),
+      )!.response.id;
 
       return config;
 
     case ProductName.BLANKET:
       config = cloneDeep(BlanketConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('8228x6260'),
-        )!.response.id;
+      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('8228x6260'),
+      )!.response.id;
 
-      config.print_areas[1].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('6299x5276'),
-        )!.response.id;
+      config.print_areas[1].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('6299x5276'),
+      )!.response.id;
 
-      config.print_areas[2].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('4252x3307'),
-        )!.response.id;
+      config.print_areas[2].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('4252x3307'),
+      )!.response.id;
 
       return config;
 
     case ProductName.WOVEN_BLANKET:
       config = cloneDeep(WovenBlanketConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('7680x5760'),
-        )!.response.id;
+      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('7680x5760'),
+      )!.response.id;
 
-      config.print_areas[1].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('5760x4800'),
-        )!.response.id;
+      config.print_areas[1].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('5760x4800'),
+      )!.response.id;
 
-      config.print_areas[2].placeholders[0].images[0].id =
-        uploadedImagesArray.find((image) =>
-          image.response.file_name.includes('4992x3552'),
-        )!.response.id;
+      config.print_areas[2].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
+        image.response.file_name.includes('4992x3552'),
+      )!.response.id;
 
       return config;
 

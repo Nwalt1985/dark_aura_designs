@@ -1,7 +1,20 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
+import crypto, { BinaryLike } from 'crypto';
 import { updateEtsyAuthCredentials } from '../../service/db';
+import { isTokenResponse } from './types';
+
+interface CodeChallengeResult {
+  codeChallenge: string;
+  codeVerifier: string;
+  state: string;
+  fullUrl: string;
+}
+
+interface EtsyErrorResponse {
+  error: string;
+  error_description?: string;
+}
 
 dotenv.config();
 
@@ -9,13 +22,13 @@ dotenv.config();
 const app = express();
 
 const challenge = codeChallenge();
-console.log(challenge);
+process.stdout.write(`${JSON.stringify(challenge, null, 2)}\n`);
 
 app.set('view engine', 'hbs');
 app.set('views', `${process.cwd()}/src/auth/etsy/views`);
 
 // This renders our `index.hbs` file.
-app.get('/', async (req, res) => {
+app.get('/', (req, res) => {
   res.render('index', {
     fullUrl: challenge.fullUrl,
   });
@@ -30,10 +43,7 @@ app.get('/ping', async (req, res) => {
     },
   };
 
-  const response = await fetch(
-    'https://api.etsy.com/v3/application/openapi-ping',
-    requestOptions,
-  );
+  const response = await fetch('https://api.etsy.com/v3/application/openapi-ping', requestOptions);
 
   if (response.ok) {
     const data = await response.json();
@@ -71,8 +81,12 @@ app.get('/oauth/redirect', async (req, res) => {
 
   // Extract the access token from the response access_token data field
   if (response.ok) {
-    const tokenData = (await response.json()) as TokenResponse;
-    console.log('Token Data:', tokenData);
+    const data = await response.json();
+    if (!isTokenResponse(data)) {
+      throw new Error('Invalid token response from Etsy');
+    }
+    const tokenData = data;
+    process.stdout.write(`Token Data: ${JSON.stringify(tokenData, null, 2)}\n`);
 
     await updateEtsyAuthCredentials({
       accessToken: tokenData.access_token,
@@ -89,23 +103,19 @@ app.get('/oauth/redirect', async (req, res) => {
 const port = 3003;
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+  process.stdout.write(`Example app listening at http://localhost:${port}\n`);
 });
 
-function codeChallenge() {
+function codeChallenge(): CodeChallengeResult {
   // The next two functions help us generate the code challenge
-  // required by Etsy’s OAuth implementation.
-  const base64URLEncode = (str: any) =>
-    str
-      .toString('base64')
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=/g, '');
+  // required by Etsy's OAuth implementation.
+  const base64URLEncode = (str: Buffer): string =>
+    str.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
-  const sha256 = (buffer: Buffer) =>
+  const sha256 = (buffer: BinaryLike): Buffer =>
     crypto.createHash('sha256').update(buffer).digest();
 
-  // We’ll use the verifier to generate the challenge.
+  // We'll use the verifier to generate the challenge.
   // The verifier needs to be saved for a future step in the OAuth flow.
   const codeVerifier = base64URLEncode(crypto.randomBytes(32));
 
@@ -124,12 +134,12 @@ function codeChallenge() {
   };
 }
 
-async function logError(response: any) {
+async function logError(response: Response): Promise<EtsyErrorResponse> {
   // Log http status to the console
-  console.log(response.status, response.statusText);
+  process.stderr.write(`${response.status} ${response.statusText}\n`);
 
   // For non-500 errors, the endpoints return a JSON object as an error response
-  const errorData = await response.json();
-  console.log(errorData);
+  const errorData = (await response.json()) as EtsyErrorResponse;
+  process.stderr.write(`${JSON.stringify(errorData, null, 2)}\n`);
   return errorData;
 }

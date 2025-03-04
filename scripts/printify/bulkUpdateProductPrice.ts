@@ -21,7 +21,7 @@ interface PrintifyPaginatedResponse {
   next_page_url: string | null;
 }
 
-(async () => {
+(async (): Promise<void> => {
   try {
     const allProducts: ({
       id: string;
@@ -32,7 +32,7 @@ interface PrintifyPaginatedResponse {
     let hasMorePages = true;
 
     while (hasMorePages) {
-      console.log('Fetching page', currentPage);
+      process.stdout.write(`Fetching page ${currentPage}\n`);
       const { data } = await axios.get<PrintifyPaginatedResponse>(
         `https://api.printify.com/v1/shops/${printifyShopId}/products.json?page=${currentPage}&limit=50`,
         {
@@ -52,8 +52,7 @@ interface PrintifyPaginatedResponse {
 
     const deskMatVariants = allProducts.map((product) => {
       if (
-        product.blueprint_id ===
-          Number(process.env.DESK_MAT_PRINTIFY_BLUEPRINT_ID) && // <---- change to product blueprint id env variable
+        product.blueprint_id === Number(process.env.DESK_MAT_PRINTIFY_BLUEPRINT_ID) && // <---- change to product blueprint id env variable
         product.is_deleted === false &&
         product.visible === true
       ) {
@@ -65,46 +64,53 @@ interface PrintifyPaginatedResponse {
     });
 
     // Add delay function
-    const delay = (ms: number) =>
-      new Promise((resolve) => setTimeout(resolve, ms));
+    const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
     // Calculate delay needed to stay within rate limit (200 requests per 30 minutes)
     const MIN_DELAY_MS = 30000; // 30 seconds between requests (30 minutes / 200 requests)
 
     for (const product of deskMatVariants) {
-      if (!product) continue;
+      if (!product) {
+        continue;
+      }
 
-      console.log(`Updating ${product.id}`);
+      process.stdout.write(`Updating ${product.id}\n`);
 
-        for (const variant of product.variants) {
-          if (variant.title === '31.5" × 15.5"') {
-            variant.price = 3800;
-          } else if (variant.title === '23.6" × 13.8"') {
-            variant.price = 3200;
-          } else if (variant.title === '14.4" × 12.1"') {
-            variant.price = 2500;
-          }
+      for (const variant of product.variants) {
+        if (variant.title === '31.5" × 15.5"') {
+          variant.price = 3800;
+        } else if (variant.title === '23.6" × 13.8"') {
+          variant.price = 3200;
+        } else if (variant.title === '14.4" × 12.1"') {
+          variant.price = 2500;
         }
+      }
 
-        await axios.put(
-          `https://api.printify.com/v1/shops/${printifyShopId}/products/${product.id}.json`,
-          {
-            variants: product.variants,
+      await axios.put(
+        `https://api.printify.com/v1/shops/${printifyShopId}/products/${product.id}.json`,
+        {
+          variants: product.variants,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'User-Agent': 'NodeJS',
+            Authorization: `Bearer ${printifyApiKey}`,
           },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'User-Agent': 'NodeJS',
-              Authorization: `Bearer ${printifyApiKey}`,
-            },
-          },
-        );
+        },
+      );
 
       // Add delay between requests
-      console.log(`Waiting 30 seconds before next request...`);
+      process.stdout.write(`Waiting 30 seconds before next request...\n`);
       await delay(MIN_DELAY_MS);
     }
   } catch (error) {
-    console.error(error);
+    process.stderr.write(`Error: ${error instanceof Error ? error.message : String(error)}\n`);
+    process.exit(1);
   }
-})();
+})().catch((error) => {
+  process.stderr.write(
+    `Unhandled error: ${error instanceof Error ? error.message : String(error)}\n`,
+  );
+  process.exit(1);
+});

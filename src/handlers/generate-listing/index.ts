@@ -2,11 +2,7 @@ import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
 import { dbTidy, getBuffer, getProductDetails } from '../../helpers';
 import { getUnlisted, updateListing } from '../../service/db';
-import {
-  createNewProduct,
-  getUploadedImages,
-  uploadImages,
-} from '../../service/printify';
+import { createNewProduct, getUploadedImages, uploadImages } from '../../service/printify';
 import { PrintifyImageResponseType } from '../../models/schemas/printify';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -42,7 +38,7 @@ const parser = yargs(hideBin(process.argv))
   .strict()
   .help();
 
-(async () => {
+void (async (): Promise<void> => {
   try {
     const argv = parser.parseSync();
 
@@ -51,7 +47,7 @@ const parser = yargs(hideBin(process.argv))
     const unlisted = await getUnlisted(product.name);
 
     if (!unlisted.length) {
-      console.log('No unlisted listings to create');
+      process.stdout.write('No unlisted listings to create\n');
       return;
     }
     const data = await dbTidy(unlisted, product);
@@ -60,7 +56,7 @@ const parser = yargs(hideBin(process.argv))
 
     const uploadedImages = await getUploadedImages();
 
-    console.log(`Creating ${limitedData.length} Printify listings`);
+    process.stdout.write(`Creating ${limitedData.length} Printify listings\n`);
 
     for (const item of limitedData) {
       await createPrintifyListingsData(item, uploadedImages, product);
@@ -96,7 +92,7 @@ export async function createPrintifyListingsData(
   },
   product: Product,
 ): Promise<void> {
-  const bufferArray = await getBuffer(unlisted.filename, product.baseDir);
+  const bufferArray = getBuffer(unlisted.filename, product.baseDir);
 
   const uploadedImagesArray: {
     fileId: string | null;
@@ -106,7 +102,7 @@ export async function createPrintifyListingsData(
   if (bufferArray.length) {
     for (const buffer of bufferArray) {
       if (buffer.filename.includes('mockup')) {
-        console.log(`Skipping mockup image: ${buffer.filename}`);
+        process.stdout.write(`Skipping mockup image: ${buffer.filename}\n`);
         continue;
       }
 
@@ -115,7 +111,7 @@ export async function createPrintifyListingsData(
       );
 
       if (!uploadedImage) {
-        console.log(`Uploading image: ${buffer.filename}`);
+        process.stdout.write(`Uploading image: ${buffer.filename}\n`);
 
         const uploaded = await uploadImages(buffer.base64, buffer.filename);
         uploadedImagesArray.push({
@@ -123,22 +119,16 @@ export async function createPrintifyListingsData(
           fileId: buffer.fileId,
         });
       } else {
-        console.log(`Image already uploaded: ${buffer.filename}`);
+        process.stdout.write(`Image already uploaded: ${buffer.filename}\n`);
         return;
       }
     }
   }
 
   if (product.name === ProductName.PILLOW) {
-    const pillowCoverConfig = generateListingConfig(
-      uploadedImagesArray,
-      ProductName.PILLOW_COVER,
-    );
+    const pillowCoverConfig = generateListingConfig(uploadedImagesArray, ProductName.PILLOW_COVER);
 
-    const pillowConfig = generateListingConfig(
-      uploadedImagesArray,
-      ProductName.PILLOW,
-    );
+    const pillowConfig = generateListingConfig(uploadedImagesArray, ProductName.PILLOW);
 
     const pillowData = {
       title: unlisted.title,
@@ -173,7 +163,7 @@ export async function createPrintifyListingsData(
         printifyProductId: productResponse.id,
       });
     } else {
-      console.log('failed to create pillow product');
+      process.stdout.write('failed to create pillow product\n');
     }
 
     if (productResponseCover.id) {
@@ -182,10 +172,10 @@ export async function createPrintifyListingsData(
         printifyProductId: productResponseCover.id,
       });
     } else {
-      console.log('failed to create pillow cover product');
+      process.stdout.write('failed to create pillow cover product\n');
     }
 
-    console.log('uploaded product & variant');
+    process.stdout.write('uploaded product & variant\n');
   } else {
     const config = generateListingConfig(uploadedImagesArray, product.name);
 
@@ -206,6 +196,6 @@ export async function createPrintifyListingsData(
       printifyProductId: productResponse.id,
     });
 
-    console.log('uploaded product');
+    process.stdout.write('uploaded product\n');
   }
 }

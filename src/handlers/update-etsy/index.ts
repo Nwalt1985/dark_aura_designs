@@ -1,4 +1,3 @@
-import axios from 'axios';
 import dotenv from 'dotenv';
 import yargs from 'yargs';
 import qs from 'qs';
@@ -6,10 +5,7 @@ import qs from 'qs';
 import { hideBin } from 'yargs/helpers';
 
 import { updateEtsyListingId } from '../../service/db';
-import {
-  EtsyListingType,
-  EtsyListingRequestSchema,
-} from '../../models/schemas/etsy';
+import { EtsyListingType, EtsyListingRequestSchema } from '../../models/schemas/etsy';
 import { getAllActiveListings, updateEtsyListing } from '../../service/etsy';
 import {
   ProductName,
@@ -28,7 +24,7 @@ const parser = yargs(hideBin(process.argv))
       type: 'string',
       description: 'Product type for the listing',
       choices: Object.values(ProductName),
-      default: 'desk mat',
+      default: ProductName.DESK_MAT,
     },
     limit: {
       type: 'number',
@@ -39,7 +35,7 @@ const parser = yargs(hideBin(process.argv))
   .strict()
   .help();
 
-(async () => {
+void (async (): Promise<void> => {
   try {
     const argv = parser.parseSync();
     const shopId = process.env.ETSY_SHOP_ID as string;
@@ -47,13 +43,13 @@ const parser = yargs(hideBin(process.argv))
     const activeListings = await getAllActiveListings(shopId, argv.limit);
 
     if (!activeListings) {
-      console.log('No active listings found');
+      process.stdout.write('No active listings found\n');
       return;
     }
 
     let productTitleString: string = '';
     let materials: string = '';
-    let shopSectionId: number = 0;
+    const shopSectionId: number = 0;
 
     switch (argv.product) {
       case ProductName.DESK_MAT:
@@ -76,25 +72,19 @@ const parser = yargs(hideBin(process.argv))
 
     const listingsToUpdate: EtsyListingType[] = activeListings
       .filter((listing: EtsyListingType) => listing.tags.length === 0)
-      .filter((listing: EtsyListingType) =>
-        listing.title.includes(productTitleString),
-      );
+      .filter((listing: EtsyListingType) => listing.title.includes(productTitleString));
 
-    console.log(`Listings to update: ${listingsToUpdate.length}`);
+    process.stdout.write(`Listings to update: ${listingsToUpdate.length}\n`);
 
     for (const listing of listingsToUpdate) {
       const { listing_id, description, title } = listing;
 
       const firstSentence = description.split('.')[0].trim();
 
-      const record = await updateEtsyListingId(
-        firstSentence,
-        listing_id,
-        title,
-      );
+      const record = await updateEtsyListingId(firstSentence, listing_id, title);
 
       if (!record) {
-        console.log(`No record found for description: ${firstSentence}`);
+        process.stdout.write(`No record found for description: ${firstSentence}\n`);
         continue;
       }
 
@@ -123,7 +113,7 @@ const parser = yargs(hideBin(process.argv))
       await updateEtsyListing(shopId, listing_id, title, data);
     }
     return;
-  } catch (err: any) {
+  } catch (err: unknown) {
     let statusCode;
     let message;
 

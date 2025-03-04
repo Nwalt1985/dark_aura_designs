@@ -1,31 +1,16 @@
 import dotenv from 'dotenv';
-import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
 import { updateEtsyListingId } from '../../service/db';
 import { getAllActiveListings } from '../../service/etsy';
 
 dotenv.config();
 
-const parser = yargs(hideBin(process.argv))
-  .options({
-    product: {
-      type: 'string',
-      description: 'Product type for the listing',
-      demandOption: true,
-      choices: ['desk mat', 'laptop sleeve'],
-    },
-  })
-  .strict() // Ensure that invalid options throw an error
-  .help();
-
-(async () => {
-  const argv = parser.parseSync();
+void (async (): Promise<void> => {
   const shopId = process.env.ETSY_SHOP_ID as string;
 
   const activeListings = await getAllActiveListings(shopId);
 
   if (!activeListings) {
-    console.log('No active listings found');
+    process.stdout.write('No active listings found\n');
     return;
   }
 

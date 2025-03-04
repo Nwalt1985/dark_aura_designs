@@ -3,11 +3,14 @@ import { mongoConnect } from '../database';
 import { PromptResponse, PromptResponseType } from '../models/schemas/prompt';
 import { DateTime } from 'luxon';
 import he from 'he';
-import { ProductData, UpdateListingData } from '../models/schemas/db';
+import { UpdateListingData } from '../models/schemas/db';
+import { ObjectId } from 'mongodb';
 
-export async function createDBListing(
-  listing: z.infer<typeof PromptResponse>[],
-) {
+export async function createDBListing(listing: z.infer<typeof PromptResponse>[]): Promise<{
+  acknowledged: boolean;
+  insertedCount: number;
+  insertedIds: { [key: number]: ObjectId };
+}> {
   const { client, collection } = await mongoConnect();
 
   const result = await collection.insertMany(listing);
@@ -17,7 +20,7 @@ export async function createDBListing(
   return result;
 }
 
-export async function getAllListings(product: string) {
+export async function getAllListings(product: string): Promise<PromptResponseType[]> {
   const { client, collection } = await mongoConnect();
 
   const result = (await collection
@@ -34,7 +37,7 @@ export async function getAllListings(product: string) {
   return result;
 }
 
-export async function getUnlisted(product: string) {
+export async function getUnlisted(product: string): Promise<PromptResponseType[]> {
   const { client, collection } = await mongoConnect();
 
   const result = (await collection
@@ -52,7 +55,7 @@ export async function getUnlisted(product: string) {
   return result;
 }
 
-export async function deleteListingByFileName(filename: string) {
+export async function deleteListingByFileName(filename: string): Promise<void> {
   const { client, collection } = await mongoConnect();
 
   await collection.updateOne(
@@ -98,12 +101,12 @@ export async function updateEtsyListingId(
     deletedAt: null,
   };
 
-  const document = (await collection.findOne(
-    query,
-  )) as unknown as PromptResponseType & { _id: object };
+  const document = (await collection.findOne(query)) as unknown as PromptResponseType & {
+    _id: object;
+  };
 
   if (!document) {
-    console.log(`No document found for description: ${description}`);
+    process.stdout.write(`No document found for description: ${description}\n`);
     return;
   }
 

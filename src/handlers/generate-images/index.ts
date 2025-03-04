@@ -28,7 +28,7 @@ const parser = yargs(hideBin(process.argv))
   .strict()
   .help();
 
-(async () => {
+void (async (): Promise<void> => {
   try {
     const argv = parser.parseSync();
 

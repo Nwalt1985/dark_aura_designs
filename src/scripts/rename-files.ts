@@ -7,31 +7,37 @@ const FOLDER_PATH = path.resolve(
 );
 
 // Function to rename files
-async function renameFiles() {
-  try {
-    // Read all files in the directory
-    const files = fs.readdirSync(FOLDER_PATH);
+function renameFiles(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      // Read all files in the directory
+      const files = fs.readdirSync(FOLDER_PATH);
 
-    console.log(files);
+      process.stdout.write(`${JSON.stringify(files)}\n`);
 
-    for (const file of files) {
-      // Match pattern: anything followed by -numbers-4050x4050
-      const newFileName = file.replace(/-\d+-4050x4050/, '');
+      for (const file of files) {
+        // Match pattern: anything followed by -numbers-4050x4050
+        const newFileName = file.replace(/-\d+-4050x4050/, '');
 
-      if (file !== newFileName) {
-        const oldPath = path.join(FOLDER_PATH, file);
-        const newPath = path.join(FOLDER_PATH, newFileName);
+        if (file !== newFileName) {
+          const oldPath = path.join(FOLDER_PATH, file);
+          const newPath = path.join(FOLDER_PATH, newFileName);
 
-        fs.renameSync(oldPath, newPath);
-        console.log(`Renamed: ${file} -> ${newFileName}`);
+          fs.renameSync(oldPath, newPath);
+          process.stdout.write(`Renamed: ${file} -> ${newFileName}\n`);
+        }
       }
-    }
 
-    console.log('File renaming completed successfully!');
-  } catch (error) {
-    console.error('Error renaming files:', error);
-  }
+      process.stdout.write('File renaming completed successfully!\n');
+      resolve();
+    } catch (error) {
+      process.stderr.write(
+        `Error renaming files: ${error instanceof Error ? error.message : String(error)}\n`,
+      );
+      reject(error);
+    }
+  });
 }
 
 // Execute the script
-renameFiles();
+void renameFiles();

@@ -10,7 +10,7 @@ import {
 } from '../handlers/generate-images/defaultDescription';
 import { Marketplace, Product, ProductName } from '../models/types/listing';
 
-export function getformattedDate() {
+export function getformattedDate(): string {
   const date = new Date();
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
@@ -28,11 +28,8 @@ export function generateRandomNumber(): number {
   return randomNumber;
 }
 
-export function getProductDetails(
-  arg: string,
-  marketplace: Marketplace,
-): Product {
-  let product: Product = {
+export function getProductDetails(arg: ProductName, marketplace: Marketplace): Product {
+  const product: Product = {
     name:
       ProductName.DESK_MAT ||
       ProductName.PILLOW ||
@@ -148,10 +145,7 @@ export function getProductDetails(
   return product;
 }
 
-export function getGeneratedFileNames(
-  dir: string,
-  productType: string,
-): string[] {
+export function getGeneratedFileNames(dir: string, productType: ProductName): string[] {
   const fileNameArray = assetFolder(dir);
 
   switch (productType) {
@@ -176,10 +170,7 @@ export function getGeneratedFileNames(
     case ProductName.BLANKET:
       return fileNameArray
         .filter((fileName) => {
-          if (
-            fileName.includes('-8228x6260') ||
-            fileName.includes('-6260x8228')
-          ) {
+          if (fileName.includes('-8228x6260') || fileName.includes('-6260x8228')) {
             return fileName;
           }
         })
@@ -192,10 +183,7 @@ export function getGeneratedFileNames(
     case ProductName.WOVEN_BLANKET:
       return fileNameArray
         .filter((fileName) => {
-          if (
-            fileName.includes('-7680x5760') ||
-            fileName.includes('-5760x7680')
-          ) {
+          if (fileName.includes('-7680x5760') || fileName.includes('-5760x7680')) {
             return fileName;
           }
         })
@@ -239,20 +227,17 @@ export async function dbTidy(
 ): Promise<PromptResponseType[]> {
   const unlistedFileNames = unlisted.map((listing) => {
     if (!listing.filename) {
-      console.log('No filename found for listing', listing);
+      process.stdout.write(`No filename found for listing: ${JSON.stringify(listing)}\n`);
     }
 
     return listing.filename.replace(/(-\d+x\d+)?$/, '');
   });
 
-  const generatedImagesFilenames = getGeneratedFileNames(
-    product.baseDir,
-    product.name,
-  );
+  const generatedImagesFilenames = getGeneratedFileNames(product.baseDir, product.name);
 
   for (const listing of unlistedFileNames) {
-    if (!generatedImagesFilenames!.includes(listing)) {
-      console.log(`Deleting ${listing} from the DB`);
+    if (!generatedImagesFilenames.includes(listing)) {
+      process.stdout.write(`Deleting ${listing} from the DB\n`);
       await deleteListingByFileName(listing);
     }
   }
@@ -261,16 +246,14 @@ export async function dbTidy(
 }
 
 // Loop through the folders and subfolders in the original directory and return the buffer of the image
-export async function getBuffer(
+export function getBuffer(
   fileName: string,
   baseDir: string,
-): Promise<
-  {
-    filename: string;
-    fileId: string | null;
-    base64: Buffer;
-  }[]
-> {
+): {
+  filename: string;
+  fileId: string | null;
+  base64: Buffer;
+}[] {
   const buffer: {
     filename: string;
     fileId: string | null;
@@ -312,7 +295,7 @@ function extractImageId(filename: string): string | null {
   return match![0] || null;
 }
 
-export async function relocateRescaleImage(product: Product, fileName: string) {
+export function relocateRescaleImage(product: Product, fileName: string): void {
   const rescaleDir = product.rescale;
   const completedDir = product.completedRescalePath;
 
@@ -329,25 +312,19 @@ export async function relocateRescaleImage(product: Product, fileName: string) {
 
     if (fs.existsSync(sourceFile)) {
       fs.renameSync(sourceFile, targetFile);
-      console.log(
-        `Moved ${fileName}${extension} to completed_rescale directory`,
-      );
+      process.stdout.write(`Moved ${fileName}${extension} to completed_rescale directory\n`);
     }
   });
 }
 
-export async function createFile(
-  baseDir: string,
-  filename: string,
-  resizedBuffer: Buffer,
-): Promise<void> {
+export function createFile(baseDir: string, filename: string, resizedBuffer: Buffer): void {
   const filePath = path.join(`${baseDir}`, `${filename}`);
 
   fs.writeFile(filePath, resizedBuffer.toString('base64'), 'base64', (err) => {
     if (err) {
-      console.error(`Error writing file: ${err}`);
+      process.stdout.write(`Error writing file: ${err.message}\n`);
     } else {
-      console.log(`${filename} written successfully.`);
+      process.stdout.write(`${filename} written successfully.\n`);
     }
   });
 }

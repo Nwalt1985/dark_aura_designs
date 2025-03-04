@@ -10,11 +10,9 @@ import { Product, ProductName } from '../../models/types/listing';
 import { getImageData } from './queryWithOpenAi';
 import path from 'path';
 import { getformattedDate, relocateRescaleImage } from '../../helpers';
+import { ProductData } from '../../models/schemas/db';
 
-export async function generateImagesFromRescale(
-  product: Product,
-  limit: number,
-): Promise<void> {
+export async function generateImagesFromRescale(product: Product, limit: number): Promise<void> {
   const formattedDate = getformattedDate();
 
   const rescaleDir = product.rescale;
@@ -24,46 +22,49 @@ export async function generateImagesFromRescale(
   const files = fs.readdirSync(rescaleDir);
 
   for (let i = 0; i <= limit; i++) {
-    if (i >= files.length) break;
+    if (i >= files.length) {
+      break;
+    }
 
     const file = files[i];
     const fileId = generateRandomNumber();
     const filePath = path.join(rescaleDir, file);
     const buffer = fs.readFileSync(filePath);
 
-    if (file === '.DS_Store') continue;
+    if (file === '.DS_Store') {
+      continue;
+    }
 
-    const imageData = await getImageData(
+    const imageData = (await getImageData(
       buffer.toString('base64'),
       product.name,
-    );
+    )) as Partial<ProductData>;
 
-    if (imageData.title.length > 140) {
-      console.log('Title is too long:', imageData.title);
+    if (!imageData.title || imageData.title.length > 140) {
+      process.stderr.write(`Title is missing or too long: ${imageData.title}\n`);
       continue;
     }
 
     const fileName = file.replace('.png', '').replace('.jpg', '').toLowerCase();
 
     const dbData = {
-      ...imageData,
+      prompt: imageData.prompt || '',
       productType: product.name,
-      filename: `${fileName}-${fileId}`,
-      description: `${imageData.description}
+      description: `${imageData.description || ''}
 				  ${product.defaultDescription}`,
+      title: imageData.title,
+      keywords: imageData.keywords || [],
+      theme: imageData.theme || '',
+      style: imageData.style || '',
+      filename: `${fileName}-${fileId}`,
+      createdAt: new Date().toISOString(),
     };
 
     await createDBListing([dbData]);
 
     switch (product.name) {
       case ProductName.DESK_MAT:
-        await resizeDeskmats(
-          buffer.toString('base64'),
-          fileName,
-          fileId,
-          outputDir,
-          formattedDate,
-        );
+        await resizeDeskmats(buffer.toString('base64'), fileName, fileId, outputDir, formattedDate);
         break;
 
       case ProductName.PILLOW:
@@ -97,7 +98,7 @@ export async function generateImagesFromRescale(
         break;
     }
 
-    await relocateRescaleImage(product, fileName);
+    relocateRescaleImage(product, fileName);
   }
   return;
 }

@@ -12,12 +12,15 @@ dotenv.config();
 
 const printifyApiKey = process.env.PRINTIFY_API_KEY || '';
 
-export async function uploadImages(buffer: Buffer, filename: string) {
+export async function uploadImages(
+  buffer: Buffer,
+  filename: string,
+): Promise<PrintifyImageResponseType> {
   const { data } = await axios.post<PrintifyImageResponseType>(
     `https://api.printify.com/v1/uploads/images.json`,
     {
       file_name: filename,
-      contents: Buffer.from(buffer).toString('base64'),
+      contents: buffer.toString('base64'),
     },
     {
       headers: {
@@ -31,7 +34,11 @@ export async function uploadImages(buffer: Buffer, filename: string) {
   return data;
 }
 
-export async function getUploadedImages() {
+export async function getUploadedImages(): Promise<{
+  imageData: PrintifyImageResponseType[];
+  length: number;
+  totalImages: number;
+}> {
   const imageData = [];
 
   const { data } = await axios.get<PrintifyGetUploadsResponseType>(
@@ -72,7 +79,7 @@ export async function getUploadedImages() {
 export async function createNewProduct(
   productData: PrintifyProductUploadRequestType,
   shopId: string,
-) {
+): Promise<PrintifyProductUploadResponseType> {
   PrintifyProductUploadRequest.parse(productData);
 
   const response = await axios.post<PrintifyProductUploadResponseType>(

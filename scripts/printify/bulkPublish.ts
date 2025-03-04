@@ -21,7 +21,7 @@ interface PrintifyPaginatedResponse {
   next_page_url: string | null;
 }
 
-(async () => {
+(async (): Promise<void> => {
   try {
     const allProducts: ({
       id: string;
@@ -32,7 +32,7 @@ interface PrintifyPaginatedResponse {
     let hasMorePages = true;
 
     while (hasMorePages) {
-      console.log('Fetching page', currentPage);
+      process.stdout.write(`Fetching page ${currentPage}\n`);
       const { data } = await axios.get<PrintifyPaginatedResponse>(
         `https://api.printify.com/v1/shops/${printifyShopId}/products.json?page=${currentPage}&limit=50`,
         {
@@ -52,8 +52,7 @@ interface PrintifyPaginatedResponse {
 
     const deskMatVariants = allProducts.map((product) => {
       if (
-        product.blueprint_id ===
-          Number(process.env.DESK_MAT_PRINTIFY_BLUEPRINT_ID) &&
+        product.blueprint_id === Number(process.env.DESK_MAT_PRINTIFY_BLUEPRINT_ID) &&
         product.is_deleted === false &&
         product.visible === true
       ) {
@@ -65,16 +64,13 @@ interface PrintifyPaginatedResponse {
     });
 
     // Add delay function
-    const delay = (ms: number) =>
-      new Promise((resolve) => setTimeout(resolve, ms));
+    const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
     // Calculate delay needed to stay within rate limit (200 requests per 30 minutes)
     const MIN_DELAY_MS = 30000; // 30 seconds between requests (30 minutes / 200 requests)
 
     // Convert filtered deskMatVariants to a mutable array we can pop from
-    const publishQueue = deskMatVariants.filter(
-      (product) => product !== undefined,
-    );
+    const publishQueue = deskMatVariants.filter((product) => product !== undefined);
 
     // Add starting index parameter (set to 221 to continue from where it left off)
     const REMAINING_PRODUCTS = 328;
@@ -86,11 +82,11 @@ interface PrintifyPaginatedResponse {
 
     while (publishQueue.length > 0) {
       const product = publishQueue.pop();
-      if (!product) continue;
+      if (!product) {
+        continue;
+      }
 
-      console.log(
-        `Publishing ${product.id} (${publishQueue.length} remaining)`,
-      );
+      process.stdout.write(`Publishing ${product.id} (${publishQueue.length} remaining)\n`);
 
       await axios.post(
         `https://api.printify.com/v1/shops/${printifyShopId}/products/${product.id}/publish.json`,
@@ -115,8 +111,12 @@ interface PrintifyPaginatedResponse {
       await delay(MIN_DELAY_MS);
     }
 
-    console.log('All products have been published!');
+    process.stdout.write('All products have been published!\n');
   } catch (error) {
     console.error(error);
+    process.exit(1);
   }
-})();
+})().catch((error) => {
+  console.error('Unhandled error:', error);
+  process.exit(1);
+});
