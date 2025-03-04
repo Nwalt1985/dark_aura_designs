@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { updateEtsyListingId } from '../../service/db';
 import { getAllActiveListings } from '../../service/etsy';
-
+import { Logger } from '../../errors/logger';
 dotenv.config();
 
 void (async (): Promise<void> => {
@@ -10,7 +10,7 @@ void (async (): Promise<void> => {
   const activeListings = await getAllActiveListings(shopId);
 
   if (!activeListings) {
-    process.stdout.write('No active listings found\n');
+    Logger.info('No active listings found');
     return;
   }
 

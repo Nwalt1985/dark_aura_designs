@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import { Logger } from 'src/errors/logger';
+import { ErrorType } from 'src/errors/CustomError';
 
 const FOLDER_PATH = path.resolve(
   process.env['HOME'] || '',
@@ -13,7 +15,7 @@ function renameFiles(): Promise<void> {
       // Read all files in the directory
       const files = fs.readdirSync(FOLDER_PATH);
 
-      process.stdout.write(`${JSON.stringify(files)}\n`);
+      Logger.info(`${JSON.stringify(files)}`);
 
       for (const file of files) {
         // Match pattern: anything followed by -numbers-4050x4050
@@ -24,16 +26,19 @@ function renameFiles(): Promise<void> {
           const newPath = path.join(FOLDER_PATH, newFileName);
 
           fs.renameSync(oldPath, newPath);
-          process.stdout.write(`Renamed: ${file} -> ${newFileName}\n`);
+          Logger.info(`Renamed: ${file} -> ${newFileName}`);
         }
       }
 
-      process.stdout.write('File renaming completed successfully!\n');
+      Logger.info('File renaming completed successfully!');
       resolve();
     } catch (error) {
-      process.stderr.write(
-        `Error renaming files: ${error instanceof Error ? error.message : String(error)}\n`,
-      );
+      Logger.error({
+        type: ErrorType.INTERNAL,
+        code: 500,
+        message: `Error renaming files: ${error instanceof Error ? error.message : String(error)}`,
+        details: error,
+      });
       reject(error);
     }
   });

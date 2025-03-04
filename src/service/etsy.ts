@@ -79,7 +79,40 @@ export async function getAllActiveListings(
         },
       ),
     'Failed to fetch Etsy listings',
-  );
+  ).then((response) => {
+    // Extract the listings array from the response
+    // The Etsy API likely returns an object with a 'results' or 'listings' property
+    if (response && typeof response === 'object') {
+      // Log the response structure to help debug
+      Logger.info(`Etsy API response structure: ${JSON.stringify(Object.keys(response))}`);
+
+      if (Array.isArray(response)) {
+        return response;
+      }
+
+      // Check for common response structures
+      if ('results' in response && Array.isArray(response.results)) {
+        return response.results;
+      }
+      if ('listings' in response && Array.isArray(response.listings)) {
+        return response.listings;
+      }
+      if ('count' in response && 'results' in response && Array.isArray(response.results)) {
+        return response.results;
+      }
+
+      // If response is an object with numeric keys, it might be an array-like object
+      // Convert it to a proper array
+      const keys = Object.keys(response);
+      if (keys.length > 0 && keys.every((key) => !isNaN(Number(key)))) {
+        return Object.values(response);
+      }
+    }
+
+    // Return an empty array if we couldn't find the listings
+    Logger.warn('Could not find listings array in Etsy API response');
+    return [];
+  });
 }
 
 export async function updateEtsyListing(

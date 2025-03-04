@@ -2,6 +2,8 @@ import axios from 'axios';
 import { PrintifyProductUploadRequestType } from '../../src/models/schemas/printify';
 import dotenv from 'dotenv';
 import path from 'path';
+import { Logger } from 'src/errors/logger';
+import { ErrorType } from 'src/errors/CustomError';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -32,7 +34,7 @@ interface PrintifyPaginatedResponse {
     let hasMorePages = true;
 
     while (hasMorePages) {
-      process.stdout.write(`Fetching page ${currentPage}\n`);
+      Logger.info(`Fetching page ${currentPage}`);
       const { data } = await axios.get<PrintifyPaginatedResponse>(
         `https://api.printify.com/v1/shops/${printifyShopId}/products.json?page=${currentPage}&limit=50`,
         {
@@ -77,7 +79,7 @@ interface PrintifyPaginatedResponse {
         continue;
       }
 
-      process.stdout.write(`Updating ${product.id}\n`);
+      Logger.info(`Updating ${product.id}`);
 
       for (const variant of product.variants) {
         if (variant.title === '31.5" × 15.5"') {
@@ -104,16 +106,24 @@ interface PrintifyPaginatedResponse {
       );
 
       // Add delay between requests
-      process.stdout.write(`Waiting 30 seconds before next request...\n`);
+      Logger.info(`Waiting 30 seconds before next request...`);
       await delay(MIN_DELAY_MS);
     }
   } catch (error) {
-    process.stderr.write(`Error: ${error instanceof Error ? error.message : String(error)}\n`);
+    Logger.error({
+      type: ErrorType.EXTERNAL_SERVICE,
+      code: 500,
+      message: `Error: ${error instanceof Error ? error.message : String(error)}`,
+      details: error,
+    });
     process.exit(1);
   }
 })().catch((error) => {
-  process.stderr.write(
-    `Unhandled error: ${error instanceof Error ? error.message : String(error)}\n`,
-  );
+  Logger.error({
+    type: ErrorType.INTERNAL,
+    code: 500,
+    message: `Unhandled error: ${error instanceof Error ? error.message : String(error)}`,
+    details: error,
+  });
   process.exit(1);
 });

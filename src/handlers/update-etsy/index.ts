@@ -15,6 +15,8 @@ import {
   WovenBlanketMaterials,
 } from '../../models/types/listing';
 import { StatusCodes } from 'http-status-codes';
+import { Logger } from '../../errors/logger';
+import { ErrorType } from '../../errors/CustomError';
 
 dotenv.config();
 
@@ -42,10 +44,13 @@ void (async (): Promise<void> => {
 
     const activeListings = await getAllActiveListings(shopId, argv.limit);
 
-    if (!activeListings) {
-      process.stdout.write('No active listings found\n');
+    if (!activeListings || !Array.isArray(activeListings) || activeListings.length === 0) {
+      Logger.info('No active listings found');
       return;
     }
+
+    // Ensure activeListings is an array
+    const listingsArray = Array.isArray(activeListings) ? activeListings : [];
 
     let productTitleString: string = '';
     let materials: string = '';
@@ -70,11 +75,11 @@ void (async (): Promise<void> => {
         break;
     }
 
-    const listingsToUpdate: EtsyListingType[] = activeListings
+    const listingsToUpdate: EtsyListingType[] = listingsArray
       .filter((listing: EtsyListingType) => listing.tags.length === 0)
       .filter((listing: EtsyListingType) => listing.title.includes(productTitleString));
 
-    process.stdout.write(`Listings to update: ${listingsToUpdate.length}\n`);
+    Logger.info(`Listings to update: ${listingsToUpdate.length}`);
 
     for (const listing of listingsToUpdate) {
       const { listing_id, description, title } = listing;
@@ -84,7 +89,7 @@ void (async (): Promise<void> => {
       const record = await updateEtsyListingId(firstSentence, listing_id, title);
 
       if (!record) {
-        process.stdout.write(`No record found for description: ${firstSentence}\n`);
+        Logger.info(`No record found for description: ${firstSentence}`);
         continue;
       }
 
@@ -129,6 +134,11 @@ void (async (): Promise<void> => {
         message = error.message;
     }
 
-    console.error({ name: error.name, statusCode, message, error });
+    Logger.error({
+      type: ErrorType.INTERNAL,
+      code: statusCode,
+      message: message,
+      details: error,
+    });
   }
 })();
