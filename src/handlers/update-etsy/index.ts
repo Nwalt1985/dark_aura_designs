@@ -27,7 +27,7 @@ import {
 import { StatusCodes } from 'http-status-codes';
 import { Logger } from '../../errors/logger';
 import { ErrorType } from '../../errors/CustomError';
-
+import { closeConnection } from '../../database';
 dotenv.config();
 
 /**
@@ -144,6 +144,9 @@ void (async (): Promise<void> => {
 
       await updateEtsyListing(shopId, listing_id, title, data);
     }
+
+    // Close the database connection before exiting
+    await closeConnection();
     return;
   } catch (err: unknown) {
     let statusCode;
@@ -160,6 +163,9 @@ void (async (): Promise<void> => {
         statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
         message = error.message;
     }
+
+    // Close the database connection before exiting
+    await closeConnection();
 
     Logger.error({
       type: ErrorType.INTERNAL,
