@@ -19,7 +19,7 @@ import {
   resizePillowImage,
   resizeBlanketImage,
   resizeWovenBlanketImage,
-} from '../../helpers/rescaleImages';
+} from '../../helpers';
 import { Product, ProductName } from '../../models/types/listing';
 import { getImageData } from './queryWithOpenAi';
 import path from 'path';
