@@ -151,7 +151,7 @@ export async function createPrintifyListingsData(
     };
 
     const pillowCoverData = {
-      title: unlisted.title.replace('Cushion', 'Cushion Cover'),
+      title: `VARIATION ${unlisted.title.replace('Cushion', 'Cushion Cover')}`,
       description: unlisted.description,
       blueprint_id: pillowCoverConfig.blueprint_id,
       print_provider_id: pillowCoverConfig.print_provider_id,
@@ -160,11 +160,12 @@ export async function createPrintifyListingsData(
       print_areas: pillowCoverConfig.print_areas,
     };
 
-    const productResponse = await createNewProduct(pillowData, product.shopId);
-    const productResponseCover = await createNewProduct(
-      pillowCoverData,
-      product.shopId,
-    );
+    const promises = [
+      createNewProduct(pillowData, product.shopId),
+      createNewProduct(pillowCoverData, product.shopId),
+    ];
+
+    const [productResponse, productResponseCover] = await Promise.all(promises);
 
     if (productResponse.id) {
       await updateListing(unlisted.filename, ProductName.PILLOW, {

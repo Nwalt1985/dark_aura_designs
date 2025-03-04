@@ -3,12 +3,12 @@
 
 // Paths
 var templatePaths = [
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_1.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_2.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_3.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_4.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_5.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_template_6.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_1.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_2.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_3.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_4.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_5.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_6.psd'),
 ];
 
 var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/woven_blankets/');
@@ -153,7 +153,8 @@ function resetTemplate(templatePath) {
 }
 
 // Function to process each design folder
-function processDesignFolder(designFolder, exportFolder, index, templatePath) {
+function processDesignFolder(designFolder, exportFolder, templatePath) {
+	var templateNumber = templatePath.match(/mockup_(\d+)\.psd$/i)[1];
     var designFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
 
     for (var i = 0; i < designFiles.length; i++) {
@@ -163,7 +164,7 @@ function processDesignFolder(designFolder, exportFolder, index, templatePath) {
         if (designFile.name.indexOf('._') === 0) continue;
 
         if (isValidDesignForTemplate(designFile, templatePath)) {
-            var fileName = designFile.name.split('.')[0] + '_' + index;
+            var fileName = designFile.name.split('.')[0] + '_' + templateNumber;
 
             if (mockupExists(exportFolder, fileName)) {
                 continue;
@@ -189,43 +190,48 @@ function saveMockupAsJPEG(exportPath, fileName) {
     var saveFile = new File(exportPath + "/" + fileName + ".jpg"); // Change extension to .jpg
 
     var jpegOptions = new JPEGSaveOptions();
-    jpegOptions.quality = 5; // Set maximum quality (1 to 12, where 12 is the highest)
+    jpegOptions.quality = 6; // Set maximum quality (1 to 12, where 12 is the highest)
 
     activeDocument.saveAs(saveFile, jpegOptions, true, Extension.LOWERCASE);
 }
 
 // Main function
 function main() {
-	var testFolder = new Folder(designFolderBasePath);
+    var testFolder = new Folder(designFolderBasePath);
     
-	if (!testFolder.exists) {
+    if (!testFolder.exists) {
         alert("Cannot access path: " + designFolderBasePath);
         return;
     }
 
-	for (var i = 0; i < templatePaths.length; i++) {
-		var templatePath = templatePaths[i];
+    for (var i = 0; i < templatePaths.length; i++) {
+        var templatePath = templatePaths[i];
 
-		// Open the template
-		if (!openTemplate(templatePath)) {
-			return;
-		}
+        // Open the template
+        if (!openTemplate(templatePath)) {
+            return;
+        }
 
-		var baseDesignFolder = new Folder(designFolderBasePath);
-		var mainFolders = baseDesignFolder.getFiles(function (f) { return f instanceof Folder; });
+        var baseDesignFolder = new Folder(designFolderBasePath);
+        var allFolders = baseDesignFolder.getFiles(function (f) { 
+            // Check if it's a folder and matches dd-mm-yyyy format
+            if (!(f instanceof Folder)) return false;
+            var datePattern = /^(\d{2})-(\d{2})-(\d{4})$/;
+            return datePattern.test(f.name);
+        });
 
-		if (mainFolders.length === 0) {
-			alert("No main folders found in: " + baseDesignFolder.fsName);
-			return;
-		}
+        if (allFolders.length === 0) {
+            alert("No valid date-formatted folders found in: " + baseDesignFolder.fsName);
+            return;
+        }
 
-		// Loop through each main folder (e.g., 19-09-2024, 20-09-2024)
-		for (var j = 0; j < mainFolders.length; j++) {
-			var mainFolder = mainFolders[j];
-			var exportMainFolder = new Folder(exportFolderBasePath + mainFolder.name);
+        // Loop through each main folder (e.g., 24-02-2025)
+        for (var j = 0; j < allFolders.length; j++) {
+            var mainFolder = allFolders[j];
+            var exportMainFolder = new Folder(exportFolderBasePath + mainFolder.name);
 
-			processDesignFolder(mainFolder, exportMainFolder, i, templatePath);
-		}
+            processDesignFolder(mainFolder, exportMainFolder, templatePath);
+        }
     }
 }
 
