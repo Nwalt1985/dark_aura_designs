@@ -66,7 +66,7 @@ void (async (): Promise<void> => {
 
     if (!unlisted.length) {
       Logger.info('No unlisted listings to create');
-      process.exit(0);
+      await closeConnection();
       return;
     }
 
