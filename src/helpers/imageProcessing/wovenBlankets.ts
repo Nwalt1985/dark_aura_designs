@@ -33,28 +33,28 @@ export async function resizeWovenBlanketImage(
 
     // Create the main product image (7680x5760)
     const mainImageBuffer = await processImage(buffer, 7680, 5760);
-    createFile(dateDir, `${filename}-${fileId}-7680x5760.jpg`, mainImageBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-7680x5760.jpg`, mainImageBuffer);
 
     // Create the thumbnail image (1500x1500)
     const thumbnailBuffer = await processImage(buffer, 1500, 1500, {
       fit: 'contain',
       position: 'center',
     });
-    createFile(dateDir, `${filename}-${fileId}-1500x1500.jpg`, thumbnailBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-1500x1500.jpg`, thumbnailBuffer);
 
     // Create the mockup image (1000x1000)
     const mockupBuffer = await processImage(buffer, 1000, 1000, {
       fit: 'contain',
       position: 'center',
     });
-    createFile(dateDir, `${filename}-${fileId}-1000x1000.jpg`, mockupBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-1000x1000.jpg`, mockupBuffer);
 
     // Create the small mockup image (570x570)
     const smallMockupBuffer = await processImage(buffer, 570, 570, {
       fit: 'contain',
       position: 'center',
     });
-    createFile(dateDir, `${filename}-${fileId}-570x570.jpg`, smallMockupBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-570x570.jpg`, smallMockupBuffer);
 
     Logger.info(`Successfully processed woven blanket images for ${filename}`);
   } catch (error: unknown) {

@@ -11,22 +11,60 @@
  * It also sets up a process event handler to ensure the database connection
  * is properly closed when the application terminates.
  */
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoClientOptions } from 'mongodb';
 import { DatabaseError } from '../errors/CustomError';
 import { Logger, handleError } from '../errors';
 
-// Connection URL
-const url = 'mongodb://localhost:27017';
-const client = new MongoClient(url, {
-  maxPoolSize: 10,
+// Connection URL from environment variable with fallback
+const url = process.env['MONGODB_URI'] || 'mongodb://localhost:27017';
+
+// Enhanced connection options
+const connectionOptions: MongoClientOptions = {
+  maxPoolSize: 20,
+  minPoolSize: 5,
   serverSelectionTimeoutMS: 5000,
   socketTimeoutMS: 45000,
-});
+  connectTimeoutMS: 10000,
+  retryWrites: true,
+  retryReads: true,
+  w: 'majority',
+};
 
-// Database Name
-const dbName = 'ai_etsy';
+const client = new MongoClient(url, connectionOptions);
+
+// Database Name from environment variable with fallback
+const dbName = process.env['MONGODB_DB_NAME'] || 'ai_etsy';
 
 let isConnected = false;
+let connectionAttempts = 0;
+const MAX_RETRY_ATTEMPTS = 5;
+const RETRY_DELAY_MS = 1000;
+
+/**
+ * Attempts to connect to MongoDB with retry logic
+ *
+ * @returns {Promise<MongoClient>} Connected MongoDB client
+ * @throws {DatabaseError} If connection fails after all retry attempts
+ */
+async function connectWithRetry(): Promise<MongoClient> {
+  connectionAttempts++;
+
+  try {
+    await client.connect();
+    connectionAttempts = 0; // Reset counter on successful connection
+    return client;
+  } catch (error) {
+    if (connectionAttempts < MAX_RETRY_ATTEMPTS) {
+      Logger.warn(
+        `MongoDB connection attempt ${connectionAttempts} failed. Retrying in ${RETRY_DELAY_MS}ms...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS * connectionAttempts));
+      return connectWithRetry();
+    }
+
+    throw error;
+  }
+}
 
 /**
  * Establishes a connection to the MongoDB database
@@ -44,9 +82,21 @@ export async function mongoConnect(collectionName: string = 'ai_etsy_collection'
 }> {
   try {
     if (!isConnected) {
-      await client.connect();
+      await connectWithRetry();
       isConnected = true;
       Logger.info('Connected to MongoDB');
+
+      // Set up connection monitoring
+      client.on('connectionPoolCreated', (event) => {
+        Logger.info(
+          `MongoDB connection pool created with ${event.options.maxPoolSize} max connections`,
+        );
+      });
+
+      client.on('connectionPoolClosed', () => {
+        Logger.info('MongoDB connection pool closed');
+        isConnected = false;
+      });
     }
 
     const db = client.db(dbName);
@@ -90,4 +140,10 @@ export async function closeConnection(): Promise<void> {
 // Handle process termination
 process.on('SIGINT', () => {
   void closeConnection().then(() => process.exit(0));
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason) => {
+  Logger.error(handleError(reason instanceof Error ? reason : new Error(String(reason))));
+  void closeConnection().then(() => process.exit(1));
 });

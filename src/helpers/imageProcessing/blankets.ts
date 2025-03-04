@@ -33,28 +33,28 @@ export async function resizeBlanketImage(
 
     // Create the main product image (8228x6260)
     const mainImageBuffer = await processImage(buffer, 8228, 6260);
-    createFile(dateDir, `${filename}-${fileId}-8228x6260.jpg`, mainImageBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-8228x6260.jpg`, mainImageBuffer);
 
     // Create the thumbnail image (1500x1500)
     const thumbnailBuffer = await processImage(buffer, 1500, 1500, {
       fit: 'contain',
       position: 'center',
     });
-    createFile(dateDir, `${filename}-${fileId}-1500x1500.jpg`, thumbnailBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-1500x1500.jpg`, thumbnailBuffer);
 
     // Create the mockup image (1000x1000)
     const mockupBuffer = await processImage(buffer, 1000, 1000, {
       fit: 'contain',
       position: 'center',
     });
-    createFile(dateDir, `${filename}-${fileId}-1000x1000.jpg`, mockupBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-1000x1000.jpg`, mockupBuffer);
 
     // Create the small mockup image (570x570)
     const smallMockupBuffer = await processImage(buffer, 570, 570, {
       fit: 'contain',
       position: 'center',
     });
-    createFile(dateDir, `${filename}-${fileId}-570x570.jpg`, smallMockupBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-570x570.jpg`, smallMockupBuffer);
 
     Logger.info(`Successfully processed blanket images for ${filename}`);
   } catch (error: unknown) {

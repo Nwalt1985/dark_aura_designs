@@ -7,7 +7,69 @@
 import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { Logger, handleError, ValidationError } from '../../errors';
+
+// Simple in-memory cache for processed images
+interface CacheEntry {
+  buffer: Buffer;
+  timestamp: number;
+}
+
+// Cache configuration
+const CACHE_MAX_SIZE = 100; // Maximum number of items in cache
+const CACHE_TTL = 1000 * 60 * 30; // 30 minutes TTL
+const imageCache = new Map<string, CacheEntry>();
+
+/**
+ * Generates a cache key for an image processing operation
+ *
+ * @param {Buffer} buffer - The image buffer
+ * @param {Object} params - Processing parameters
+ * @returns {string} A unique cache key
+ */
+function generateCacheKey(
+  buffer: Buffer,
+  params: {
+    width: number;
+    height: number;
+    rotate?: number;
+    extract?: { left: number; top: number; width: number; height: number };
+    fit?: keyof sharp.FitEnum;
+    position?: string;
+  },
+): string {
+  // Create a hash of the buffer content - using a small sample of the buffer for performance
+  const sampleSize = Math.min(1024, buffer.length);
+  const sample = buffer.subarray(0, sampleSize);
+  const bufferHash = crypto.createHash('md5').update(sample.toString('binary')).digest('hex');
+
+  // Combine with processing parameters
+  const paramsString = JSON.stringify(params);
+  return `${bufferHash}_${paramsString}`;
+}
+
+/**
+ * Manages the image cache to prevent it from growing too large
+ */
+function manageCache(): void {
+  if (imageCache.size <= CACHE_MAX_SIZE) return;
+
+  // If cache exceeds max size, remove oldest entries
+  const now = Date.now();
+  const entries = Array.from(imageCache.entries());
+
+  // First remove expired entries
+  const expiredEntries = entries.filter(([_, entry]) => now - entry.timestamp > CACHE_TTL);
+  expiredEntries.forEach(([key]) => imageCache.delete(key));
+
+  // If still too large, remove oldest entries
+  if (imageCache.size > CACHE_MAX_SIZE) {
+    const sortedEntries = entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    const entriesToRemove = sortedEntries.slice(0, sortedEntries.length - CACHE_MAX_SIZE);
+    entriesToRemove.forEach(([key]) => imageCache.delete(key));
+  }
+}
 
 /**
  * Validates if a directory exists and creates it if it doesn't.
@@ -29,6 +91,7 @@ export function validateAndCreateDirectory(directoryPath: string): void {
 
 /**
  * Processes an image with the specified dimensions and optional transformations.
+ * Uses caching to improve performance for repeated operations.
  *
  * @param {Buffer} buffer - The image buffer to process
  * @param {number} width - The target width for the image
@@ -53,6 +116,16 @@ export async function processImage(
   },
 ): Promise<Buffer> {
   try {
+    // Check if we have this image in cache
+    const cacheKey = generateCacheKey(buffer, { width, height, ...options });
+    const cachedImage = imageCache.get(cacheKey);
+
+    if (cachedImage && Date.now() - cachedImage.timestamp < CACHE_TTL) {
+      Logger.info('Using cached image');
+      return cachedImage.buffer;
+    }
+
+    // Process the image if not in cache
     let sharpInstance = sharp(buffer);
 
     if (options?.rotate) {
@@ -70,7 +143,18 @@ export async function processImage(
       sharpInstance = sharpInstance.extract(options.extract);
     }
 
-    return await sharpInstance.jpeg().toBuffer();
+    const processedBuffer = await sharpInstance.jpeg().toBuffer();
+
+    // Store in cache
+    imageCache.set(cacheKey, {
+      buffer: processedBuffer,
+      timestamp: Date.now(),
+    });
+
+    // Manage cache size
+    manageCache();
+
+    return processedBuffer;
   } catch (error: unknown) {
     const handledError = handleError(error);
     Logger.error(handledError);

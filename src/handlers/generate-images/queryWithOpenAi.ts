@@ -13,8 +13,16 @@ import {
   wovenBlanketGenericKeywords,
 } from './genericKeywords';
 import { ProductName } from '../../models/types/listing';
+import { Logger, handleError, ExternalServiceError } from '../../errors';
 
-const openai = new OpenAI();
+// Initialize OpenAI client with API key from environment
+const openai = new OpenAI({
+  apiKey: process.env['OPENAI_API_KEY'],
+});
+
+// Retry configuration
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
 
 /**
  * Map of product types to their respective generic keywords.
@@ -169,61 +177,134 @@ function generatePromptTemplate(config: ProductPromptConfig): string {
 }
 
 /**
+ * Executes an OpenAI API call with retry logic
+ *
+ * @param {Function} apiCall - Function that makes the API call
+ * @param {string} operationName - Name of the operation for logging
+ * @returns {Promise<T>} The API response
+ * @throws {ExternalServiceError} If all retry attempts fail
+ */
+async function executeWithRetry<T>(apiCall: () => Promise<T>, operationName: string): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await apiCall();
+    } catch (error: unknown) {
+      lastError = error;
+      const handledError = handleError(error);
+
+      // Check if we should retry based on error type
+      const isRateLimitError =
+        error instanceof Error &&
+        (error.message.includes('rate_limit') || error.message.includes('429'));
+
+      if (
+        attempt < MAX_RETRIES &&
+        (isRateLimitError || (error instanceof Error && error.message.includes('timeout')))
+      ) {
+        const delay = RETRY_DELAY_MS * attempt;
+        Logger.warn(`${operationName} attempt ${attempt} failed. Retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+
+      Logger.error(handledError);
+      break;
+    }
+  }
+
+  throw new ExternalServiceError(
+    `${operationName} failed after ${MAX_RETRIES} attempts`,
+    lastError,
+  );
+}
+
+/**
  * Analyzes an image using OpenAI to generate product metadata.
  *
  * @param {Buffer} image - Image buffer to analyze
  * @param {ProductName} type - Type of product for context
  * @returns {Promise<ImageDataResponse>} Promise resolving to structured image data
- * @throws {Error} If OpenAI request fails or response is invalid
+ * @throws {ExternalServiceError} If OpenAI request fails or response is invalid
  */
 export async function getImageData(image: Buffer, type: ProductName): Promise<ImageDataResponse> {
   const config = productPromptConfigs[type];
   if (!config) {
-    throw new Error(`No prompt configuration found for product type: ${type}`);
+    throw new ExternalServiceError(`No prompt configuration found for product type: ${type}`);
   }
 
   const promptText = generatePromptTemplate(config);
   const base64Image = image.toString('base64');
 
-  const response = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'text',
-            text: promptText,
-          },
-          {
-            type: 'image_url',
-            image_url: {
-              url: `data:image/jpeg;base64,${base64Image}`,
+  try {
+    const response = await executeWithRetry(
+      async () =>
+        openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: promptText,
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:image/jpeg;base64,${base64Image}`,
+                  },
+                },
+              ],
             },
-          },
-        ],
-      },
-    ],
-    max_tokens: 1000,
-    response_format: { type: 'json_object' },
-  });
+          ],
+          max_tokens: 1000,
+          response_format: { type: 'json_object' },
+        }),
+      'OpenAI image analysis',
+    );
 
-  const content =
-    response.choices && response.choices[0] && response.choices[0].message
-      ? response.choices[0].message.content || '{}'
-      : '{}';
-  const result = JSON.parse(content) as ImageDataResponse;
+    const content =
+      response.choices && response.choices[0] && response.choices[0].message
+        ? response.choices[0].message.content || '{}'
+        : '{}';
 
-  if (result.keywords && result.keywords.length === 0) {
-    throw new Error('No keywords generated');
+    let result: ImageDataResponse;
+
+    try {
+      result = JSON.parse(content) as ImageDataResponse;
+    } catch (parseError) {
+      throw new ExternalServiceError('Failed to parse OpenAI response', {
+        content,
+        parseError,
+      });
+    }
+
+    if (!result.keywords || result.keywords.length === 0) {
+      throw new ExternalServiceError('No keywords generated in OpenAI response');
+    }
+
+    if (!result.title) {
+      throw new ExternalServiceError('No title generated in OpenAI response');
+    }
+
+    const keywordsWithGeneric = generateKeywordArray(result.keywords, type);
+
+    const resultWithGenericKeywords = {
+      ...result,
+      keywords: keywordsWithGeneric,
+    };
+
+    return resultWithGenericKeywords;
+  } catch (error: unknown) {
+    const handledError = handleError(error);
+    Logger.error(handledError);
+
+    if (error instanceof ExternalServiceError) {
+      throw error;
+    }
+
+    throw new ExternalServiceError('Failed to generate image data with OpenAI', error);
   }
-
-  const keywordsWithGeneric = generateKeywordArray(result.keywords, type);
-
-  const resultWithGenericKeywords = {
-    ...result,
-    keywords: keywordsWithGeneric,
-  };
-
-  return resultWithGenericKeywords;
 }

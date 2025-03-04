@@ -31,6 +31,7 @@ export interface ErrorResponse {
   code: number;
   details?: unknown;
   stack?: string;
+  context?: Record<string, unknown>;
 }
 
 /**

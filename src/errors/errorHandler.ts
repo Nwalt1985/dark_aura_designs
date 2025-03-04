@@ -12,6 +12,21 @@ import { ZodError } from 'zod';
 import { AxiosError } from 'axios';
 
 /**
+ * Captures additional context information about the current execution environment
+ * to help with debugging and error analysis.
+ *
+ * @returns {Record<string, unknown>} Object containing context information
+ */
+function captureErrorContext(): Record<string, unknown> {
+  return {
+    timestamp: new Date().toISOString(),
+    nodeVersion: process.version,
+    memoryUsage: process.memoryUsage(),
+    // Add any other relevant context information
+  };
+}
+
+/**
  * Converts any error type into a standardized error response.
  * Handles different error classes differently to extract the most relevant information.
  *
@@ -19,9 +34,15 @@ import { AxiosError } from 'axios';
  * @returns {ErrorResponse} Standardized error response object
  */
 export function handleError(error: unknown): ErrorResponse {
+  const context = captureErrorContext();
+
   // Already handled errors
   if (error instanceof CustomError) {
-    return error.toJSON();
+    const errorResponse = error.toJSON();
+    return {
+      ...errorResponse,
+      context,
+    };
   }
 
   // Zod validation errors
@@ -31,6 +52,7 @@ export function handleError(error: unknown): ErrorResponse {
       message: 'Validation error',
       code: StatusCodes.BAD_REQUEST,
       details: error.errors,
+      context,
     };
   }
 
@@ -47,6 +69,7 @@ export function handleError(error: unknown): ErrorResponse {
           method: error.config?.method,
         },
       },
+      context,
     };
   }
 
@@ -57,6 +80,7 @@ export function handleError(error: unknown): ErrorResponse {
       message: error.message,
       code: StatusCodes.INTERNAL_SERVER_ERROR,
       stack: error.stack,
+      context,
     };
   }
 
@@ -66,5 +90,6 @@ export function handleError(error: unknown): ErrorResponse {
     message: 'An unexpected error occurred',
     code: StatusCodes.INTERNAL_SERVER_ERROR,
     details: error,
+    context,
   };
 }
