@@ -20,6 +20,7 @@ import { generateListingConfig } from './listingConfig';
 import { ProductName, Product, Marketplace } from '../../models/types/listing';
 import { DateTime } from 'luxon';
 import { Logger, handleError, ExternalServiceError } from '../../errors';
+import { closeConnection } from '../../database';
 
 import dotenv from 'dotenv';
 
@@ -79,11 +80,12 @@ void (async (): Promise<void> => {
       await createPrintifyListingsData(item, uploadedImages, product);
     }
 
-    process.exit(0);
+    // Close the database connection before exiting
+    await closeConnection();
   } catch (error: unknown) {
     const handledError = handleError(error);
     Logger.error(handledError);
-    process.exit(1);
+    await closeConnection();
   }
 })();
 

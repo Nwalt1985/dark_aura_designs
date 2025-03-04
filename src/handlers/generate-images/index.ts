@@ -12,6 +12,7 @@ import { hideBin } from 'yargs/helpers';
 import { getProductDetails } from '../../helpers';
 import { Marketplace, ProductName } from '../../models/types/listing';
 import { ErrorType, Logger } from '../../errors';
+import { closeConnection } from '../../database';
 
 /**
  * Command-line argument parser configuration.
@@ -53,6 +54,8 @@ void (async (): Promise<void> => {
 
     await generateImagesFromRescale(product, argv.limit);
 
+    // Close the database connection before exiting
+    await closeConnection();
     return;
   } catch (err) {
     let statusCode;
@@ -76,5 +79,8 @@ void (async (): Promise<void> => {
       message: message,
       details: error,
     });
+
+    // Make sure to close the database connection even if there's an error
+    await closeConnection();
   }
 })();

@@ -178,7 +178,7 @@ export async function generateImagesFromRescale(product: Product, limit: number)
       const file = files[i];
       if (!file) continue;
 
-      const fileId = Math.floor(Math.random() * 9000) + 1000;
+      const fileId = Math.floor(Math.random() * 900000) + 100000;
       const filePath = path.join(rescaleDir, file);
       const fileName = file.replace(/\.(png|jpg)$/, '').toLowerCase();
 
