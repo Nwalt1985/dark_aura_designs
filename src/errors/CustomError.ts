@@ -57,7 +57,10 @@ export class CustomError extends Error {
     this.code = code;
     this.details = details;
     this.name = this.constructor.name;
-    Error.captureStackTrace(this, this.constructor);
+    // Check if captureStackTrace is available (it may not be in all environments)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor);
+    }
   }
 
   /**

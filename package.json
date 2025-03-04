@@ -18,10 +18,14 @@
     "generate-all-listings-shopify": "npm run generate-listings -- --product='blanket' --marketplace='Shopify' && npm run generate-listings -- --product='woven' --marketplace='Shopify' && npm run generate-listings -- --product='pillow' --marketplace='Shopify' && npm run generate-listings -- --product='desk mat' --marketplace='Shopify'",
     "update-all": "npm run update-etsy -- --product='blanket' && npm run update-etsy -- --product='woven' && npm run update-etsy -- --product='pillow' && npm run update-etsy -- --product='desk mat'",
     "rename-images": "npx tsc && node ./.build/src/scripts/rename-files.js",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint ./src --ext .ts --ignore-pattern \"**/__tests__/**\"",
+    "lint:fix": "eslint ./src --ext .ts --ignore-pattern \"**/__tests__/**\" --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "check": "npm run lint && npm run typecheck"
+    "check": "npm run lint && npm run typecheck",
+    "test": "jest --no-typecheck",
+    "test:typecheck": "jest",
+    "test:watch": "jest --watch --no-typecheck",
+    "test:coverage": "jest --coverage --no-typecheck"
   },
   "engines": {
     "node": ">=20.12.2"
@@ -30,6 +34,7 @@
     "@eslint/js": "^9.21.0",
     "@types/express": "^5.0.0",
     "@types/he": "^1.2.3",
+    "@types/jest": "^29.5.14",
     "@types/yargs": "^17.0.33",
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
@@ -37,8 +42,10 @@
     "eslint-config-prettier": "^10.0.2",
     "eslint-plugin-prettier": "^5.2.3",
     "husky": "^9.1.7",
+    "jest": "^29.7.0",
     "lint-staged": "^15.4.3",
     "prettier": "^3.5.3",
+    "ts-jest": "^29.2.6",
     "ts-node": "^10.4.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.2"

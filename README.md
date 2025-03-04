@@ -115,6 +115,31 @@ Note: Prices and core details will still need manual updates.
 
 ## Development
 
+### Testing
+
+```bash
+# Run tests with type checking disabled (faster)
+npm test
+
+# Run tests with type checking enabled
+npm run test:typecheck
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+The project uses Jest for testing. Tests are located in the `src/__tests__` directory, organized to mirror the structure of the source code.
+
+#### Test Structure
+
+- `src/__tests__/handlers/` - Tests for handler functions
+- `src/__tests__/service/` - Tests for service modules
+- `src/__tests__/database/` - Tests for database operations
+- `src/__tests__/errors/` - Tests for error handling
+
 ### Code Quality
 
 ```bash
