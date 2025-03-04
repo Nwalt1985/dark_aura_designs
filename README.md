@@ -1,71 +1,135 @@
-# Generate Images
+# Dark Aura Designs
 
-To generate images for listing, run the following command:
+This repository contains scripts for automating the creation and management of product listings across multiple marketplaces.
+
+## Generate Images
+
+To generate images for a product listing, run the following command:
 
 ```bash
-npm run generate-images -- --product="<product>" --limit=5
+npm run generate-images -- --product="<product>" --marketplace="<marketplace>" --limit=10
 ```
 
 Options:
 | Option | Values | Required |
-| ------ | ----- | ----- |
-| product | 'desk mat', 'sleeve' | true |
-| limit | number (default 5) | false |
+| ------ | ------ | -------- |
+| product | 'desk mat', 'pillow', 'blanket', 'woven' | true |
+| marketplace | 'Etsy', 'Shopify' | true |
+| limit | number (default 10) | false |
 
-If the exists flag is set to true, the script will not generate images from Dalle-E. It will process the images that exist in the rescale folder. After it has processed the images, it will remove the file from the folder.
+### Generate All Images at Once
 
-# Generate the mock up images
-
-Review the images that have been generated. Make adjustments to the images as needed. Once approved, open Photoshop and run script:
-
-File > Scripts > Browse > select the script file (desk-mat-mockup.jsx or laptop-sleeve-mockup.jsx)
-
-# Generate the Listing
-
-To generate a listing, run the following command:
+To generate images for all products for Etsy:
 
 ```bash
-npm run generate-listings -- --product="<product>" --limit=5
+npm run generate-all-rescale-etsy
 ```
 
-This will upload the images to Printify and generate a listing for the product.
+To generate images for all products for Shopify:
 
-# Manually Review Uploaded Images
+```bash
+npm run generate-all-rescale-shopify
+```
 
-Navigate to the Printify Dashboard and review the uploaded images. Remove the default images from the mockup library and add the generated mockup + some defaults.
+## Generate Listings
 
-The title can be replaced with better SEO friendly titles.
+After reviewing and approving the generated images, you can create listings with:
 
-Validate the description and make sure it is accurate.
+```bash
+npm run generate-listings -- --product="<product>" --marketplace="<marketplace>" --limit=10
+```
 
-Set the shipping profile.
+Options:
+| Option | Values | Required |
+| ------ | ------ | -------- |
+| product | 'desk mat', 'pillow', 'blanket', 'woven' | true |
+| marketplace | 'Etsy', 'Shopify' | true |
+| limit | number (default 10) | false |
 
-Publish the listing. For the next steps to work the status of the listing must be published.
+### Generate All Listings at Once
 
-# Etsy Auth
+To generate listings for all products for Etsy:
 
-Start the auth server with the following command:
+```bash
+npm run generate-all-listings-etsy
+```
+
+To generate listings for all products for Shopify:
+
+```bash
+npm run generate-all-listings-shopify
+```
+
+## Manually Review Uploaded Images
+
+Navigate to the Printify Dashboard and review the uploaded images:
+
+1. Remove the default images from the mockup library
+2. Add the generated mockup + some defaults
+3. Update the title with SEO-friendly text
+4. Validate the description for accuracy
+5. Set the shipping profile
+6. Publish the listing (must be published for the next steps to work)
+
+## Etsy Authentication
+
+Start the auth server with:
 
 ```bash
 npm run auth-server
 ```
 
-navigate to `http://localhost:3003` in your browser to view the auth server. Click the hyperlink and follow sign in instructions.
+Navigate to `http://localhost:3003` in your browser. Click the hyperlink and follow the sign-in instructions.
 
-The access token should be returned in the console. The token is stored in our database, it will be automatically used in any API endpoints that require Oauth authentication.
+The access token will be returned in the console and stored in the database. It will be automatically used for any API endpoints requiring OAuth authentication.
 
-Stop the auth server:
-
-```bash
-crtl + c
-```
-
-# Update Etsy Listing
-
-To update a listing, run the following command:
+Stop the auth server with:
 
 ```bash
-npm run update-etsy -- --product="<product>"
+ctrl + c
 ```
 
-This will update the listing with the tags, materials, auto renew and production partner. Prices and core details will still need manual updates.
+## Update Etsy Listing
+
+To update a listing with tags, materials, auto-renew settings, and production partner information:
+
+```bash
+npm run update-etsy -- --product="<product>" --limit=25
+```
+
+Options:
+| Option | Values | Required |
+| ------ | ------ | -------- |
+| product | 'desk mat', 'pillow', 'blanket', 'woven' | true |
+| limit | number (default 25) | false |
+
+### Update All Listings at Once
+
+To update all product listings on Etsy:
+
+```bash
+npm run update-all
+```
+
+Note: Prices and core details will still need manual updates.
+
+## Development
+
+### Code Quality
+
+```bash
+# Run linter
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Type checking
+npm run typecheck
+
+# Format code
+npm run format
+
+# Run all checks
+npm run check
+```
