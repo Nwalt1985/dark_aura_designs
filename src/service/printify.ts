@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import {
   PrintifyImageResponseType,
   PrintifyGetUploadsResponseType,
@@ -7,31 +7,65 @@ import {
   PrintifyProductUploadRequest,
 } from '../models/schemas/printify';
 import dotenv from 'dotenv';
+import { ExternalServiceError, handleError, Logger } from '../errors';
 
 dotenv.config();
 
-const printifyApiKey = process.env.PRINTIFY_API_KEY || '';
+const printifyApiKey = process.env['PRINTIFY_API_KEY'] || '';
+
+/**
+ * Default headers for Printify API calls
+ */
+const defaultHeaders = {
+  'Content-Type': 'application/json',
+  'User-Agent': 'NodeJS',
+  Authorization: `Bearer ${printifyApiKey}`,
+};
+
+/**
+ * Utility function to make Printify API calls with consistent error handling
+ * @param method HTTP method
+ * @param url API endpoint
+ * @param data Request body (for POST/PUT/PATCH)
+ * @param errorMessage Error message to use if the call fails
+ * @returns Result of the API call
+ */
+async function executePrintifyApiCall<T>(
+  method: string,
+  url: string,
+  data?: unknown,
+  errorMessage = 'Printify API error',
+): Promise<T> {
+  try {
+    const config: AxiosRequestConfig = {
+      method,
+      url,
+      headers: defaultHeaders,
+      data,
+    };
+
+    const response: AxiosResponse<T> = await axios(config);
+    return response.data;
+  } catch (error: unknown) {
+    const handledError = handleError(error);
+    Logger.error(handledError);
+    throw new ExternalServiceError(errorMessage, error);
+  }
+}
 
 export async function uploadImages(
   buffer: Buffer,
   filename: string,
 ): Promise<PrintifyImageResponseType> {
-  const { data } = await axios.post<PrintifyImageResponseType>(
-    `https://api.printify.com/v1/uploads/images.json`,
+  return executePrintifyApiCall<PrintifyImageResponseType>(
+    'post',
+    'https://api.printify.com/v1/uploads/images.json',
     {
       file_name: filename,
       contents: buffer.toString('base64'),
     },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'NodeJS',
-        Authorization: `Bearer ${printifyApiKey}`,
-      },
-    },
+    'Failed to upload image to Printify',
   );
-
-  return data;
 }
 
 export async function getUploadedImages(): Promise<{
@@ -39,17 +73,13 @@ export async function getUploadedImages(): Promise<{
   length: number;
   totalImages: number;
 }> {
-  const imageData = [];
+  const imageData: PrintifyImageResponseType[] = [];
 
-  const { data } = await axios.get<PrintifyGetUploadsResponseType>(
-    `https://api.printify.com/v1/uploads.json`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'NodeJS',
-        Authorization: `Bearer ${printifyApiKey}`,
-      },
-    },
+  const data = await executePrintifyApiCall<PrintifyGetUploadsResponseType>(
+    'get',
+    'https://api.printify.com/v1/uploads.json',
+    undefined,
+    'Failed to get uploaded images from Printify',
   );
 
   imageData.push(...data.data);
@@ -58,18 +88,14 @@ export async function getUploadedImages(): Promise<{
     const pages = data.to;
 
     for (let i = 2; i <= pages; i++) {
-      const nextPage = await axios.get<PrintifyGetUploadsResponseType>(
+      const nextPage = await executePrintifyApiCall<PrintifyGetUploadsResponseType>(
+        'get',
         `https://api.printify.com/v1/uploads.json?page=${i}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'NodeJS',
-            Authorization: `Bearer ${printifyApiKey}`,
-          },
-        },
+        undefined,
+        `Failed to get uploaded images from Printify (page ${i})`,
       );
 
-      imageData.push(...nextPage.data.data);
+      imageData.push(...nextPage.data);
     }
   }
 
@@ -80,19 +106,13 @@ export async function createNewProduct(
   productData: PrintifyProductUploadRequestType,
   shopId: string,
 ): Promise<PrintifyProductUploadResponseType> {
+  // Validate the product data
   PrintifyProductUploadRequest.parse(productData);
 
-  const response = await axios.post<PrintifyProductUploadResponseType>(
+  return executePrintifyApiCall<PrintifyProductUploadResponseType>(
+    'post',
     `https://api.printify.com/v1/shops/${shopId}/products.json`,
     productData,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'NodeJS',
-        Authorization: `Bearer ${printifyApiKey}`,
-      },
-    },
+    'Failed to create new product on Printify',
   );
-
-  return response.data;
 }

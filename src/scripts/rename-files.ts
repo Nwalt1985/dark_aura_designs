@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 const FOLDER_PATH = path.resolve(
-  process.env.HOME || '',
+  process.env['HOME'] || '',
   `Desktop/dark_aura_designs/rescale_pillow_covers`,
 );
 

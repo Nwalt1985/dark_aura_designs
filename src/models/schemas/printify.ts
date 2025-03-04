@@ -169,3 +169,22 @@ export const PrintifyProductUploadResponse = z.object({
 });
 
 export type PrintifyProductUploadResponseType = z.infer<typeof PrintifyProductUploadResponse>;
+
+export const PrintifyPaginatedResponse = z.object({
+  current_page: z.number(),
+  data: z.array(
+    z
+      .object({
+        id: z.string(),
+        is_deleted: z.boolean(),
+        visible: z.boolean(),
+      })
+      .and(PrintifyProductUploadRequest),
+  ),
+  last_page: z.number(),
+  per_page: z.number(),
+  total: z.number(),
+  next_page_url: z.string().nullable(),
+});
+
+export type PrintifyPaginatedResponse = z.infer<typeof PrintifyPaginatedResponse>;

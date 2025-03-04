@@ -5,7 +5,7 @@ import { getAllActiveListings } from '../../service/etsy';
 dotenv.config();
 
 void (async (): Promise<void> => {
-  const shopId = process.env.ETSY_SHOP_ID as string;
+  const shopId = process.env['ETSY_SHOP_ID'] as string;
 
   const activeListings = await getAllActiveListings(shopId);
 
@@ -25,7 +25,7 @@ void (async (): Promise<void> => {
   for (const listing of listings) {
     const { listingId, description, title } = listing;
 
-    const firstSentence = description.split('.')[0].trim();
+    const firstSentence = description?.split('.')?.[0]?.trim() || description || '';
 
     await updateEtsyListingId(firstSentence, listingId, title);
   }

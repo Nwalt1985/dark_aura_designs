@@ -22,8 +22,8 @@ const createPlaceholder = (): {
 });
 
 export const deskMatConfig = {
-  print_provider_id: Number(process.env.DESK_MAT_PRINT_PROVIDER_ID) || 0,
-  blueprint_id: Number(process.env.DESK_MAT_PRINTIFY_BLUEPRINT_ID) || 0,
+  print_provider_id: Number(process.env['DESK_MAT_PRINT_PROVIDER_ID']) || 0,
+  blueprint_id: Number(process.env['DESK_MAT_PRINTIFY_BLUEPRINT_ID']) || 0,
   variants: [
     {
       id: 81075,
@@ -64,8 +64,8 @@ export const deskMatConfig = {
 };
 
 export const pillowConfig = {
-  print_provider_id: Number(process.env.PILLOW_PRINT_PROVIDER_ID) || 0,
-  blueprint_id: Number(process.env.PILLOW_PRINTIFY_BLUEPRINT_ID) || 0,
+  print_provider_id: Number(process.env['PILLOW_PRINT_PROVIDER_ID']) || 0,
+  blueprint_id: Number(process.env['PILLOW_PRINTIFY_BLUEPRINT_ID']) || 0,
   variants: [
     {
       id: 79311,
@@ -108,8 +108,8 @@ export const pillowConfig = {
 };
 
 export const pillowCoverConfig = {
-  print_provider_id: Number(process.env.PILLOW_CASE_PRINT_PROVIDER_ID) || 0,
-  blueprint_id: Number(process.env.PILLOW_CASE_PRINTIFY_BLUEPRINT_ID) || 0,
+  print_provider_id: Number(process.env['PILLOW_CASE_PRINT_PROVIDER_ID']) || 0,
+  blueprint_id: Number(process.env['PILLOW_CASE_PRINTIFY_BLUEPRINT_ID']) || 0,
   variants: [
     {
       id: 79394,
@@ -152,8 +152,8 @@ export const pillowCoverConfig = {
 };
 
 export const BlanketConfig = {
-  print_provider_id: Number(process.env.BLANKET_PRINT_PROVIDER_ID) || 0,
-  blueprint_id: Number(process.env.BLANKET_PRINTIFY_BLUEPRINT_ID) || 0,
+  print_provider_id: Number(process.env['BLANKET_PRINT_PROVIDER_ID']) || 0,
+  blueprint_id: Number(process.env['BLANKET_PRINTIFY_BLUEPRINT_ID']) || 0,
   variants: [
     {
       id: 102314,
@@ -194,8 +194,8 @@ export const BlanketConfig = {
 };
 
 export const WovenBlanketConfig = {
-  print_provider_id: Number(process.env.WOVEN_BLANKET_PRINT_PROVIDER_ID) || 0,
-  blueprint_id: Number(process.env.WOVEN_BLANKET_PRINTIFY_BLUEPRINT_ID) || 0,
+  print_provider_id: Number(process.env['WOVEN_BLANKET_PRINT_PROVIDER_ID']) || 0,
+  blueprint_id: Number(process.env['WOVEN_BLANKET_PRINTIFY_BLUEPRINT_ID']) || 0,
   variants: [
     {
       id: 112797,
@@ -253,68 +253,123 @@ export function generateListingConfig(
     case ProductName.DESK_MAT:
       config = cloneDeep(deskMatConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('9450x4650'),
-      )!.response.id;
+      if (config.print_areas?.[0]?.placeholders?.[0]?.images?.[0]) {
+        const image9450x4650 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('9450x4650'),
+        );
+        if (image9450x4650) {
+          config.print_areas[0].placeholders[0].images[0].id = image9450x4650.response.id;
+        }
+      }
 
-      config.print_areas[1].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('4320x3630'),
-      )!.response.id;
+      if (config.print_areas?.[1]?.placeholders?.[0]?.images?.[0]) {
+        const image4320x3630 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('4320x3630'),
+        );
+        if (image4320x3630) {
+          config.print_areas[1].placeholders[0].images[0].id = image4320x3630.response.id;
+        }
+      }
 
-      config.print_areas[2].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('7080x4140'),
-      )!.response.id;
+      if (config.print_areas?.[2]?.placeholders?.[0]?.images?.[0]) {
+        const image7080x4140 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('7080x4140'),
+        );
+        if (image7080x4140) {
+          config.print_areas[2].placeholders[0].images[0].id = image7080x4140.response.id;
+        }
+      }
 
       return config;
 
     case ProductName.PILLOW_COVER:
       config = cloneDeep(pillowCoverConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('4050x4050'),
-      )!.response.id;
+      if (config.print_areas?.[0]?.placeholders?.[0]?.images?.[0]) {
+        const image4050x4050 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('4050x4050'),
+        );
+        if (image4050x4050) {
+          config.print_areas[0].placeholders[0].images[0].id = image4050x4050.response.id;
+        }
+      }
 
       return config;
     case ProductName.PILLOW:
       config = cloneDeep(pillowConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('4050x4050'),
-      )!.response.id;
+      if (config.print_areas?.[0]?.placeholders?.[0]?.images?.[0]) {
+        const image4050x4050 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('4050x4050'),
+        );
+        if (image4050x4050) {
+          config.print_areas[0].placeholders[0].images[0].id = image4050x4050.response.id;
+        }
+      }
 
       return config;
 
     case ProductName.BLANKET:
       config = cloneDeep(BlanketConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('8228x6260'),
-      )!.response.id;
+      if (config.print_areas?.[0]?.placeholders?.[0]?.images?.[0]) {
+        const image8228x6260 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('8228x6260'),
+        );
+        if (image8228x6260) {
+          config.print_areas[0].placeholders[0].images[0].id = image8228x6260.response.id;
+        }
+      }
 
-      config.print_areas[1].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('6299x5276'),
-      )!.response.id;
+      if (config.print_areas?.[1]?.placeholders?.[0]?.images?.[0]) {
+        const image6260x8228 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('6260x8228'),
+        );
+        if (image6260x8228) {
+          config.print_areas[1].placeholders[0].images[0].id = image6260x8228.response.id;
+        }
+      }
 
-      config.print_areas[2].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('4252x3307'),
-      )!.response.id;
+      if (config.print_areas?.[2]?.placeholders?.[0]?.images?.[0]) {
+        const image8228x6260_2 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('8228x6260'),
+        );
+        if (image8228x6260_2) {
+          config.print_areas[2].placeholders[0].images[0].id = image8228x6260_2.response.id;
+        }
+      }
 
       return config;
 
     case ProductName.WOVEN_BLANKET:
       config = cloneDeep(WovenBlanketConfig);
 
-      config.print_areas[0].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('7680x5760'),
-      )!.response.id;
+      if (config.print_areas?.[0]?.placeholders?.[0]?.images?.[0]) {
+        const image7680x5760 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('7680x5760'),
+        );
+        if (image7680x5760) {
+          config.print_areas[0].placeholders[0].images[0].id = image7680x5760.response.id;
+        }
+      }
 
-      config.print_areas[1].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('5760x4800'),
-      )!.response.id;
+      if (config.print_areas?.[1]?.placeholders?.[0]?.images?.[0]) {
+        const image5760x7680 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('5760x7680'),
+        );
+        if (image5760x7680) {
+          config.print_areas[1].placeholders[0].images[0].id = image5760x7680.response.id;
+        }
+      }
 
-      config.print_areas[2].placeholders[0].images[0].id = uploadedImagesArray.find((image) =>
-        image.response.file_name.includes('4992x3552'),
-      )!.response.id;
+      if (config.print_areas?.[2]?.placeholders?.[0]?.images?.[0]) {
+        const image7680x5760_2 = uploadedImagesArray.find((image) =>
+          image.response.file_name.includes('7680x5760'),
+        );
+        if (image7680x5760_2) {
+          config.print_areas[2].placeholders[0].images[0].id = image7680x5760_2.response.id;
+        }
+      }
 
       return config;
 

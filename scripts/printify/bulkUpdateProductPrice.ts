@@ -5,8 +5,8 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const printifyApiKey = process.env.PRINTIFY_API_KEY;
-const printifyShopId = process.env.DARK_AURA_ETSY_SHOP_ID;
+const printifyApiKey = process.env['PRINTIFY_API_KEY'];
+const printifyShopId = process.env['DARK_AURA_ETSY_SHOP_ID'];
 
 interface PrintifyPaginatedResponse {
   current_page: number;
@@ -50,18 +50,21 @@ interface PrintifyPaginatedResponse {
       currentPage++;
     }
 
-    const deskMatVariants = allProducts.map((product) => {
-      if (
-        product.blueprint_id === Number(process.env.DESK_MAT_PRINTIFY_BLUEPRINT_ID) && // <---- change to product blueprint id env variable
-        product.is_deleted === false &&
-        product.visible === true
-      ) {
-        return {
-          id: product.id,
-          variants: product.variants,
-        };
-      }
-    });
+    const deskMatVariants = allProducts
+      .map((product) => {
+        if (
+          product.blueprint_id === Number(process.env['DESK_MAT_PRINTIFY_BLUEPRINT_ID']) && // <---- change to product blueprint id env variable
+          product.is_deleted === false &&
+          product.visible === true
+        ) {
+          return {
+            id: product.id,
+            variants: product.variants,
+          };
+        }
+        return null; // Return null for products that don't match criteria
+      })
+      .filter((product): product is { id: string; variants: any[] } => product !== null);
 
     // Add delay function
     const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));

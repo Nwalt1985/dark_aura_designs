@@ -4,70 +4,118 @@ import { PromptResponse, PromptResponseType } from '../models/schemas/prompt';
 import { DateTime } from 'luxon';
 import he from 'he';
 import { UpdateListingData } from '../models/schemas/db';
-import { ObjectId } from 'mongodb';
+import { ObjectId, ClientSession, Collection } from 'mongodb';
+import { Logger, handleError, DatabaseError, NotFoundError } from '../errors';
+
+/**
+ * Utility function to execute database operations with proper error handling
+ * @param operation Function that performs the database operation
+ * @param errorMessage Error message to use if the operation fails
+ * @param useTransaction Whether to use a transaction for the operation
+ * @returns Result of the database operation
+ */
+async function executeDbOperation<T>(
+  operation: (collection: Collection, session?: ClientSession) => Promise<T>,
+  errorMessage: string,
+  useTransaction: boolean = false,
+): Promise<T> {
+  const { client, collection } = await mongoConnect();
+  let session: ClientSession | undefined;
+
+  try {
+    if (useTransaction) {
+      session = client.startSession();
+      let result: T | undefined;
+
+      await session.withTransaction(async () => {
+        result = await operation(collection, session);
+      });
+
+      if (result === undefined) {
+        throw new DatabaseError(`${errorMessage} - No result returned from transaction`);
+      }
+
+      return result;
+    } else {
+      return await operation(collection);
+    }
+  } catch (error: unknown) {
+    const handledError = handleError(error);
+    Logger.error(handledError);
+    throw new DatabaseError(errorMessage, error);
+  } finally {
+    if (session) {
+      await session.endSession();
+    }
+    await client.close();
+  }
+}
 
 export async function createDBListing(listing: z.infer<typeof PromptResponse>[]): Promise<{
   acknowledged: boolean;
   insertedCount: number;
   insertedIds: { [key: number]: ObjectId };
 }> {
-  const { client, collection } = await mongoConnect();
-
-  const result = await collection.insertMany(listing);
-
-  await client.close();
-
-  return result;
+  return executeDbOperation(
+    async (collection, session) => {
+      const result = await collection.insertMany(listing, { session });
+      if (!result) {
+        throw new DatabaseError('Failed to create listing - No result returned');
+      }
+      return result;
+    },
+    'Failed to create listing',
+    true,
+  );
 }
 
 export async function getAllListings(product: string): Promise<PromptResponseType[]> {
-  const { client, collection } = await mongoConnect();
-
-  const result = (await collection
-    .find({
-      listedAt: { $ne: null },
-      productType: {
-        $eq: product,
-      },
-    })
-    .toArray()) as unknown as PromptResponseType[];
-
-  await client.close();
-
-  return result;
+  return executeDbOperation(async (collection) => {
+    return (await collection
+      .find({
+        listedAt: { $ne: null },
+        productType: {
+          $eq: product,
+        },
+      })
+      .toArray()) as unknown as PromptResponseType[];
+  }, 'Failed to get all listings');
 }
 
 export async function getUnlisted(product: string): Promise<PromptResponseType[]> {
-  const { client, collection } = await mongoConnect();
-
-  const result = (await collection
-    .find({
-      listedAt: null,
-      deletedAt: null,
-      productType: {
-        $eq: product,
-      },
-    })
-    .toArray()) as unknown as PromptResponseType[];
-
-  await client.close();
-
-  return result;
+  return executeDbOperation(async (collection) => {
+    return (await collection
+      .find({
+        listedAt: null,
+        deletedAt: null,
+        productType: {
+          $eq: product,
+        },
+      })
+      .toArray()) as unknown as PromptResponseType[];
+  }, 'Failed to get unlisted items');
 }
 
 export async function deleteListingByFileName(filename: string): Promise<void> {
-  const { client, collection } = await mongoConnect();
+  return executeDbOperation(
+    async (collection, session) => {
+      const result = await collection.updateOne(
+        { filename },
+        {
+          $set: {
+            deletedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+          },
+        },
+        { session },
+      );
 
-  await collection.updateOne(
-    { filename },
-    {
-      $set: {
-        deletedAt: DateTime.now().toFormat('dd-MM-yyyy'),
-      },
+      if (result.matchedCount === 0) {
+        throw new NotFoundError(`No listing found with filename: ${filename}`);
+      }
     },
+    'Failed to delete listing',
+    true,
   );
-
-  await client.close();
 }
 
 export async function updateListing(
@@ -75,16 +123,28 @@ export async function updateListing(
   productType: string,
   data: UpdateListingData,
 ): Promise<void> {
-  const { client, collection } = await mongoConnect();
+  return executeDbOperation(
+    async (collection, session) => {
+      const result = await collection.updateOne(
+        { filename, productType },
+        { $set: data },
+        { session },
+      );
 
-  await collection.updateOne(
-    { filename, productType },
-    {
-      $set: data,
+      if (result.matchedCount === 0) {
+        throw new NotFoundError(
+          `No listing found with filename: ${filename} and productType: ${productType}`,
+        );
+      }
     },
+    'Failed to update listing',
+    true,
   );
+}
 
-  await client.close();
+function escapeRegex(string: string): string {
+  const decodedString = he.decode(string);
+  return decodedString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 export async function updateEtsyListingId(
@@ -92,43 +152,44 @@ export async function updateEtsyListingId(
   listingId: number,
   title: string,
 ): Promise<PromptResponseType | undefined> {
-  const { client, collection } = await mongoConnect();
+  return executeDbOperation(
+    async (collection, session) => {
+      const escapedSubstring = escapeRegex(description);
+      const query = {
+        description: { $regex: escapedSubstring, $options: 'i' },
+        deletedAt: null,
+      };
 
-  const escapedSubstring = escapeRegex(description);
+      const document = (await collection.findOne(query, {
+        session,
+      })) as unknown as
+        | (PromptResponseType & {
+            _id: object;
+          })
+        | null;
 
-  const query = {
-    description: { $regex: escapedSubstring, $options: 'i' }, // 'i' for case-insensitive
-    deletedAt: null,
-  };
+      if (!document) {
+        return undefined;
+      }
 
-  const document = (await collection.findOne(query)) as unknown as PromptResponseType & {
-    _id: object;
-  };
+      if (!document.etsyListingId) {
+        await collection.updateOne(
+          { _id: document._id },
+          {
+            $set: {
+              etsyListingId: listingId,
+              title: title,
+            },
+          },
+          { session },
+        );
+      }
 
-  if (!document) {
-    process.stdout.write(`No document found for description: ${description}\n`);
-    return;
-  }
-
-  if (!document.etsyListingId) {
-    await collection.updateOne(
-      { _id: document?._id },
-      {
-        $set: {
-          etsyListingId: listingId,
-          title: title,
-        },
-      },
-    );
-  }
-
-  await client.close();
-  return { ...document, etsyListingId: listingId };
-}
-
-function escapeRegex(string: string): string {
-  const decodedString = he.decode(string);
-  return decodedString.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special characters
+      return { ...document, etsyListingId: listingId } as PromptResponseType;
+    },
+    'Failed to update Etsy listing ID',
+    true,
+  );
 }
 
 export async function updateEtsyAuthCredentials(data: {

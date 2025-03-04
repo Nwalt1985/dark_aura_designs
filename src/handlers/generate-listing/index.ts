@@ -6,12 +6,12 @@ import { createNewProduct, getUploadedImages, uploadImages } from '../../service
 import { PrintifyImageResponseType } from '../../models/schemas/printify';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-
-import dotenv from 'dotenv';
 import { generateListingConfig } from './listingConfig';
 import { ProductName, Product, Marketplace } from '../../models/types/listing';
-import { StatusCodes } from 'http-status-codes';
 import { DateTime } from 'luxon';
+import { Logger, handleError, ExternalServiceError } from '../../errors';
+
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -41,45 +41,27 @@ const parser = yargs(hideBin(process.argv))
 void (async (): Promise<void> => {
   try {
     const argv = parser.parseSync();
-
     const product = getProductDetails(argv.product, argv.marketplace);
-
     const unlisted = await getUnlisted(product.name);
 
     if (!unlisted.length) {
-      process.stdout.write('No unlisted listings to create\n');
+      Logger.info('No unlisted listings to create');
       return;
     }
+
     const data = await dbTidy(unlisted, product);
-
     const limitedData = data.slice(0, argv.limit);
-
     const uploadedImages = await getUploadedImages();
 
-    process.stdout.write(`Creating ${limitedData.length} Printify listings\n`);
+    Logger.info(`Creating ${limitedData.length} Printify listings`);
 
     for (const item of limitedData) {
       await createPrintifyListingsData(item, uploadedImages, product);
     }
-
-    return;
-  } catch (err) {
-    let statusCode;
-    let message;
-
-    const error = err as Error;
-
-    switch (error.name) {
-      case 'ZodError':
-        statusCode = StatusCodes.BAD_REQUEST;
-        message = error.message;
-        break;
-      default:
-        statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
-        message = error.message;
-    }
-
-    console.error({ name: error.name, statusCode, message, error });
+  } catch (error: unknown) {
+    const handledError = handleError(error);
+    Logger.error(handledError);
+    process.exit(1);
   }
 })();
 
@@ -92,110 +74,123 @@ export async function createPrintifyListingsData(
   },
   product: Product,
 ): Promise<void> {
-  const bufferArray = getBuffer(unlisted.filename, product.baseDir);
+  let bufferArray;
+  try {
+    bufferArray = getBuffer(unlisted.filename, product.baseDir);
+    const uploadedImagesArray: {
+      fileId: string | null;
+      response: PrintifyImageResponseType;
+    }[] = [];
 
-  const uploadedImagesArray: {
-    fileId: string | null;
-    response: PrintifyImageResponseType;
-  }[] = [];
+    if (bufferArray.length) {
+      for (const buffer of bufferArray) {
+        if (buffer.filename.includes('mockup')) {
+          Logger.debug(`Skipping mockup image: ${buffer.filename}`);
+          continue;
+        }
 
-  if (bufferArray.length) {
-    for (const buffer of bufferArray) {
-      if (buffer.filename.includes('mockup')) {
-        process.stdout.write(`Skipping mockup image: ${buffer.filename}\n`);
-        continue;
+        const uploadedImage = uploadedImages.imageData.find(
+          (image) => image.file_name === buffer.filename,
+        );
+
+        if (!uploadedImage) {
+          Logger.info(`Uploading image: ${buffer.filename}`);
+          const uploaded = await uploadImages(buffer.base64, buffer.filename);
+          uploadedImagesArray.push({
+            response: uploaded,
+            fileId: buffer.fileId,
+          });
+        } else {
+          Logger.info(`Image already uploaded: ${buffer.filename}`);
+          continue;
+        }
       }
+    }
 
-      const uploadedImage = uploadedImages.imageData.find(
-        (image) => image.file_name === buffer.filename,
+    if (product.name === ProductName.PILLOW) {
+      const pillowCoverConfig = generateListingConfig(
+        uploadedImagesArray,
+        ProductName.PILLOW_COVER,
       );
+      const pillowConfig = generateListingConfig(uploadedImagesArray, ProductName.PILLOW);
 
-      if (!uploadedImage) {
-        process.stdout.write(`Uploading image: ${buffer.filename}\n`);
+      const [productResponse, productResponseCover] = await Promise.all([
+        createNewProduct(
+          {
+            title: unlisted.title,
+            description: unlisted.description,
+            blueprint_id: pillowConfig.blueprint_id,
+            print_provider_id: pillowConfig.print_provider_id,
+            tags: [],
+            variants: pillowConfig.variants,
+            print_areas: pillowConfig.print_areas,
+          },
+          product.shopId,
+        ),
+        createNewProduct(
+          {
+            title: `VARIATION ${unlisted.title.replace('Cushion', 'Cushion Cover')}`,
+            description: unlisted.description,
+            blueprint_id: pillowCoverConfig.blueprint_id,
+            print_provider_id: pillowCoverConfig.print_provider_id,
+            tags: [],
+            variants: pillowCoverConfig.variants,
+            print_areas: pillowCoverConfig.print_areas,
+          },
+          product.shopId,
+        ),
+      ]);
 
-        const uploaded = await uploadImages(buffer.base64, buffer.filename);
-        uploadedImagesArray.push({
-          response: uploaded,
-          fileId: buffer.fileId,
-        });
-      } else {
-        process.stdout.write(`Image already uploaded: ${buffer.filename}\n`);
-        return;
+      if (!productResponse.id) {
+        throw new ExternalServiceError('Failed to create pillow product');
       }
-    }
-  }
 
-  if (product.name === ProductName.PILLOW) {
-    const pillowCoverConfig = generateListingConfig(uploadedImagesArray, ProductName.PILLOW_COVER);
+      if (!productResponseCover.id) {
+        throw new ExternalServiceError('Failed to create pillow cover product');
+      }
 
-    const pillowConfig = generateListingConfig(uploadedImagesArray, ProductName.PILLOW);
+      await Promise.all([
+        updateListing(unlisted.filename, ProductName.PILLOW, {
+          listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+          printifyProductId: productResponse.id,
+        }),
+        updateListing(unlisted.filename, ProductName.PILLOW_COVER, {
+          listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
+          printifyProductId: productResponseCover.id,
+        }),
+      ]);
 
-    const pillowData = {
-      title: unlisted.title,
-      description: unlisted.description,
-      blueprint_id: pillowConfig.blueprint_id,
-      print_provider_id: pillowConfig.print_provider_id,
-      tags: [],
-      variants: pillowConfig.variants,
-      print_areas: pillowConfig.print_areas,
-    };
-
-    const pillowCoverData = {
-      title: `VARIATION ${unlisted.title.replace('Cushion', 'Cushion Cover')}`,
-      description: unlisted.description,
-      blueprint_id: pillowCoverConfig.blueprint_id,
-      print_provider_id: pillowCoverConfig.print_provider_id,
-      tags: [],
-      variants: pillowCoverConfig.variants,
-      print_areas: pillowCoverConfig.print_areas,
-    };
-
-    const promises = [
-      createNewProduct(pillowData, product.shopId),
-      createNewProduct(pillowCoverData, product.shopId),
-    ];
-
-    const [productResponse, productResponseCover] = await Promise.all(promises);
-
-    if (productResponse.id) {
-      await updateListing(unlisted.filename, ProductName.PILLOW, {
-        listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
-        printifyProductId: productResponse.id,
-      });
-    } else {
-      process.stdout.write('failed to create pillow product\n');
+      Logger.info('Uploaded product & variant');
+      return;
     }
 
-    if (productResponseCover.id) {
-      await updateListing(unlisted.filename, ProductName.PILLOW_COVER, {
-        listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
-        printifyProductId: productResponseCover.id,
-      });
-    } else {
-      process.stdout.write('failed to create pillow cover product\n');
-    }
-
-    process.stdout.write('uploaded product & variant\n');
-  } else {
     const config = generateListingConfig(uploadedImagesArray, product.name);
+    const productResponse = await createNewProduct(
+      {
+        title: unlisted.title,
+        description: unlisted.description,
+        blueprint_id: config.blueprint_id,
+        print_provider_id: config.print_provider_id,
+        tags: [],
+        variants: config.variants,
+        print_areas: config.print_areas,
+      },
+      product.shopId,
+    );
 
-    const data = {
-      title: unlisted.title,
-      description: unlisted.description,
-      blueprint_id: config.blueprint_id,
-      print_provider_id: config.print_provider_id,
-      tags: [],
-      variants: config.variants,
-      print_areas: config.print_areas,
-    };
-
-    const productResponse = await createNewProduct(data, product.shopId);
+    if (!productResponse.id) {
+      throw new ExternalServiceError('Failed to create product');
+    }
 
     await updateListing(unlisted.filename, product.name, {
       listedAt: DateTime.now().toFormat('dd-MM-yyyy'),
       printifyProductId: productResponse.id,
     });
 
-    process.stdout.write('uploaded product\n');
+    Logger.info('Uploaded product');
+  } catch (error: unknown) {
+    const handledError = handleError(error);
+    Logger.error(handledError);
+    throw error;
   }
 }

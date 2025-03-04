@@ -38,7 +38,7 @@ const parser = yargs(hideBin(process.argv))
 void (async (): Promise<void> => {
   try {
     const argv = parser.parseSync();
-    const shopId = process.env.ETSY_SHOP_ID as string;
+    const shopId = process.env['ETSY_SHOP_ID'] as string;
 
     const activeListings = await getAllActiveListings(shopId, argv.limit);
 
@@ -79,7 +79,7 @@ void (async (): Promise<void> => {
     for (const listing of listingsToUpdate) {
       const { listing_id, description, title } = listing;
 
-      const firstSentence = description.split('.')[0].trim();
+      const firstSentence = description?.split('.')?.[0]?.trim() || description || '';
 
       const record = await updateEtsyListingId(firstSentence, listing_id, title);
 

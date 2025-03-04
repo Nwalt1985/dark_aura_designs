@@ -9,6 +9,7 @@ import {
   wovenBlanketDefaultDescription,
 } from '../handlers/generate-images/defaultDescription';
 import { Marketplace, Product, ProductName } from '../models/types/listing';
+import { Logger, handleError } from '../errors';
 
 export function getformattedDate(): string {
   const date = new Date();
@@ -50,23 +51,23 @@ export function getProductDetails(arg: ProductName, marketplace: Marketplace): P
       product.title = 'Desk Mat XL Mouse Matt';
       product.dimensions = '9450x4650';
       product.baseDir = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/desk_mats`, // Upload to NAS device
         // `Desktop/assets/${marketplace}/deskMats`,
       );
       product.defaultDescription = deskMatDefaultDescription;
       product.rescale = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `Desktop/dark_aura_designs/rescale_desk_mats`,
       );
       product.completedRescalePath = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `Desktop/dark_aura_designs/completed_desk_mats`,
       );
       product.shopId =
         marketplace === Marketplace.ETSY
-          ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
-          : process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
+          ? process.env['DARK_AURA_ETSY_SHOP_ID'] || ''
+          : process.env['DARK_AURA_SHOPIFY_SHOP_ID'] || '';
       break;
 
     case ProductName.PILLOW:
@@ -74,23 +75,23 @@ export function getProductDetails(arg: ProductName, marketplace: Marketplace): P
       product.title = 'Cushion';
       product.dimensions = '4050x4050';
       product.baseDir = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/pillows`,
         // `Desktop/assets/${marketplace}/pillows`,
       );
       product.defaultDescription = pillowDefaultDescription;
       product.rescale = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `Desktop/dark_aura_designs/rescale_pillows`,
       );
       product.completedRescalePath = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `Desktop/dark_aura_designs/completed_pillows`,
       );
       product.shopId =
         marketplace === Marketplace.ETSY
-          ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
-          : process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
+          ? process.env['DARK_AURA_ETSY_SHOP_ID'] || ''
+          : process.env['DARK_AURA_SHOPIFY_SHOP_ID'] || '';
       break;
 
     case ProductName.BLANKET:
@@ -98,23 +99,23 @@ export function getProductDetails(arg: ProductName, marketplace: Marketplace): P
       product.title = 'Blanket';
       product.dimensions = '8228x6260';
       product.baseDir = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/blankets`,
         // `Desktop/assets/${marketplace}/blankets`,
       );
       product.defaultDescription = blanketDefaultDescription;
       product.rescale = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `Desktop/dark_aura_designs/rescale_blankets`,
       );
       product.completedRescalePath = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `Desktop/dark_aura_designs/completed_blankets`,
       );
       product.shopId =
         marketplace === Marketplace.ETSY
-          ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
-          : process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
+          ? process.env['DARK_AURA_ETSY_SHOP_ID'] || ''
+          : process.env['DARK_AURA_SHOPIFY_SHOP_ID'] || '';
       break;
 
     case ProductName.WOVEN_BLANKET:
@@ -122,23 +123,23 @@ export function getProductDetails(arg: ProductName, marketplace: Marketplace): P
       product.title = 'Woven Blanket';
       product.dimensions = '7680x5760';
       product.baseDir = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `/volumes/Shop Assets/${marketplace}/dark_aura_designs/woven_blankets`,
         // `Desktop/assets/${marketplace}/wovenBlankets`,
       );
       product.defaultDescription = wovenBlanketDefaultDescription;
       product.rescale = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `Desktop/dark_aura_designs/rescale_woven_blankets`,
       );
       product.completedRescalePath = path.resolve(
-        process.env.HOME || '',
+        process.env['HOME'] || '',
         `Desktop/dark_aura_designs/completed_woven_blankets`,
       );
       product.shopId =
         marketplace === Marketplace.ETSY
-          ? process.env.DARK_AURA_ETSY_SHOP_ID || ''
-          : process.env.DARK_AURA_SHOPIFY_SHOP_ID || '';
+          ? process.env['DARK_AURA_ETSY_SHOP_ID'] || ''
+          : process.env['DARK_AURA_SHOPIFY_SHOP_ID'] || '';
       break;
   }
 
@@ -151,29 +152,17 @@ export function getGeneratedFileNames(dir: string, productType: ProductName): st
   switch (productType) {
     case ProductName.DESK_MAT:
       return fileNameArray
-        .filter((fileName) => {
-          if (fileName.includes('-9450x4650')) {
-            return fileName;
-          }
-        })
+        .filter((fileName) => fileName.includes('-9450x4650'))
         .map((fileName) => fileName.replace('-9450x4650', ''));
 
     case ProductName.PILLOW:
       return fileNameArray
-        .filter((fileName) => {
-          if (fileName.includes('-4050x4050')) {
-            return fileName;
-          }
-        })
+        .filter((fileName) => fileName.includes('-4050x4050'))
         .map((fileName) => fileName.replace('-4050x4050', ''));
 
     case ProductName.BLANKET:
       return fileNameArray
-        .filter((fileName) => {
-          if (fileName.includes('-8228x6260') || fileName.includes('-6260x8228')) {
-            return fileName;
-          }
-        })
+        .filter((fileName) => fileName.includes('-8228x6260') || fileName.includes('-6260x8228'))
         .map((fileName) =>
           fileName.includes('-8228x6260')
             ? fileName.replace('-8228x6260', '')
@@ -182,11 +171,7 @@ export function getGeneratedFileNames(dir: string, productType: ProductName): st
 
     case ProductName.WOVEN_BLANKET:
       return fileNameArray
-        .filter((fileName) => {
-          if (fileName.includes('-7680x5760') || fileName.includes('-5760x7680')) {
-            return fileName;
-          }
-        })
+        .filter((fileName) => fileName.includes('-7680x5760') || fileName.includes('-5760x7680'))
         .map((fileName) =>
           fileName.includes('-7680x5760')
             ? fileName.replace('-7680x5760', '')
@@ -227,9 +212,8 @@ export async function dbTidy(
 ): Promise<PromptResponseType[]> {
   const unlistedFileNames = unlisted.map((listing) => {
     if (!listing.filename) {
-      process.stdout.write(`No filename found for listing: ${JSON.stringify(listing)}\n`);
+      Logger.warn('No filename found for listing', listing);
     }
-
     return listing.filename.replace(/(-\d+x\d+)?$/, '');
   });
 
@@ -237,7 +221,7 @@ export async function dbTidy(
 
   for (const listing of unlistedFileNames) {
     if (!generatedImagesFilenames.includes(listing)) {
-      process.stdout.write(`Deleting ${listing} from the DB\n`);
+      Logger.info(`Deleting ${listing} from the DB`);
       await deleteListingByFileName(listing);
     }
   }
@@ -296,25 +280,31 @@ function extractImageId(filename: string): string | null {
 }
 
 export function relocateRescaleImage(product: Product, fileName: string): void {
-  const rescaleDir = product.rescale;
-  const completedDir = product.completedRescalePath;
+  try {
+    const rescaleDir = product.rescale;
+    const completedDir = product.completedRescalePath;
 
-  // Create completed_rescale directory if it doesn't exist
-  if (!fs.existsSync(completedDir)) {
-    fs.mkdirSync(completedDir, { recursive: true });
-  }
-
-  const fileExtensions = ['.png', '.jpg'];
-
-  fileExtensions.forEach((extension) => {
-    const sourceFile = path.resolve(rescaleDir, `${fileName}${extension}`);
-    const targetFile = path.resolve(completedDir, `${fileName}${extension}`);
-
-    if (fs.existsSync(sourceFile)) {
-      fs.renameSync(sourceFile, targetFile);
-      process.stdout.write(`Moved ${fileName}${extension} to completed_rescale directory\n`);
+    // Create completed_rescale directory if it doesn't exist
+    if (!fs.existsSync(completedDir)) {
+      fs.mkdirSync(completedDir, { recursive: true });
     }
-  });
+
+    const fileExtensions = ['.png', '.jpg'];
+
+    fileExtensions.forEach((extension) => {
+      const sourceFile = path.resolve(rescaleDir, `${fileName}${extension}`);
+      const targetFile = path.resolve(completedDir, `${fileName}${extension}`);
+
+      if (fs.existsSync(sourceFile)) {
+        fs.renameSync(sourceFile, targetFile);
+        Logger.info(`Moved ${fileName}${extension} to completed_rescale directory`);
+      }
+    });
+  } catch (error: unknown) {
+    const handledError = handleError(error);
+    Logger.error(handledError);
+    throw error;
+  }
 }
 
 export function createFile(baseDir: string, filename: string, resizedBuffer: Buffer): void {
@@ -322,9 +312,10 @@ export function createFile(baseDir: string, filename: string, resizedBuffer: Buf
 
   fs.writeFile(filePath, resizedBuffer.toString('base64'), 'base64', (err) => {
     if (err) {
-      process.stdout.write(`Error writing file: ${err.message}\n`);
-    } else {
-      process.stdout.write(`${filename} written successfully.\n`);
+      const handledError = handleError(err);
+      Logger.error(handledError);
+      throw err;
     }
+    Logger.info(`${filename} written successfully`);
   });
 }
