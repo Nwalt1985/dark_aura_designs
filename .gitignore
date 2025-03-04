@@ -9,3 +9,4 @@ rescale_*/*
 completed_*/*
 templates
 .vscode
+coverage
