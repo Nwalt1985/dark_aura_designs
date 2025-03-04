@@ -11,7 +11,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { getProductDetails } from '../../helpers';
 import { Marketplace, ProductName } from '../../models/types/listing';
-import { ErrorType, Logger } from 'src/errors';
+import { ErrorType, Logger } from '../../errors';
 
 /**
  * Command-line argument parser configuration.

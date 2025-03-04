@@ -32,29 +32,29 @@ export async function resizeDeskmats(
     const dateDir = createDateDirectory(baseDir, formattedDate);
 
     // Create the main product image (9450x4650)
-    const mainImageBuffer = await processImage(buffer, 9450, 4650);
-    await createFile(dateDir, `${filename}-${fileId}-9450x4650.jpg`, mainImageBuffer);
+    const image1Buffer = await processImage(buffer, 9450, 4650);
+    await createFile(dateDir, `${filename}-${fileId}-9450x4650.jpg`, image1Buffer);
 
-    // Create the thumbnail image (1500x1500)
-    const thumbnailBuffer = await processImage(buffer, 1500, 1500, {
+    // Create the image (7080x4140)
+    const image2Buffer = await processImage(buffer, 7080, 4140, {
       fit: 'contain',
       position: 'center',
     });
-    await createFile(dateDir, `${filename}-${fileId}-1500x1500.jpg`, thumbnailBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-7080x4140.jpg`, image2Buffer);
 
-    // Create the mockup image (1000x1000)
-    const mockupBuffer = await processImage(buffer, 1000, 1000, {
+    // Create the image (4320x3630)
+    const image3Buffer = await processImage(buffer, 4320, 3630, {
       fit: 'contain',
       position: 'center',
     });
-    await createFile(dateDir, `${filename}-${fileId}-1000x1000.jpg`, mockupBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-4320x3630.jpg`, image3Buffer);
 
-    // Create the small mockup image (570x570)
-    const smallMockupBuffer = await processImage(buffer, 570, 570, {
+    // Create the mockup image (2543x1254)
+    const mockupBuffer = await processImage(buffer, 2543, 1254, {
       fit: 'contain',
       position: 'center',
     });
-    await createFile(dateDir, `${filename}-${fileId}-570x570.jpg`, smallMockupBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-mockup-2543x1254.jpg`, mockupBuffer);
 
     Logger.info(`Successfully processed desk mat images for ${filename}`);
   } catch (error: unknown) {

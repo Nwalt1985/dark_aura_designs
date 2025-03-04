@@ -31,30 +31,101 @@ export async function resizeWovenBlanketImage(
   try {
     const dateDir = createDateDirectory(baseDir, formattedDate);
 
-    // Create the main product image (7680x5760)
-    const mainImageBuffer = await processImage(buffer, 7680, 5760);
-    await createFile(dateDir, `${filename}-${fileId}-7680x5760.jpg`, mainImageBuffer);
+    if (filename.includes('_portrait')) {
+      // Process portrait-oriented woven blanket images
 
-    // Create the thumbnail image (1500x1500)
-    const thumbnailBuffer = await processImage(buffer, 1500, 1500, {
-      fit: 'contain',
-      position: 'center',
-    });
-    await createFile(dateDir, `${filename}-${fileId}-1500x1500.jpg`, thumbnailBuffer);
+      // Create the main product images
+      const image1Buffer = await processImage(buffer, 7680, 5760, {
+        rotate: 270,
+      });
+      await createFile(dateDir, `${filename}-${fileId}-7680x5760.jpg`, image1Buffer);
 
-    // Create the mockup image (1000x1000)
-    const mockupBuffer = await processImage(buffer, 1000, 1000, {
-      fit: 'contain',
-      position: 'center',
-    });
-    await createFile(dateDir, `${filename}-${fileId}-1000x1000.jpg`, mockupBuffer);
+      const image2Buffer = await processImage(buffer, 5760, 4800, {
+        rotate: 270,
+      });
+      await createFile(dateDir, `${filename}-${fileId}-5760x4800.jpg`, image2Buffer);
 
-    // Create the small mockup image (570x570)
-    const smallMockupBuffer = await processImage(buffer, 570, 570, {
-      fit: 'contain',
-      position: 'center',
-    });
-    await createFile(dateDir, `${filename}-${fileId}-570x570.jpg`, smallMockupBuffer);
+      const image3Buffer = await processImage(buffer, 4992, 3552, {
+        rotate: 270,
+      });
+      await createFile(dateDir, `${filename}-${fileId}-4992x3552.jpg`, image3Buffer);
+
+      // Create mockup images - Portrait
+      const mockup1Buffer = await processImage(buffer, 2868, 3442);
+      await createFile(dateDir, `${filename}-${fileId}-mockup-2868x3442.jpg`, mockup1Buffer);
+
+      const mockup2Buffer = await processImage(buffer, 9601, 8000);
+      await createFile(dateDir, `${filename}-${fileId}-mockup-9601x8000.jpg`, mockup2Buffer);
+
+      const mockup3Buffer = await processImage(buffer, 3613, 3037, {
+        rotate: 90,
+      });
+      await createFile(
+        dateDir,
+        `${filename}-${fileId}-mockup-rotated-3613x3037.jpg`,
+        mockup3Buffer,
+      );
+
+      const mockup4Buffer = await processImage(buffer, 11520, 15360, {
+        fit: 'cover',
+        position: 'north',
+        extract: {
+          left: 7200,
+          top: 0,
+          width: 4290,
+          height: 2910,
+        },
+      });
+      await createFile(
+        dateDir,
+        `${filename}-${fileId}-mockup-cropped-4290x2910.jpg`,
+        mockup4Buffer,
+      );
+    } else {
+      // Process standard woven blanket images
+
+      // Create the main product images
+      const image1Buffer = await processImage(buffer, 7680, 5760);
+      await createFile(dateDir, `${filename}-${fileId}-7680x5760.jpg`, image1Buffer);
+
+      const image2Buffer = await processImage(buffer, 5760, 4800);
+      await createFile(dateDir, `${filename}-${fileId}-5760x4800.jpg`, image2Buffer);
+
+      const image3Buffer = await processImage(buffer, 4992, 3552);
+      await createFile(dateDir, `${filename}-${fileId}-4992x3552.jpg`, image3Buffer);
+
+      // Create mockup images - Landscape
+      const mockup1Buffer = await processImage(buffer, 3613, 3037);
+      await createFile(dateDir, `${filename}-${fileId}-mockup-3613x3037.jpg`, mockup1Buffer);
+
+      const mockup2Buffer = await processImage(buffer, 8000, 9601);
+      await createFile(dateDir, `${filename}-${fileId}-mockup-8000x9601.jpg`, mockup2Buffer);
+
+      const mockup3Buffer = await processImage(buffer, 2868, 3442, {
+        rotate: 90,
+      });
+      await createFile(
+        dateDir,
+        `${filename}-${fileId}-mockup-rotated-2868x3442.jpg`,
+        mockup3Buffer,
+      );
+
+      const mockup4Buffer = await processImage(buffer, 15360, 11520, {
+        fit: 'cover',
+        position: 'north',
+        extract: {
+          left: 11000,
+          top: 0,
+          width: 4290,
+          height: 2910,
+        },
+      });
+      await createFile(
+        dateDir,
+        `${filename}-${fileId}-mockup-cropped-4290x2910.jpg`,
+        mockup4Buffer,
+      );
+    }
 
     Logger.info(`Successfully processed woven blanket images for ${filename}`);
   } catch (error: unknown) {

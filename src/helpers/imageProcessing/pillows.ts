@@ -32,29 +32,15 @@ export async function resizePillowImage(
     const dateDir = createDateDirectory(baseDir, formattedDate);
 
     // Create the main product image (4050x4050)
-    const mainImageBuffer = await processImage(buffer, 4050, 4050);
-    await createFile(dateDir, `${filename}-${fileId}-4050x4050.jpg`, mainImageBuffer);
-
-    // Create the thumbnail image (1500x1500)
-    const thumbnailBuffer = await processImage(buffer, 1500, 1500, {
-      fit: 'contain',
-      position: 'center',
-    });
-    await createFile(dateDir, `${filename}-${fileId}-1500x1500.jpg`, thumbnailBuffer);
+    const image1Buffer = await processImage(buffer, 4050, 4050);
+    await createFile(dateDir, `${filename}-${fileId}-4050x4050.jpg`, image1Buffer);
 
     // Create the mockup image (1000x1000)
-    const mockupBuffer = await processImage(buffer, 1000, 1000, {
+    const image2Buffer = await processImage(buffer, 1275, 1275, {
       fit: 'contain',
       position: 'center',
     });
-    await createFile(dateDir, `${filename}-${fileId}-1000x1000.jpg`, mockupBuffer);
-
-    // Create the small mockup image (570x570)
-    const smallMockupBuffer = await processImage(buffer, 570, 570, {
-      fit: 'contain',
-      position: 'center',
-    });
-    await createFile(dateDir, `${filename}-${fileId}-570x570.jpg`, smallMockupBuffer);
+    await createFile(dateDir, `${filename}-${fileId}-mockup-1275x1275.jpg`, image2Buffer);
 
     Logger.info(`Successfully processed pillow images for ${filename}`);
   } catch (error: unknown) {
