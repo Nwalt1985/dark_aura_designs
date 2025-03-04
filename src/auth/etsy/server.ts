@@ -23,7 +23,7 @@ dotenv.config();
 const app = express();
 
 const challenge = codeChallenge();
-Logger.info('Code challenge generated', challenge);
+Logger.info('Code challenge generated');
 
 app.set('view engine', 'hbs');
 app.set('views', `${process.cwd()}/src/auth/etsy/views`);
@@ -32,6 +32,7 @@ app.set('views', `${process.cwd()}/src/auth/etsy/views`);
 app.get('/', (_req, res) => {
   res.render('index', {
     title: 'Etsy OAuth',
+    fullUrl: challenge.fullUrl,
   });
 });
 
@@ -61,6 +62,10 @@ const redirectUri = 'http://localhost:3003/oauth/redirect';
 app.get('/oauth/redirect', async (req, res) => {
   try {
     const authCode = req.query['code'] as string;
+    if (!authCode) {
+      throw new ExternalServiceError('No authorization code provided by Etsy');
+    }
+
     const tokenUrl = 'https://api.etsy.com/v3/public/oauth/token';
 
     const requestOptions = {
@@ -85,14 +90,23 @@ app.get('/oauth/redirect', async (req, res) => {
         throw new ExternalServiceError('Invalid token response from Etsy');
       }
 
-      Logger.info('Token data received', data);
+      Logger.info('Token data received');
 
-      await updateEtsyAuthCredentials({
-        accessToken: data.access_token,
-        refreshToken: data.refresh_token,
-      });
+      try {
+        await updateEtsyAuthCredentials({
+          accessToken: data.access_token,
+          refreshToken: data.refresh_token,
+        });
 
-      res.send('Success!');
+        res.send(
+          'Authentication successful! You can close this window and return to the application.',
+        );
+      } catch (dbError) {
+        Logger.error(handleError(dbError));
+        res
+          .status(500)
+          .send('Authentication successful, but failed to save credentials. Please try again.');
+      }
     } else {
       const errorData = (await response.json()) as EtsyErrorResponse;
       throw new ExternalServiceError('Failed to get Etsy token', errorData);

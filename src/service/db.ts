@@ -197,40 +197,50 @@ export async function updateEtsyAuthCredentials(data: {
   accessToken: string;
   refreshToken: string;
 }): Promise<void> {
-  const currentAuth = await getEtsyAuthCredentials();
+  try {
+    const { collection } = await mongoConnect('etsy_auth');
 
-  const { client, collection } = await mongoConnect('etsy_auth');
-
-  await collection.updateOne(
-    { accessToken: currentAuth },
-    {
-      $set: {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
+    // Use a more reliable query that doesn't depend on existing credentials
+    await collection.updateOne(
+      {}, // Empty filter to match any document
+      {
+        $set: {
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          updatedAt: new Date(),
+        },
       },
-    },
-    {
-      upsert: true,
-    },
-  );
+      {
+        upsert: true, // Create if it doesn't exist
+      },
+    );
 
-  await client.close();
+    Logger.info('Successfully updated Etsy auth credentials');
+  } catch (error) {
+    const handledError = handleError(error);
+    Logger.error(handledError);
+    throw new DatabaseError('Failed to update Etsy auth credentials', error);
+  }
 }
 
 export async function getEtsyAuthCredentials(): Promise<string> {
-  const { client, collection } = await mongoConnect('etsy_auth');
+  try {
+    const { collection } = await mongoConnect('etsy_auth');
 
-  const result = (await collection.findOne<{
-    accessToken: string;
-    refreshToken: string;
-  }>({})) as
-    | {
-        accessToken: string;
-        refreshToken: string;
-      }
-    | undefined;
+    const result = (await collection.findOne<{
+      accessToken: string;
+      refreshToken: string;
+    }>({})) as
+      | {
+          accessToken: string;
+          refreshToken: string;
+        }
+      | undefined;
 
-  await client.close();
-
-  return result?.accessToken || '';
+    return result?.accessToken || '';
+  } catch (error) {
+    const handledError = handleError(error);
+    Logger.error(handledError);
+    return '';
+  }
 }
