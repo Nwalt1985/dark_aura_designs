@@ -1,3 +1,13 @@
+/**
+ * Listing Configuration Module
+ *
+ * This module provides configuration templates and generation functions for creating
+ * product listings on Printify. It defines the structure, pricing, variants, and print areas
+ * for different product types.
+ *
+ * Each product type has its own configuration template with specific print provider IDs,
+ * blueprint IDs, variants, and print areas tailored to that product's requirements.
+ */
 import dotenv from 'dotenv';
 import { PrintifyImageResponseType } from '../../models/schemas/printify';
 import { ProductName } from '../../models/types/listing';
@@ -5,6 +15,12 @@ import { cloneDeep } from 'lodash';
 
 dotenv.config();
 
+/**
+ * Creates a standard placeholder object for print areas.
+ * This defines where and how images are positioned on products.
+ *
+ * @returns {Object} A placeholder object with position and image properties
+ */
 const createPlaceholder = (): {
   position: string;
   images: Array<{ id: string; x: number; y: number; scale: number; angle: number }>;
@@ -21,6 +37,11 @@ const createPlaceholder = (): {
   ],
 });
 
+/**
+ * Configuration template for desk mat products.
+ * Includes print provider ID, blueprint ID, variants with pricing,
+ * and print areas with placeholders for different sizes.
+ */
 export const deskMatConfig = {
   print_provider_id: Number(process.env['DESK_MAT_PRINT_PROVIDER_ID']) || 0,
   blueprint_id: Number(process.env['DESK_MAT_PRINTIFY_BLUEPRINT_ID']) || 0,
@@ -63,6 +84,11 @@ export const deskMatConfig = {
   ],
 };
 
+/**
+ * Configuration template for pillow products.
+ * Includes print provider ID, blueprint ID, variants with pricing,
+ * and print areas with placeholders for different sizes.
+ */
 export const pillowConfig = {
   print_provider_id: Number(process.env['PILLOW_PRINT_PROVIDER_ID']) || 0,
   blueprint_id: Number(process.env['PILLOW_PRINTIFY_BLUEPRINT_ID']) || 0,
@@ -107,6 +133,11 @@ export const pillowConfig = {
   ],
 };
 
+/**
+ * Configuration template for pillow cover products.
+ * Includes print provider ID, blueprint ID, variants with pricing,
+ * and print areas with placeholders for different sizes.
+ */
 export const pillowCoverConfig = {
   print_provider_id: Number(process.env['PILLOW_CASE_PRINT_PROVIDER_ID']) || 0,
   blueprint_id: Number(process.env['PILLOW_CASE_PRINTIFY_BLUEPRINT_ID']) || 0,
@@ -151,6 +182,11 @@ export const pillowCoverConfig = {
   ],
 };
 
+/**
+ * Configuration template for blanket products.
+ * Includes print provider ID, blueprint ID, variants with pricing,
+ * and print areas with placeholders for different sizes.
+ */
 export const BlanketConfig = {
   print_provider_id: Number(process.env['BLANKET_PRINT_PROVIDER_ID']) || 0,
   blueprint_id: Number(process.env['BLANKET_PRINTIFY_BLUEPRINT_ID']) || 0,
@@ -193,6 +229,11 @@ export const BlanketConfig = {
   ],
 };
 
+/**
+ * Configuration template for woven blanket products.
+ * Includes print provider ID, blueprint ID, variants with pricing,
+ * and print areas with placeholders for different sizes.
+ */
 export const WovenBlanketConfig = {
   print_provider_id: Number(process.env['WOVEN_BLANKET_PRINT_PROVIDER_ID']) || 0,
   blueprint_id: Number(process.env['WOVEN_BLANKET_PRINTIFY_BLUEPRINT_ID']) || 0,
@@ -235,6 +276,19 @@ export const WovenBlanketConfig = {
   ],
 };
 
+/**
+ * Generates a product-specific listing configuration with uploaded image IDs.
+ *
+ * This function:
+ * 1. Selects the appropriate base configuration based on product type
+ * 2. Creates a deep clone of the configuration to avoid modifying the original
+ * 3. Maps uploaded images to the correct print areas based on image dimensions
+ * 4. Returns a complete configuration ready for submission to Printify
+ *
+ * @param {Array<{fileId: string | null, response: PrintifyImageResponseType}>} uploadedImagesArray - Array of uploaded image data
+ * @param {ProductName} productType - Type of product to generate configuration for
+ * @returns {Object} Complete product configuration for Printify
+ */
 export function generateListingConfig(
   uploadedImagesArray: {
     fileId: string | null;

@@ -1,10 +1,22 @@
+/**
+ * Image Generation CLI Module
+ *
+ * This module provides a command-line interface for generating product images.
+ * It uses yargs to parse command-line arguments and delegates to the generateImagesFromRescale
+ * function to process images for different product types and marketplaces.
+ */
 import { StatusCodes } from 'http-status-codes';
 import { generateImagesFromRescale } from './generateImages';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { getProductDetails } from '../../helpers';
 import { Marketplace, ProductName } from '../../models/types/listing';
+import { ErrorType, Logger } from 'src/errors';
 
+/**
+ * Command-line argument parser configuration.
+ * Defines the expected arguments and their types.
+ */
 const parser = yargs(hideBin(process.argv))
   .options({
     product: {
@@ -28,6 +40,11 @@ const parser = yargs(hideBin(process.argv))
   .strict()
   .help();
 
+/**
+ * Self-executing async function that serves as the entry point for the CLI.
+ * Parses arguments, gets product details, and initiates the image generation process.
+ * Handles errors and provides appropriate status codes and messages.
+ */
 void (async (): Promise<void> => {
   try {
     const argv = parser.parseSync();
@@ -53,6 +70,11 @@ void (async (): Promise<void> => {
         message = error.message;
     }
 
-    console.error({ name: error.name, statusCode, message });
+    Logger.error({
+      type: ErrorType.INTERNAL,
+      code: statusCode,
+      message: message,
+      details: error,
+    });
   }
 })();

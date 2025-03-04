@@ -1,3 +1,13 @@
+/**
+ * Printify Service Module
+ *
+ * This module provides functions for interacting with the Printify API.
+ * It includes operations for uploading images, retrieving uploaded images,
+ * and creating new products on Printify.
+ *
+ * All API calls are wrapped in a utility function that provides
+ * consistent error handling and logging.
+ */
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import {
   PrintifyImageResponseType,
@@ -53,6 +63,14 @@ async function executePrintifyApiCall<T>(
   }
 }
 
+/**
+ * Uploads an image to Printify
+ *
+ * @param buffer - The image buffer to upload
+ * @param filename - The name of the file being uploaded
+ * @returns The Printify image response containing the image ID and URL
+ * @throws ExternalServiceError if the API call fails
+ */
 export async function uploadImages(
   buffer: Buffer,
   filename: string,
@@ -68,6 +86,12 @@ export async function uploadImages(
   );
 }
 
+/**
+ * Retrieves all uploaded images from Printify
+ *
+ * @returns Object containing the array of image data, length, and total images count
+ * @throws ExternalServiceError if the API call fails
+ */
 export async function getUploadedImages(): Promise<{
   imageData: PrintifyImageResponseType[];
   length: number;
@@ -102,6 +126,14 @@ export async function getUploadedImages(): Promise<{
   return { imageData, length: imageData.length, totalImages: data.total };
 }
 
+/**
+ * Creates a new product on Printify
+ *
+ * @param productData - The product data to create
+ * @param shopId - The Printify shop ID
+ * @returns The Printify product upload response
+ * @throws ExternalServiceError if the API call fails
+ */
 export async function createNewProduct(
   productData: PrintifyProductUploadRequestType,
   shopId: string,

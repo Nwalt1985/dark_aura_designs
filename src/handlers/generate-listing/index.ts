@@ -1,3 +1,13 @@
+/**
+ * Listing Generation Module
+ *
+ * This module handles the creation of product listings on e-commerce platforms.
+ * It processes unlisted products from the database, uploads their images to Printify,
+ * and creates product listings with appropriate configurations based on product type.
+ *
+ * The module supports various product types including desk mats, pillows, blankets,
+ * and woven blankets, with specialized handling for each product type.
+ */
 import { z } from 'zod';
 import { PromptResponse } from '../../models/schemas/prompt';
 import { dbTidy, getBuffer, getProductDetails } from '../../helpers';
@@ -15,6 +25,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+/**
+ * Command-line argument parser configuration.
+ * Defines the expected arguments and their types for the listing generation CLI.
+ */
 const parser = yargs(hideBin(process.argv))
   .options({
     product: {
@@ -38,6 +52,11 @@ const parser = yargs(hideBin(process.argv))
   .strict()
   .help();
 
+/**
+ * Self-executing async function that serves as the entry point for the CLI.
+ * Processes unlisted products, uploads images, and creates listings on Printify.
+ * Handles errors and provides appropriate status codes and messages.
+ */
 void (async (): Promise<void> => {
   try {
     const argv = parser.parseSync();
@@ -68,6 +87,28 @@ void (async (): Promise<void> => {
   }
 })();
 
+/**
+ * Creates product listings on Printify for a given unlisted product.
+ * Handles image uploading, configuration generation, and product creation.
+ *
+ * This function:
+ * 1. Retrieves image buffers for the product
+ * 2. Uploads images to Printify if not already uploaded
+ * 3. Generates appropriate product configurations based on product type
+ * 4. Creates product listings on Printify
+ * 5. Updates the database with listing information
+ *
+ * Special handling is included for pillow products, which create both pillow and pillow cover variants.
+ *
+ * @param {z.infer<typeof PromptResponse>} unlisted - The unlisted product data from the database
+ * @param {Object} uploadedImages - Information about already uploaded images
+ * @param {PrintifyImageResponseType[]} uploadedImages.imageData - Array of uploaded image data
+ * @param {number} uploadedImages.length - Number of uploaded images
+ * @param {number} uploadedImages.totalImages - Total number of images to upload
+ * @param {Product} product - Product configuration object
+ * @returns {Promise<void>} A promise that resolves when the listing is created
+ * @throws Will log and rethrow errors that occur during processing
+ */
 export async function createPrintifyListingsData(
   unlisted: z.infer<typeof PromptResponse>,
   uploadedImages: {

@@ -1,3 +1,10 @@
+/**
+ * OpenAI Integration Module
+ *
+ * This module handles the integration with OpenAI's API to generate metadata for product images.
+ * It provides functionality to analyze images and generate SEO-optimized titles, descriptions,
+ * keywords, and other metadata for product listings.
+ */
 import OpenAI from 'openai';
 import {
   blanketGenericKeywords,
@@ -9,7 +16,10 @@ import { ProductName } from '../../models/types/listing';
 
 const openai = new OpenAI();
 
-// Map product types to their generic keywords
+/**
+ * Map of product types to their respective generic keywords.
+ * Used to supplement AI-generated keywords with product-specific generic keywords.
+ */
 const productGenericKeywords: Record<ProductName, string[]> = {
   [ProductName.DESK_MAT]: deskMatgenericKeywords,
   [ProductName.PILLOW]: pillowGenericKeywords,
@@ -18,6 +28,14 @@ const productGenericKeywords: Record<ProductName, string[]> = {
   [ProductName.PILLOW_COVER]: pillowGenericKeywords, // Assuming pillow cover uses the same keywords as pillow
 };
 
+/**
+ * Generates a combined array of keywords by adding random generic keywords to the provided keywords.
+ *
+ * @param {string[]} keywords - Base keywords to supplement
+ * @param {ProductName} product - Product type to get generic keywords for
+ * @returns {string[]} Combined array of keywords
+ * @throws {Error} If no keywords could be generated
+ */
 function generateKeywordArray(keywords: string[], product: ProductName): string[] {
   const selectedKeywords = new Set<string>();
 
@@ -44,6 +62,9 @@ function generateKeywordArray(keywords: string[], product: ProductName): string[
   return keywords.concat(Array.from(selectedKeywords));
 }
 
+/**
+ * Interface defining the structure of image data response from OpenAI.
+ */
 interface ImageDataResponse {
   description: string;
   title: string;
@@ -53,13 +74,19 @@ interface ImageDataResponse {
   keywords: string[];
 }
 
-// Product-specific configuration for prompts
+/**
+ * Configuration interface for product-specific prompt templates.
+ */
 interface ProductPromptConfig {
   defaultTitle: string;
   productNameInTitle: string;
   exampleTitles: string[];
 }
 
+/**
+ * Map of product types to their respective prompt configurations.
+ * Used to generate appropriate prompts for each product type.
+ */
 const productPromptConfigs: Record<ProductName, ProductPromptConfig> = {
   [ProductName.DESK_MAT]: {
     defaultTitle: '| XL Mouse Matt | Accessories For Home & Office',
@@ -103,7 +130,12 @@ const productPromptConfigs: Record<ProductName, ProductPromptConfig> = {
   },
 };
 
-// Generate a standardized prompt template
+/**
+ * Generates a standardized prompt template for OpenAI based on product configuration.
+ *
+ * @param {ProductPromptConfig} config - Product-specific configuration
+ * @returns {string} Formatted prompt template for OpenAI
+ */
 function generatePromptTemplate(config: ProductPromptConfig): string {
   return `Analyze this image and provide the following:
 
@@ -136,6 +168,14 @@ function generatePromptTemplate(config: ProductPromptConfig): string {
 `;
 }
 
+/**
+ * Analyzes an image using OpenAI to generate product metadata.
+ *
+ * @param {Buffer} image - Image buffer to analyze
+ * @param {ProductName} type - Type of product for context
+ * @returns {Promise<ImageDataResponse>} Promise resolving to structured image data
+ * @throws {Error} If OpenAI request fails or response is invalid
+ */
 export async function getImageData(image: Buffer, type: ProductName): Promise<ImageDataResponse> {
   const config = productPromptConfigs[type];
   if (!config) {

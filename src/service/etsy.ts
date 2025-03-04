@@ -1,18 +1,40 @@
+/**
+ * Etsy Service Module
+ *
+ * This module provides functions for interacting with the Etsy API.
+ * It includes operations for pinging the Etsy API, retrieving active listings,
+ * and updating existing listings.
+ *
+ * All API calls are wrapped in a utility function that provides
+ * consistent error handling and logging.
+ */
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import dotenv from 'dotenv';
 import { EtsyListingType } from '../models/schemas/etsy';
 import { getEtsyAuthCredentials } from './db';
 import { ExternalServiceError, handleError, Logger } from '../errors';
 
+/**
+ * Interface for the response from the Etsy ping endpoint
+ */
 interface PingResponse {
   application_id: number;
   ping: string;
 }
 
+/**
+ * Interface for Etsy API error responses
+ */
 interface EtsyErrorResponse {
   error: string;
 }
 
+/**
+ * Type guard to check if a response is an Etsy error
+ *
+ * @param data - The data to check
+ * @returns True if the data is an Etsy error response
+ */
 function isEtsyError(data: unknown): data is EtsyErrorResponse {
   return (
     typeof data === 'object' &&
@@ -50,6 +72,12 @@ async function executeEtsyApiCall<T>(
   }
 }
 
+/**
+ * Pings the Etsy API to verify connectivity and authentication
+ *
+ * @returns The ping response from Etsy
+ * @throws ExternalServiceError if the API call fails
+ */
 export async function pingEtsy(): Promise<PingResponse> {
   return executeEtsyApiCall(
     () =>
@@ -64,6 +92,14 @@ export async function pingEtsy(): Promise<PingResponse> {
   );
 }
 
+/**
+ * Retrieves all active listings for a shop from Etsy
+ *
+ * @param shopId - The Etsy shop ID
+ * @param limit - Optional limit on the number of listings to retrieve
+ * @returns Array of active Etsy listings
+ * @throws ExternalServiceError if the API call fails
+ */
 export async function getAllActiveListings(
   shopId: string,
   limit?: number,
@@ -115,6 +151,15 @@ export async function getAllActiveListings(
   });
 }
 
+/**
+ * Updates an existing Etsy listing
+ *
+ * @param shopId - The Etsy shop ID
+ * @param listingId - The ID of the listing to update
+ * @param title - The new title for the listing
+ * @param data - The new description for the listing
+ * @throws ExternalServiceError if the API call fails
+ */
 export async function updateEtsyListing(
   shopId: string,
   listingId: number,

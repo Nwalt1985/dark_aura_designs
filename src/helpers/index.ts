@@ -1,3 +1,16 @@
+/**
+ * Helpers Module
+ *
+ * This module provides utility functions used throughout the application for various tasks:
+ * - Date and number formatting
+ * - Product configuration and details
+ * - File system operations (creating, moving, and managing files)
+ * - Database operations and cleanup
+ * - Image processing and management
+ *
+ * The module centralizes common functionality to maintain consistency and reduce code duplication
+ * across the application.
+ */
 import fs from 'fs';
 import path from 'path';
 import { PromptResponseType } from '../models/schemas/prompt';
@@ -11,6 +24,11 @@ import {
 import { Marketplace, Product, ProductName } from '../models/types/listing';
 import { Logger, handleError } from '../errors';
 
+/**
+ * Returns the current date formatted as DD-MM-YYYY.
+ *
+ * @returns {string} The formatted date string
+ */
 export function getformattedDate(): string {
   const date = new Date();
   const day = String(date.getDate()).padStart(2, '0');
@@ -21,6 +39,12 @@ export function getformattedDate(): string {
   return formattedDate;
 }
 
+/**
+ * Generates a random number between 1000 and 9999.
+ * Ensures the number is at least 4 digits by adding 1000 if necessary.
+ *
+ * @returns {number} A random 4-digit number
+ */
 export function generateRandomNumber(): number {
   let randomNumber = Math.floor(Math.random() * 10000);
   if (randomNumber < 1000) {
@@ -29,6 +53,16 @@ export function generateRandomNumber(): number {
   return randomNumber;
 }
 
+/**
+ * Returns product configuration details based on product type and marketplace.
+ *
+ * This function provides all necessary configuration for a specific product type,
+ * including file paths, dimensions, descriptions, and shop IDs.
+ *
+ * @param {ProductName} arg - The type of product to get details for
+ * @param {Marketplace} marketplace - The marketplace (e.g., Etsy, Shopify)
+ * @returns {Product} Complete product configuration object
+ */
 export function getProductDetails(arg: ProductName, marketplace: Marketplace): Product {
   const product: Product = {
     name:
@@ -146,6 +180,14 @@ export function getProductDetails(arg: ProductName, marketplace: Marketplace): P
   return product;
 }
 
+/**
+ * Retrieves filenames of generated product images from the specified directory.
+ * Filters files based on product type and removes dimension information from filenames.
+ *
+ * @param {string} dir - Directory path to search for files
+ * @param {ProductName} productType - Type of product to filter files for
+ * @returns {string[]} Array of filtered filenames without dimension information
+ */
 export function getGeneratedFileNames(dir: string, productType: ProductName): string[] {
   const fileNameArray = assetFolder(dir);
 
@@ -182,6 +224,15 @@ export function getGeneratedFileNames(dir: string, productType: ProductName): st
   return [];
 }
 
+/**
+ * Recursively scans a directory for image files in date-formatted subfolders.
+ * Collects filenames from folders matching the date pattern (DD-MM-YYYY).
+ * Skips hidden files and system files like .DS_Store.
+ *
+ * @param {string} directory - Root directory to scan
+ * @returns {string[]} Array of filenames without file extensions
+ * @private
+ */
 function assetFolder(directory: string): string[] {
   const fileArray: string[] = [];
 
@@ -205,7 +256,15 @@ function assetFolder(directory: string): string[] {
   return fileArray;
 }
 
-// Remove listings from the database that do not have a corresponding image file
+/**
+ * Cleans up database listings that no longer have corresponding image files.
+ * Compares database listings with actual files in the product directory and
+ * removes any database entries that don't have matching files.
+ *
+ * @param {PromptResponseType[]} unlisted - Array of database listings to check
+ * @param {Product} product - Product configuration object
+ * @returns {Promise<PromptResponseType[]>} Updated array of unlisted items after cleanup
+ */
 export async function dbTidy(
   unlisted: PromptResponseType[],
   product: Product,
@@ -229,7 +288,14 @@ export async function dbTidy(
   return await getUnlisted(product.name);
 }
 
-// Loop through the folders and subfolders in the original directory and return the buffer of the image
+/**
+ * Retrieves image buffers from date-formatted subfolders matching a specific filename.
+ * Searches through date-formatted directories (DD-MM-YYYY) for files containing the specified filename.
+ *
+ * @param {string} fileName - Partial filename to search for
+ * @param {string} baseDir - Base directory to search in
+ * @returns {Array<{filename: string, fileId: string | null, base64: Buffer}>} Array of objects containing filename, fileId, and image buffer
+ */
 export function getBuffer(
   fileName: string,
   baseDir: string,
@@ -273,12 +339,28 @@ export function getBuffer(
   return buffer;
 }
 
+/**
+ * Extracts a 6-digit image ID from a filename.
+ * Uses regex to find a 6-digit number sequence in the filename.
+ *
+ * @param {string} filename - The filename to extract ID from
+ * @returns {string | null} The extracted 6-digit ID or null if not found
+ * @private
+ */
 function extractImageId(filename: string): string | null {
   const regex = /\b\d{6}\b/;
   const match = filename.match(regex);
   return match![0] || null;
 }
 
+/**
+ * Moves processed image files from the rescale directory to the completed directory.
+ * Handles both .png and .jpg file extensions and creates the completed directory if needed.
+ *
+ * @param {Product} product - Product configuration object containing directory paths
+ * @param {string} fileName - Base filename without extension
+ * @throws Will log error if file operations fail
+ */
 export function relocateRescaleImage(product: Product, fileName: string): void {
   try {
     const rescaleDir = product.rescale;
@@ -307,6 +389,15 @@ export function relocateRescaleImage(product: Product, fileName: string): void {
   }
 }
 
+/**
+ * Creates a file with the provided buffer data at the specified path.
+ * Writes the buffer as a base64-encoded file and logs the result.
+ *
+ * @param {string} baseDir - Directory path where the file will be created
+ * @param {string} filename - Name of the file to create
+ * @param {Buffer} resizedBuffer - Buffer containing the file data
+ * @throws Will log and throw an error if file creation fails
+ */
 export function createFile(baseDir: string, filename: string, resizedBuffer: Buffer): void {
   const filePath = path.join(`${baseDir}`, `${filename}`);
 

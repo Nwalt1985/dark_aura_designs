@@ -1,9 +1,25 @@
+/**
+ * Image Processing Module
+ *
+ * This module provides functions for processing and resizing images for various product types.
+ * It handles the creation of different image sizes and formats required for product listings
+ * across different marketplaces, including mockups and full-size product images.
+ *
+ * The module supports various product types including desk mats, pillows, blankets, and woven blankets,
+ * with specialized processing for each product type's specific requirements.
+ */
 import sharp from 'sharp';
 import fs from 'fs';
 import { createFile } from '.';
 import { Logger, handleError, ValidationError } from '../errors';
 import path from 'path';
 
+/**
+ * Validates if a directory exists and creates it if it doesn't.
+ *
+ * @param {string} directoryPath - The path of the directory to validate and create
+ * @throws {ValidationError} If directory creation fails
+ */
 function validateAndCreateDirectory(directoryPath: string): void {
   try {
     if (!fs.existsSync(directoryPath)) {
@@ -16,6 +32,20 @@ function validateAndCreateDirectory(directoryPath: string): void {
   }
 }
 
+/**
+ * Processes an image with the specified dimensions and optional transformations.
+ *
+ * @param {Buffer} buffer - The image buffer to process
+ * @param {number} width - The target width for the image
+ * @param {number} height - The target height for the image
+ * @param {Object} [options] - Optional transformation parameters
+ * @param {number} [options.rotate] - Rotation angle in degrees
+ * @param {Object} [options.extract] - Extraction region parameters
+ * @param {keyof sharp.FitEnum} [options.fit] - Fit method for resizing
+ * @param {string} [options.position] - Position for cropping
+ * @returns {Promise<Buffer>} A promise that resolves to the processed image buffer
+ * @throws {ValidationError} If image processing fails
+ */
 async function processImage(
   buffer: Buffer,
   width: number,
@@ -53,6 +83,18 @@ async function processImage(
   }
 }
 
+/**
+ * Resizes desk mat images to various dimensions required for product listings.
+ * Creates multiple versions of the image with different dimensions.
+ *
+ * @param {Buffer} buffer - The original image buffer
+ * @param {string} filename - Base filename for the resized images
+ * @param {number} fileId - Unique identifier for the file
+ * @param {string} baseDir - Base directory for storing the images
+ * @param {string} formattedDate - Formatted date string for the subdirectory
+ * @returns {Promise<void>} A promise that resolves when all images have been processed
+ * @throws {ValidationError} If image resizing fails
+ */
 export async function resizeDeskmats(
   buffer: Buffer,
   filename: string,
@@ -93,6 +135,18 @@ export async function resizeDeskmats(
   }
 }
 
+/**
+ * Resizes pillow images to various dimensions required for product listings.
+ * Creates both a mockup version and a full-size version of the image.
+ *
+ * @param {Buffer} buffer - The original image buffer
+ * @param {string} filename - Base filename for the resized images
+ * @param {number} fileId - Unique identifier for the file
+ * @param {string} baseDir - Base directory for storing the images
+ * @param {string} formattedDate - Formatted date string for the subdirectory
+ * @returns {Promise<void>} A promise that resolves when all images have been processed
+ * @throws {ValidationError} If image resizing fails
+ */
 export async function resizePillowImage(
   buffer: Buffer,
   filename: string,
@@ -123,6 +177,19 @@ export async function resizePillowImage(
   }
 }
 
+/**
+ * Resizes blanket images to various dimensions required for product listings.
+ * Handles both portrait and landscape orientations, creating multiple versions
+ * including mockups, rotated versions, and cropped versions as needed.
+ *
+ * @param {Buffer} buffer - The original image buffer
+ * @param {string} filename - Base filename for the resized images
+ * @param {number} fileId - Unique identifier for the file
+ * @param {string} baseDir - Base directory for storing the images
+ * @param {string} formattedDate - Formatted date string for the subdirectory
+ * @returns {Promise<void>} A promise that resolves when all images have been processed
+ * @throws {ValidationError} If image resizing fails
+ */
 export async function resizeBlanketImage(
   buffer: Buffer,
   filename: string,
@@ -213,6 +280,19 @@ export async function resizeBlanketImage(
   }
 }
 
+/**
+ * Resizes woven blanket images to various dimensions required for product listings.
+ * Handles both portrait and landscape orientations, creating multiple versions
+ * with different dimensions and rotations as needed.
+ *
+ * @param {Buffer} buffer - The original image buffer
+ * @param {string} filename - Base filename for the resized images
+ * @param {number} fileId - Unique identifier for the file
+ * @param {string} baseDir - Base directory for storing the images
+ * @param {string} formattedDate - Formatted date string for the subdirectory
+ * @returns {Promise<void>} A promise that resolves when all images have been processed
+ * @throws {ValidationError} If image resizing fails
+ */
 export async function resizeWovenBlanketImage(
   buffer: Buffer,
   filename: string,
@@ -270,6 +350,29 @@ export async function resizeWovenBlanketImage(
           }),
         ),
       ]);
+
+      // Create Mockups - Landscape
+      await Promise.all([
+        createFile(
+          directoryPath,
+          `${filename}-${fileId}-mockup-rotated-3613x3037.jpg`,
+          await processImage(buffer, 3613, 3037, { rotate: 90 }),
+        ),
+        createFile(
+          directoryPath,
+          `${filename}-${fileId}-mockup-rotated-2868x3442.jpg`,
+          await processImage(buffer, 2868, 3442, { rotate: 90 }),
+        ),
+        createFile(
+          directoryPath,
+          `${filename}-${fileId}-mockup-cropped-4290x2910.jpg`,
+          await processImage(buffer, 15360, 11520, {
+            fit: 'cover',
+            position: 'north',
+            extract: { left: 11000, top: 0, width: 4290, height: 2910 },
+          }),
+        ),
+      ]);
     } else {
       await Promise.all([
         createFile(
@@ -287,10 +390,6 @@ export async function resizeWovenBlanketImage(
           `${filename}-${fileId}-7680x5760.jpg`,
           await processImage(buffer, 7680, 5760),
         ),
-      ]);
-
-      // Create Mockups - Landscape
-      await Promise.all([
         createFile(
           directoryPath,
           `${filename}-${fileId}-mockup-3613x3037.jpg`,

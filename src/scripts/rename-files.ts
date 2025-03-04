@@ -3,12 +3,24 @@ import path from 'path';
 import { Logger } from 'src/errors/logger';
 import { ErrorType } from 'src/errors/CustomError';
 
+/**
+ * Path to the directory containing files to be renamed.
+ * Uses the user's home directory to construct the absolute path.
+ */
 const FOLDER_PATH = path.resolve(
   process.env['HOME'] || '',
   `Desktop/dark_aura_designs/rescale_pillow_covers`,
 );
 
-// Function to rename files
+/**
+ * Renames files in the specified directory by removing pattern matching "-numbers-4050x4050".
+ *
+ * This function processes all files in the FOLDER_PATH directory, removing dimension and
+ * identifier information from filenames to create cleaner file names.
+ *
+ * @returns {Promise<void>} A promise that resolves when all files have been processed
+ * @throws Will log and reject with an error if file operations fail
+ */
 function renameFiles(): Promise<void> {
   return new Promise((resolve, reject) => {
     try {

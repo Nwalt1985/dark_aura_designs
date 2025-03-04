@@ -1,3 +1,17 @@
+/**
+ * Etsy OAuth Server Module
+ *
+ * This module implements an Express server that handles the OAuth 2.0
+ * authorization code flow for Etsy API authentication. It includes:
+ *
+ * - An Express server that listens on port 3003
+ * - Routes for initiating the OAuth flow and handling the redirect
+ * - Functions for generating the PKCE code challenge
+ * - Error handling for the OAuth process
+ *
+ * The server stores the obtained access and refresh tokens in the database
+ * for later use by the application.
+ */
 import express from 'express';
 import dotenv from 'dotenv';
 import crypto, { BinaryLike } from 'crypto';
@@ -5,6 +19,14 @@ import { updateEtsyAuthCredentials } from '../../service/db';
 import { isTokenResponse } from './types';
 import { ExternalServiceError, Logger, handleError } from '../../errors';
 
+/**
+ * Interface for the result of the code challenge generation
+ *
+ * @property codeChallenge - The SHA-256 hash of the code verifier
+ * @property codeVerifier - The random string used to generate the code challenge
+ * @property state - A random state value for CSRF protection
+ * @property fullUrl - The complete OAuth authorization URL
+ */
 interface CodeChallengeResult {
   codeChallenge: string;
   codeVerifier: string;
@@ -12,6 +34,12 @@ interface CodeChallengeResult {
   fullUrl: string;
 }
 
+/**
+ * Interface for Etsy API error responses
+ *
+ * @property error - The error code or message
+ * @property error_description - Optional detailed error description
+ */
 interface EtsyErrorResponse {
   error: string;
   error_description?: string;
@@ -36,7 +64,10 @@ app.get('/', (_req, res) => {
   });
 });
 
-// Send a "Hello World!" response to a default get request
+/**
+ * Ping endpoint to test connectivity with the Etsy API
+ * Sends a request to Etsy's openapi-ping endpoint and returns the response
+ */
 app.get('/ping', async (_req, res) => {
   const requestOptions = {
     method: 'GET',
@@ -59,6 +90,11 @@ const clientID = process.env['ETSY_KEY_STRING'];
 const clientVerifier = challenge.codeVerifier;
 const redirectUri = 'http://localhost:3003/oauth/redirect';
 
+/**
+ * OAuth redirect endpoint that handles the authorization code callback
+ * Exchanges the authorization code for access and refresh tokens,
+ * then stores them in the database
+ */
 app.get('/oauth/redirect', async (req, res) => {
   try {
     const authCode = req.query['code'] as string;
@@ -125,6 +161,15 @@ app.listen(port, () => {
   Logger.info(`Server listening at http://localhost:${port}`);
 });
 
+/**
+ * Generates a code challenge for PKCE (Proof Key for Code Exchange)
+ *
+ * This function creates a random code verifier and its corresponding
+ * code challenge using the SHA-256 algorithm. It also generates a
+ * random state value and constructs the full OAuth authorization URL.
+ *
+ * @returns An object containing the code challenge, verifier, state, and full URL
+ */
 function codeChallenge(): CodeChallengeResult {
   // The next two functions help us generate the code challenge
   // required by Etsy's OAuth implementation.

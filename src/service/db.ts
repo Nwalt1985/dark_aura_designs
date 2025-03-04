@@ -1,3 +1,13 @@
+/**
+ * Database Service Module
+ *
+ * This module provides functions for interacting with the MongoDB database.
+ * It includes operations for creating, retrieving, updating, and deleting listings,
+ * as well as managing Etsy authentication credentials.
+ *
+ * All database operations are wrapped in a utility function that provides
+ * consistent error handling and logging.
+ */
 import { z } from 'zod';
 import { mongoConnect } from '../database';
 import { PromptResponse, PromptResponseType } from '../models/schemas/prompt';

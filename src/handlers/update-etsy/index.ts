@@ -1,3 +1,13 @@
+/**
+ * Etsy Listing Update Module
+ *
+ * This module handles updating existing Etsy listings with current product information.
+ * It retrieves active listings from Etsy, updates their details based on product type,
+ * and synchronizes the Etsy listing IDs with the local database.
+ *
+ * The module supports various product types including desk mats, pillows, blankets,
+ * and woven blankets, with specialized handling for each product type's materials and properties.
+ */
 import dotenv from 'dotenv';
 import yargs from 'yargs';
 import qs from 'qs';
@@ -20,6 +30,10 @@ import { ErrorType } from '../../errors/CustomError';
 
 dotenv.config();
 
+/**
+ * Command-line argument parser configuration.
+ * Defines the expected arguments and their types for the Etsy update CLI.
+ */
 const parser = yargs(hideBin(process.argv))
   .options({
     product: {
@@ -37,6 +51,19 @@ const parser = yargs(hideBin(process.argv))
   .strict()
   .help();
 
+/**
+ * Self-executing async function that serves as the entry point for the CLI.
+ * Retrieves active Etsy listings, updates their details based on product type,
+ * and synchronizes the Etsy listing IDs with the local database.
+ *
+ * The function:
+ * 1. Retrieves active listings from Etsy
+ * 2. Filters listings based on product type
+ * 3. Updates each listing with appropriate materials, properties, and tags
+ * 4. Updates the local database with Etsy listing IDs
+ *
+ * Handles errors and provides appropriate status codes and messages.
+ */
 void (async (): Promise<void> => {
   try {
     const argv = parser.parseSync();

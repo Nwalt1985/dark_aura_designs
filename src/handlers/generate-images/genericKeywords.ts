@@ -1,3 +1,15 @@
+/**
+ * Generic Keywords Module
+ *
+ * This module provides predefined sets of generic keywords for different product types.
+ * These keywords are used to supplement AI-generated keywords to improve SEO for product listings.
+ * Each array contains common search terms and phrases relevant to the specific product category.
+ */
+
+/**
+ * Generic keywords for desk mat products.
+ * Includes common search terms related to desk mats, mouse pads, and desk accessories.
+ */
 export const deskMatgenericKeywords = [
   'extended mouse pad',
   'mouse pad',
@@ -17,6 +29,10 @@ export const deskMatgenericKeywords = [
   'xxl mouse pad',
 ];
 
+/**
+ * Generic keywords for pillow products.
+ * Includes common search terms related to cushions, pillows, and home decor.
+ */
 export const pillowGenericKeywords = [
   'bench cushion',
   'bench cushion indoor',
@@ -33,6 +49,10 @@ export const pillowGenericKeywords = [
   'throw pillow for bed',
 ];
 
+/**
+ * Generic keywords for blanket products.
+ * Includes common search terms related to blankets, throws, and home textiles.
+ */
 export const blanketGenericKeywords = [
   'boho throw blanket',
   'camping blanket',
@@ -48,6 +68,10 @@ export const blanketGenericKeywords = [
   'throw blanket couch',
 ];
 
+/**
+ * Generic keywords for woven blanket products.
+ * Includes common search terms specific to woven blankets and throws.
+ */
 export const wovenBlanketGenericKeywords = [
   'woven blanket',
   'woven throw blanket',

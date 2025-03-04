@@ -1,8 +1,23 @@
+/**
+ * Error Handler Module
+ *
+ * This module provides a centralized error handling function that converts
+ * various error types into a standardized error response format.
+ * It handles custom errors, validation errors, external service errors,
+ * and unknown errors to ensure consistent error reporting.
+ */
 import { StatusCodes } from 'http-status-codes';
 import { CustomError, ErrorType, ErrorResponse } from './CustomError';
 import { ZodError } from 'zod';
 import { AxiosError } from 'axios';
 
+/**
+ * Converts any error type into a standardized error response.
+ * Handles different error classes differently to extract the most relevant information.
+ *
+ * @param {unknown} error - The error to handle (can be any type)
+ * @returns {ErrorResponse} Standardized error response object
+ */
 export function handleError(error: unknown): ErrorResponse {
   // Already handled errors
   if (error instanceof CustomError) {
