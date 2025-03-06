@@ -36,24 +36,15 @@ export async function resizeDeskmats(
     await createFile(dateDir, `${filename}-${fileId}-9450x4650.jpg`, image1Buffer);
 
     // Create the image (7080x4140)
-    const image2Buffer = await processImage(buffer, 7080, 4140, {
-      fit: 'contain',
-      position: 'center',
-    });
+    const image2Buffer = await processImage(buffer, 7080, 4140);
     await createFile(dateDir, `${filename}-${fileId}-7080x4140.jpg`, image2Buffer);
 
     // Create the image (4320x3630)
-    const image3Buffer = await processImage(buffer, 4320, 3630, {
-      fit: 'contain',
-      position: 'center',
-    });
+    const image3Buffer = await processImage(buffer, 4320, 3630);
     await createFile(dateDir, `${filename}-${fileId}-4320x3630.jpg`, image3Buffer);
 
     // Create the mockup image (2543x1254)
-    const mockupBuffer = await processImage(buffer, 2543, 1254, {
-      fit: 'contain',
-      position: 'center',
-    });
+    const mockupBuffer = await processImage(buffer, 2543, 1254);
     await createFile(dateDir, `${filename}-${fileId}-mockup-2543x1254.jpg`, mockupBuffer);
 
     Logger.info(`Successfully processed desk mat images for ${filename}`);

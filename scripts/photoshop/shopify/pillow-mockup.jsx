@@ -10,10 +10,10 @@ var templatePaths = [
 	Folder.decode('~/Desktop/dark_aura_designs/templates/pillow_templates/mockup_7.psd'),
 ];
 
-var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/pillows/');  // <---- Change to correct marketplace
-// var designFolderBasePath = Folder.decode('~/Desktop/assets/Shopify/pillows/');  // <---- Change to correct marketplace
-var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/pillows/mock_ups/'); // <---- Change to correct marketplace
-// var exportFolderBasePath = Folder.decode('~/Desktop/assets/Shopify/pillows/mock_ups/'); // <---- Change to correct marketplace
+var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/pillows/');  
+// var designFolderBasePath = Folder.decode('~/Desktop/assets/Shopify/pillows/');  
+var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/pillows/mock_ups/'); 
+// var exportFolderBasePath = Folder.decode('~/Desktop/assets/Shopify/pillows/mock_ups/'); 
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
@@ -33,12 +33,12 @@ function replaceSmartObject(newDesignPath) {
     try {
         var doc = app.activeDocument;
         var smartObjects = [];
-        
+
         // Recursive function to search through layer groups
         function findSmartObjectsInGroup(group) {
             for (var i = 0; i < group.layers.length; i++) {
                 var layer = group.layers[i];
-                
+
                 // If this is a layer group/folder, search inside it
                 if (layer.typename === "LayerSet") {
                     findSmartObjectsInGroup(layer);
@@ -53,10 +53,10 @@ function replaceSmartObject(newDesignPath) {
                 }
             }
         }
-        
+
         // Start the search from the root
         findSmartObjectsInGroup(doc);
-        
+
         // Show number of smart objects found
         // alert("Found " + smartObjects.length + " smart object(s)");
 
@@ -75,7 +75,7 @@ function replaceSmartObject(newDesignPath) {
             desc.putPath(idnull, new File(newDesignPath));
             executeAction(idplacedLayerReplaceContents, desc, DialogModes.NO);
         }
-        
+
         return true;
     } catch (e) {
         alert("Error replacing smart object with file: " + newDesignPath + "\nError: " + e);
@@ -99,7 +99,7 @@ function resetTemplate(templatePath) {
     try {
         // Close the current document without saving
         app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
-        
+
         // Reopen the template
         return openTemplate(templatePath);
     } catch (e) {
@@ -156,7 +156,7 @@ function saveMockupAsJPEG(exportPath, fileName) {
 
 function main() {
     var testFolder = new Folder(designFolderBasePath);
-    
+
     if (!testFolder.exists) {
         alert("Cannot access path: " + designFolderBasePath);
         return;
@@ -171,7 +171,7 @@ function main() {
         }
 
         var baseDesignFolder = new Folder(designFolderBasePath);
-        var allFolders = baseDesignFolder.getFiles(function (f) { 
+        var allFolders = baseDesignFolder.getFiles(function (f) {
             // Check if it's a folder and matches dd-mm-yyyy format
             if (!(f instanceof Folder)) return false;
             var datePattern = /^(\d{2})-(\d{2})-(\d{4})$/;

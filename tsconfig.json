@@ -3,7 +3,7 @@
   "exclude": [
     "node_modules",
     "src/handlers/generate-mockups/*.ts",
-    "scripts/photoshop/desk-mat-mockup.jsx",
+    "scripts/photoshop/etsy/desk-mat-mockup.jsx",
     "src/__tests__/**/*.ts"
   ],
   "compilerOptions": {

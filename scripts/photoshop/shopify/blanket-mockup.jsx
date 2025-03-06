@@ -3,18 +3,16 @@
 
 // Paths
 var templatePaths = [
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_1.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_2.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_3.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_4.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_5.psd'),
-	Folder.decode('~/Desktop/dark_aura_designs/templates/woven_blankets_templates/woven_blanket_mockup_6.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/blanket_mockup_1.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/blanket_portrait_mockup_2.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/blanket_landscape_mockup_3.psd'),
+	Folder.decode('~/Desktop/dark_aura_designs/templates/blankets_templates/person_holding_blanket_mockup_4.psd'),
 ];
 
-var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/woven_blankets/');
+var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/blanket/');
 // var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/test/');
-var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/woven_blankets/mock_ups/'); // <---- Change to correct marketplace
-// var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/test/mock_ups/'); // <---- Change to correct marketplace
+var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/blanket/mock_ups/');
+// var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/test/mock_ups/');
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
@@ -33,12 +31,12 @@ function replaceSmartObject(newDesignPath) {
     try {
         var doc = app.activeDocument;
         var smartObjects = [];
-        
+
         // Recursive function to search through layer groups
         function findSmartObjectsInGroup(group) {
             for (var i = 0; i < group.layers.length; i++) {
                 var layer = group.layers[i];
-                
+
                 // If this is a layer group/folder, search inside it
                 if (layer.typename === "LayerSet") {
                     findSmartObjectsInGroup(layer);
@@ -47,17 +45,16 @@ function replaceSmartObject(newDesignPath) {
                 else if (layer.typename === "ArtLayer" && layer.kind === LayerKind.SMARTOBJECT) {
                     var lowerName = layer.name.toLowerCase();
 
-                    if (lowerName.indexOf("design: blanket") !== -1 || 
-                        lowerName.indexOf("(auto) design: blanket") !== -1) {
-                        smartObjects.push(layer);
-                    }
+                    if (lowerName.indexOf("rectangle 1") !== -1) {
+						smartObjects.push(layer)
+					}
                 }
             }
         }
-        
+
         // Start the search from the root
         findSmartObjectsInGroup(doc);
-        
+
         // Show number of smart objects found
         // alert("Found " + smartObjects.length + " smart object(s)");
 
@@ -76,7 +73,7 @@ function replaceSmartObject(newDesignPath) {
             desc.putPath(idnull, new File(newDesignPath));
             executeAction(idplacedLayerReplaceContents, desc, DialogModes.NO);
         }
-        
+
         return true;
     } catch (e) {
         alert("Error replacing smart object with file: " + newDesignPath + "\nError: " + e);
@@ -96,44 +93,32 @@ function isValidDesignForTemplate(designFile, templatePath) {
 	var isPortrait = designFile.name.indexOf('_portrait') !== -1;
 
 	switch (templateName) {
-		case "woven_blanket_template_1.psd":
+		case "blanket_template_1.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
+				return designFile.name.indexOf('-mockup-rotated-1063x826') !== -1;
 			} else {
-				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
+				return designFile.name.indexOf('-mockup-1063x826') !== -1;
 			}
-		case "woven_blanket_template_2.psd":
+		case "blanket_portrait.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-9601x8000') !== -1;
+				return designFile.name.indexOf('-mockup-826x1063') !== -1;
 			} else {
-				return designFile.name.indexOf('-mockup-8000x9601') !== -1;
+				return designFile.name.indexOf('-mockup-rotated-826x1063') !== -1;
 			}
-		case "woven_blanket_template_3.psd":
+		case "blanket_landscape.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-cropped-4290x2910') !== -1;
+				return designFile.name.indexOf('-mockup-826x1063') !== -1;
 			} else {
-				return designFile.name.indexOf('-mockup-cropped-4290x2910') !== -1;
+				return designFile.name.indexOf('-mockup-1063x826.jpg') !== -1;
 			}
-		case "woven_blanket_template_4.psd":
+		case "person_holding_blanket.psd":
 			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
+				return designFile.name.indexOf('-mockup-826x1063') !== -1;
 			} else {
-				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
-			}
-		case "woven_blanket_template_5.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-2868x3442') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-rotated-2868x3442') !== -1;
-			}
-		case "woven_blanket_template_6.psd":
-			if (isPortrait) {
-				return designFile.name.indexOf('-mockup-rotated-3613x3037') !== -1;
-			} else {
-				return designFile.name.indexOf('-mockup-3613x3037') !== -1;
+				return designFile.name.indexOf('-mockup-rotated-826x1063') !== -1;
 			}
 	}
-    
+
     // For all other templates, accept any mockup file
     return designFile.name.indexOf('-mockup-') !== -1;
 }
@@ -143,7 +128,7 @@ function resetTemplate(templatePath) {
     try {
         // Close the current document without saving
         app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
-        
+
         // Reopen the template
         return openTemplate(templatePath);
     } catch (e) {
@@ -156,6 +141,7 @@ function resetTemplate(templatePath) {
 function processDesignFolder(designFolder, exportFolder, templatePath) {
 	var templateNumber = templatePath.match(/mockup_(\d+)\.psd$/i)[1];
     var designFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
+
 
     for (var i = 0; i < designFiles.length; i++) {
         var designFile = designFiles[i];
@@ -196,9 +182,10 @@ function saveMockupAsJPEG(exportPath, fileName) {
 }
 
 // Main function
+
 function main() {
     var testFolder = new Folder(designFolderBasePath);
-    
+
     if (!testFolder.exists) {
         alert("Cannot access path: " + designFolderBasePath);
         return;
@@ -213,7 +200,7 @@ function main() {
         }
 
         var baseDesignFolder = new Folder(designFolderBasePath);
-        var allFolders = baseDesignFolder.getFiles(function (f) { 
+        var allFolders = baseDesignFolder.getFiles(function (f) {
             // Check if it's a folder and matches dd-mm-yyyy format
             if (!(f instanceof Folder)) return false;
             var datePattern = /^(\d{2})-(\d{2})-(\d{4})$/;
@@ -234,6 +221,5 @@ function main() {
         }
     }
 }
-
 // Run the script
 main();
