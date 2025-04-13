@@ -6,6 +6,12 @@ export enum ProductName {
   PILLOW_COVER = 'pillow cover',
 }
 
+export enum VarSize {
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
+}
+
 export enum Marketplace {
   ETSY = 'Etsy',
   SHOPIFY = 'Shopify',

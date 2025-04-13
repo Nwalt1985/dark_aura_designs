@@ -2,16 +2,16 @@
 #target photoshop;
 
 // Paths
+
 var templatePaths = [
 	Folder.decode('~/Desktop/dark_aura_designs/templates/desk_mat_templates/desk_mat_branding_mockup_1.psd'),
 	Folder.decode('~/Desktop/dark_aura_designs/templates/desk_mat_templates/desk_mat_branding_mockup_2.psd'),
 	Folder.decode('~/Desktop/dark_aura_designs/templates/desk_mat_templates/desk_mat_branding_mockup_3.psd'),
 	Folder.decode('~/Desktop/dark_aura_designs/templates/desk_mat_templates/desk_mat_branding_mockup_4.psd'),
-	// Folder.decode('~/Desktop/dark_aura_designs/templates/desk_mat_templates/desk_mat_branding_mockup_5.psd'),
 ];
 
-var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/desk_mats/'); 
-var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/desk_mats/mock_ups/'); 
+var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/desk_mats/');
+var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/desk_mats/mock_ups/');
 
 // Function to open the PSD template
 function openTemplate(templatePath) {
@@ -26,57 +26,104 @@ function openTemplate(templatePath) {
     }
 }
 
-// Function to replace the contents of the smart object
-function replaceSmartObject(newDesignPath) {
+function findDesignFileForSmartObject(designFolder, smartObjectName, baseName) {
     try {
-        var doc = app.activeDocument;
-        var smartObjects = [];
+        var designFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
+        var targetSize = "";
 
-        // Recursive function to search through layer groups
-        function findSmartObjectsInGroup(group) {
-            for (var i = 0; i < group.layers.length; i++) {
-                var layer = group.layers[i];
+        // Determine which size we're looking for based on the smart object name
+        switch(smartObjectName.toLowerCase()) {
+            case "small":
+                targetSize = "2160x1815";
+                break;
+            case "medium":
+                targetSize = "3540x2070";
+                break;
+            case "large":
+                targetSize = "4725x2325";
+                break;
+            default:
+                targetSize = "2543x1254"; // Default size
+        }
 
-                // If this is a layer group/folder, search inside it
-                if (layer.typename === "LayerSet") {
-                    findSmartObjectsInGroup(layer);
-                }
-                // If this is a smart object, check if it matches our criteria
-                else if (layer.typename === "ArtLayer" && layer.kind === LayerKind.SMARTOBJECT) {
-                    var lowerName = layer.name.toLowerCase();
+        // First try to find the specific size for this base name, excluding hidden files
+        for (var i = 0; i < designFiles.length; i++) {
+            var fileName = designFiles[i].name;
+            if (fileName.indexOf('._') !== 0 &&
+                fileName.indexOf(baseName) !== -1 &&
+                fileName.indexOf(targetSize) !== -1) {
+                return designFiles[i];
+            }
+        }
 
-                    if (lowerName.indexOf("rectangle 1") !== -1){
-                        smartObjects.push(layer);
-                    }
+        // If specific size not found and this is not a default case, try the default size
+        if (targetSize !== "2543x1254") {
+            for (var i = 0; i < designFiles.length; i++) {
+                var fileName = designFiles[i].name;
+                if (fileName.indexOf('._') !== 0 &&
+                    fileName.indexOf(baseName) !== -1 &&
+                    fileName.indexOf("2543x1254") !== -1) {
+                    return designFiles[i];
                 }
             }
         }
 
-        // Start the search from the root
-        findSmartObjectsInGroup(doc);
+        return null;
+    } catch (e) {
+        alert("Error in findDesignFileForSmartObject: " + e);
+        return null;
+    }
+}
 
-        // Show number of smart objects found
-        // alert("Found " + smartObjects.length + " smart object(s)");
+function replaceSmartObject(designFolder, smartObject, baseName) {
+    try {
+        var doc = app.activeDocument;
+        var designFile = findDesignFileForSmartObject(designFolder, smartObject.name, baseName);
 
-        // If no smart objects found, show error
-        if (smartObjects.length === 0) {
-            alert("No matching smart objects found in template.");
+        if (!designFile) {
+            // alert("No suitable design file found for smart object: " + smartObject.name);
             return false;
         }
 
-        // Replace contents for each found smart object
-        for (var j = 0; j < smartObjects.length; j++) {
-            doc.activeLayer = smartObjects[j];
+        // Make sure the design file exists and is readable
+        if (!designFile.exists) {
+            alert("Design file does not exist: " + designFile.fsName);
+            return false;
+        }
+
+        // Select the smart object layer
+        doc.activeLayer = smartObject;
+
+        // Verify the layer is actually a smart object
+        if (doc.activeLayer.kind !== LayerKind.SMARTOBJECT) {
+            alert("Selected layer is not a smart object: " + smartObject.name);
+            return false;
+        }
+
+        // Create a new file reference for the design file
+        var newFile = new File(designFile.fsName);
+
+        // Try to replace the smart object contents
+        try {
             var idplacedLayerReplaceContents = stringIDToTypeID("placedLayerReplaceContents");
             var desc = new ActionDescriptor();
             var idnull = charIDToTypeID("null");
-            desc.putPath(idnull, new File(newDesignPath));
+            desc.putPath(idnull, newFile);
             executeAction(idplacedLayerReplaceContents, desc, DialogModes.NO);
+        } catch (e) {
+            alert("Error replacing smart object contents: " + e + "\nFile: " + designFile.name);
+            return false;
+        }
+
+        // Verify the replacement was successful
+        if (doc.activeLayer.kind !== LayerKind.SMARTOBJECT) {
+            alert("Smart object replacement failed for: " + smartObject.name);
+            return false;
         }
 
         return true;
     } catch (e) {
-        alert("Error replacing smart object with file: " + newDesignPath + "\nError: " + e);
+        alert("Error in replaceSmartObject: " + e + "\nSmart Object: " + smartObject.name);
         return false;
     }
 }
@@ -111,26 +158,103 @@ function resetTemplate(templatePath) {
     }
 }
 
+function saveMockupAsJPEG(exportPath, fileName) {
+    try {
+        var exportFolder = new Folder(exportPath);
+        if (!exportFolder.exists) {
+            exportFolder.create();
+        }
+
+        // Flatten the image before saving
+        activeDocument.flatten();
+
+        // Save directly as JPEG
+        var jpegFile = new File(exportPath + "/" + fileName + ".jpg");
+        var jpegOptions = new JPEGSaveOptions();
+        jpegOptions.quality = 10;
+        jpegOptions.embedColorProfile = true;
+        jpegOptions.formatOptions = FormatOptions.STANDARDBASELINE;
+        jpegOptions.matte = MatteType.NONE;
+
+        activeDocument.saveAs(jpegFile, jpegOptions, true, Extension.LOWERCASE);
+
+        // Verify the JPEG file was created
+        if (!jpegFile.exists) {
+            throw new Error("JPEG file was not created successfully");
+        }
+
+        return true;
+    } catch (e) {
+        alert("Error saving JPEG: " + e + "\nFile: " + fileName);
+        return false;
+    }
+}
+
 // Function to process each design folder
 function processDesignFolder(designFolder, exportFolder, templatePath) {
-	var templateNumber = templatePath.match(/mockup_(\d+)\.psd$/i)[1];
-    var designFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
+    var templateNumber = templatePath.match(/mockup_(\d+)\.psd$/i)[1];
 
-    for (var i = 0; i < designFiles.length; i++) {
-        var designFile = designFiles[i];
+    // Get unique design names (without size and extension)
+    var allFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
+    var processedDesigns = {};
 
-        // Skip files that start with '._'
-        if (designFile.name.indexOf('._') === 0) continue;
+    // Group files by base design name
+    for (var i = 0; i < allFiles.length; i++) {
+        if (allFiles[i].name.indexOf('._') === 0) continue; // Skip hidden files
 
-        if (isValidDesignForTemplate(designFile, templatePath)) {
-            var fileName = designFile.name.split('.')[0] + '_' + templateNumber;
+        // Extract base name (remove size pattern and any existing mockup patterns)
+        var baseName = allFiles[i].name
+            .replace(/-\d{3,4}x\d{3,4}.*$/, '')
+            .replace(/-mockup.*$/, '');
 
-            if (mockupExists(exportFolder, fileName)) {
+        if (!processedDesigns[baseName]) {
+            // Check if mockup already exists
+            var mockupFileName = baseName + '-mockup_' + templateNumber;
+            if (mockupExists(exportFolder, mockupFileName)) {
                 continue;
             }
 
-            if (replaceSmartObject(designFile.fsName)) {
-                saveMockupAsJPEG(exportFolder, fileName);
+            // Find all smart objects in the template
+            var doc = app.activeDocument;
+            var smartObjects = [];
+
+            function findSmartObjectsInGroup(group) {
+                for (var i = 0; i < group.layers.length; i++) {
+                    var layer = group.layers[i];
+                    if (layer.typename === "LayerSet") {
+                        findSmartObjectsInGroup(layer);
+                    } else if (layer.typename === "ArtLayer" && layer.kind === LayerKind.SMARTOBJECT) {
+                        var lowerName = layer.name.toLowerCase();
+                        if (lowerName.indexOf("small") !== -1 ||
+                            lowerName.indexOf("medium") !== -1 ||
+                            lowerName.indexOf("large") !== -1 ||
+							lowerName.indexOf("default") !== -1) {
+                            smartObjects.push(layer);
+                        }
+                    }
+                }
+            }
+
+            findSmartObjectsInGroup(doc);
+
+            if (smartObjects.length === 0) {
+                alert("No matching smart objects found in template.");
+                continue;
+            }
+
+            // Replace each smart object with its corresponding design file
+            var success = true;
+            for (var j = 0; j < smartObjects.length; j++) {
+                if (!replaceSmartObject(designFolder, smartObjects[j], baseName)) {
+                    success = false;
+                    break;
+                }
+            }
+
+            if (success) {
+                saveMockupAsJPEG(exportFolder, mockupFileName);
+                processedDesigns[baseName] = true;
+
                 // Reset template after successful save
                 if (!resetTemplate(templatePath)) {
                     return; // Stop processing if reset fails
@@ -138,20 +262,6 @@ function processDesignFolder(designFolder, exportFolder, templatePath) {
             }
         }
     }
-}
-
-// Function to save the image as a PNG
-function saveMockupAsJPEG(exportPath, fileName) {
-    var exportFolder = new Folder(exportPath);
-    if (!exportFolder.exists) {
-        exportFolder.create();
-    }
-    var saveFile = new File(exportPath + "/" + fileName + ".jpg"); // Change extension to .jpg
-
-    var jpegOptions = new JPEGSaveOptions();
-    jpegOptions.quality = 6; // Set maximum quality (1 to 12, where 12 is the highest)
-
-    activeDocument.saveAs(saveFile, jpegOptions, true, Extension.LOWERCASE);
 }
 
 function main() {

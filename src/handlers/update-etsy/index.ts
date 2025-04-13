@@ -142,6 +142,8 @@ void (async (): Promise<void> => {
         production_partner_ids: '4415768',
       });
 
+      Logger.info(`Updating listing ${listing_id} - ${title}`);
+
       await updateEtsyListing(shopId, listing_id, title, data);
     }
 

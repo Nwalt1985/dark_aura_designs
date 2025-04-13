@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Logger } from 'src/errors/logger';
-import { ErrorType } from 'src/errors/CustomError';
+import { Logger } from '../errors/logger';
+import { ErrorType } from '../errors/CustomError';
 
 /**
  * Path to the directory containing files to be renamed.
@@ -9,11 +9,11 @@ import { ErrorType } from 'src/errors/CustomError';
  */
 const FOLDER_PATH = path.resolve(
   process.env['HOME'] || '',
-  `Desktop/dark_aura_designs/rescale_pillow_covers`,
+  `Desktop/dark_aura_designs/rescale_desk_mats`,
 );
 
 /**
- * Renames files in the specified directory by removing pattern matching "-numbers-4050x4050".
+ * Renames files in the specified directory by removing pattern matching "-numbers-9450x4650".
  *
  * This function processes all files in the FOLDER_PATH directory, removing dimension and
  * identifier information from filenames to create cleaner file names.
@@ -30,8 +30,8 @@ function renameFiles(): Promise<void> {
       Logger.info(`${JSON.stringify(files)}`);
 
       for (const file of files) {
-        // Match pattern: anything followed by -numbers-4050x4050
-        const newFileName = file.replace(/-\d+-4050x4050/, '');
+        // Match pattern: anything followed by -numbers-9450x4650
+        const newFileName = file.replace(/-\d+-9450x4650/, '');
 
         if (file !== newFileName) {
           const oldPath = path.join(FOLDER_PATH, file);

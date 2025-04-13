@@ -188,7 +188,7 @@ function codeChallenge(): CodeChallengeResult {
   const codeChallenge = base64URLEncode(sha256(codeVerifier));
   const state = Math.random().toString(36).substring(7);
   const clientId = process.env['ETSY_KEY_STRING'];
-  const fullUrl = `https://www.etsy.com/oauth/connect?response_type=code&redirect_uri=http://localhost:3003/oauth/redirect&scope=listings_w&client_id=${clientId}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+  const fullUrl = `https://www.etsy.com/oauth/connect?response_type=code&redirect_uri=http://localhost:3003/oauth/redirect&scope=listings_w%20listings_r&client_id=${clientId}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
 
   return {
     codeChallenge,

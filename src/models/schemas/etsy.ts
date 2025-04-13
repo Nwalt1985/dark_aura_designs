@@ -68,3 +68,83 @@ export const EtsyListingSchema = z.object({
 export const EtsyListingRequestSchema = z.array(z.string()).max(13);
 
 export type EtsyListingType = z.infer<typeof EtsyListingSchema>;
+
+export const EtsyInventorySchema = z.object({
+  products: z.array(
+    z.object({
+      product_id: z.number().optional(),
+      sku: z.string(),
+      is_deleted: z.boolean().optional(),
+      offerings: z.array(
+        z.object({
+          offering_id: z.number().optional(),
+          quantity: z.number(),
+          is_enabled: z.boolean(),
+          is_deleted: z.boolean().optional(),
+          price: z.object({
+            amount: z.number(),
+            divisor: z.number(),
+            currency_code: z.string(),
+          }),
+          property_values: z
+            .array(
+              z.object({
+                property_id: z.number(),
+                property_name: z.string(),
+                scale_id: z.number().nullable(),
+                scale_name: z.string().nullable(),
+                value_ids: z.array(z.number()),
+                values: z.array(z.string()),
+              }),
+            )
+            .optional(),
+        }),
+      ),
+      property_values: z.array(
+        z.object({
+          property_id: z.number(),
+          property_name: z.string(),
+          scale_id: z.number().nullable(),
+          scale_name: z.string().nullable(),
+          value_ids: z.array(z.number()),
+          values: z.array(z.string()),
+        }),
+      ),
+    }),
+  ),
+  price_on_property: z.array(z.number()),
+  quantity_on_property: z.array(z.number()),
+  sku_on_property: z.array(z.number()),
+  listing: z.null(),
+});
+
+export type EtsyInventoryType = z.infer<typeof EtsyInventorySchema>;
+
+export const EtsyInventoryUpdateSchema = z.object({
+  products: z.array(
+    z.object({
+      sku: z.string(),
+      offerings: z.array(
+        z.object({
+          quantity: z.number(),
+          is_enabled: z.boolean(),
+          price: z.number(),
+        }),
+      ),
+      property_values: z.array(
+        z.object({
+          property_id: z.number(),
+          property_name: z.string(),
+          scale_id: z.number().nullable(),
+          value_ids: z.array(z.number()),
+          values: z.array(z.string()),
+        }),
+      ),
+    }),
+  ),
+  price_on_property: z.array(z.number()),
+  quantity_on_property: z.array(z.number()),
+  sku_on_property: z.array(z.number()),
+});
+
+export type EtsyInventoryUpdateType = z.infer<typeof EtsyInventoryUpdateSchema>;
