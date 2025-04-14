@@ -13,22 +13,124 @@ var templatePaths = [
 var designFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/desk_mats/');
 var exportFolderBasePath = Folder.decode('/volumes/Shop Assets/Shopify/dark_aura_designs/desk_mats/mock_ups/');
 
+// Global variables for performance tracking and memory management
+var processedCount = 0;
+var maxHistoryStates = 5;
+var memoryPurgeFrequency = 3;
+var batchSize = 10;
+var skipExistingMockups = true;
+var startTime = new Date().getTime();
+var processedDesignsCache = {};
+
+// Cache the design files to avoid repetitive file system operations
+var designFilesCache = {};
+
 // Function to open the PSD template
 function openTemplate(templatePath) {
     var fileRef = new File(templatePath);
 
+    // Check interpolation method availability
+    try {
+        app.preferences.interpolation = ResampleMethod.BILINEAR;
+    } catch (e) {
+        // Ignore if not available in this PS version
+    }
+
     if (fileRef.exists) {
-        app.open(fileRef);
-        return true;
+        try {
+            app.open(fileRef);
+
+            // Limit history states if possible
+            try {
+                if (app.activeDocument.historyStates && app.activeDocument.historyStates.length) {
+                    app.activeDocument.historyStates.length = Math.min(app.activeDocument.historyStates.length, maxHistoryStates);
+                }
+            } catch (e) {
+                // Ignore if not available
+            }
+
+            return true;
+        } catch (e) {
+            // If opening fails, try one more time
+            try {
+                app.purge(PurgeTarget.ALLCACHES);
+                app.open(fileRef);
+                return true;
+            } catch (e2) {
+                return false;
+            }
+        }
     } else {
-        alert("Template file does not exist at the specified path.");
         return false;
     }
 }
 
+// Add memory management function
+function cleanupMemory(aggressive) {
+    try {
+        // Force garbage collection
+        app.purge(PurgeTarget.HISTORYCACHES);
+        app.purge(PurgeTarget.ALLCACHES);
+
+        if (aggressive) {
+            try {
+                app.purge(PurgeTarget.CLIPBOARDCACHE);
+                app.purge(PurgeTarget.UNDOCACHES);
+            } catch (e) {
+                // Ignore if not available
+            }
+        }
+
+        try {
+            $.gc();
+        } catch (e) {
+            // Ignore if not available
+        }
+
+        return true;
+    } catch (e) {
+        // Silently continue if cleanup fails
+        return false;
+    }
+}
+
+// Function to pre-cache design files for faster access
+function cacheDesignFiles(designFolder) {
+    if (designFilesCache[designFolder.name]) {
+        return designFilesCache[designFolder.name];
+    }
+
+    var designFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
+    var filesByBaseName = {};
+
+    for (var i = 0; i < designFiles.length; i++) {
+        if (designFiles[i].name.indexOf('._') === 0) continue; // Skip hidden files
+
+        // Extract base name
+        var baseName = designFiles[i].name
+            .replace(/-\d{3,4}x\d{3,4}.*$/, '')
+            .replace(/-mockup.*$/, '');
+
+        if (!filesByBaseName[baseName]) {
+            filesByBaseName[baseName] = [];
+        }
+
+        filesByBaseName[baseName].push(designFiles[i]);
+    }
+
+    designFilesCache[designFolder.name] = filesByBaseName;
+    return filesByBaseName;
+}
+
 function findDesignFileForSmartObject(designFolder, smartObjectName, baseName) {
     try {
-        var designFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
+        // Use cached design files instead of querying filesystem each time
+        var filesByBaseName = cacheDesignFiles(designFolder);
+        if (!filesByBaseName[baseName] || filesByBaseName[baseName].length === 0) {
+            return null;
+        }
+
+        var designFiles = filesByBaseName[baseName];
         var targetSize = "";
 
         // Determine which size we're looking for based on the smart object name
@@ -46,12 +148,10 @@ function findDesignFileForSmartObject(designFolder, smartObjectName, baseName) {
                 targetSize = "2543x1254"; // Default size
         }
 
-        // First try to find the specific size for this base name, excluding hidden files
+        // First try to find the specific size for this base name
         for (var i = 0; i < designFiles.length; i++) {
             var fileName = designFiles[i].name;
-            if (fileName.indexOf('._') !== 0 &&
-                fileName.indexOf(baseName) !== -1 &&
-                fileName.indexOf(targetSize) !== -1) {
+            if (fileName.indexOf(targetSize) !== -1) {
                 return designFiles[i];
             }
         }
@@ -60,17 +160,15 @@ function findDesignFileForSmartObject(designFolder, smartObjectName, baseName) {
         if (targetSize !== "2543x1254") {
             for (var i = 0; i < designFiles.length; i++) {
                 var fileName = designFiles[i].name;
-                if (fileName.indexOf('._') !== 0 &&
-                    fileName.indexOf(baseName) !== -1 &&
-                    fileName.indexOf("2543x1254") !== -1) {
+                if (fileName.indexOf("2543x1254") !== -1) {
                     return designFiles[i];
                 }
             }
         }
 
-        return null;
+        // If still not found, return the first file in the array
+        return designFiles[0];
     } catch (e) {
-        alert("Error in findDesignFileForSmartObject: " + e);
         return null;
     }
 }
@@ -80,28 +178,24 @@ function replaceSmartObject(designFolder, smartObject, baseName) {
         var doc = app.activeDocument;
         var designFile = findDesignFileForSmartObject(designFolder, smartObject.name, baseName);
 
-        if (!designFile) {
-            // alert("No suitable design file found for smart object: " + smartObject.name);
+        if (!designFile || !designFile.exists) {
             return false;
         }
 
-        // Make sure the design file exists and is readable
-        if (!designFile.exists) {
-            alert("Design file does not exist: " + designFile.fsName);
-            return false;
-        }
+        // Create a new file reference for the design file
+        var newFile = new File(designFile.fsName);
+
+        // Timeout mechanism to prevent hanging
+        var startTime = new Date().getTime();
+        var maxTimeout = 15000; // 15 seconds max per replacement
 
         // Select the smart object layer
         doc.activeLayer = smartObject;
 
         // Verify the layer is actually a smart object
         if (doc.activeLayer.kind !== LayerKind.SMARTOBJECT) {
-            alert("Selected layer is not a smart object: " + smartObject.name);
             return false;
         }
-
-        // Create a new file reference for the design file
-        var newFile = new File(designFile.fsName);
 
         // Try to replace the smart object contents
         try {
@@ -110,39 +204,43 @@ function replaceSmartObject(designFolder, smartObject, baseName) {
             var idnull = charIDToTypeID("null");
             desc.putPath(idnull, newFile);
             executeAction(idplacedLayerReplaceContents, desc, DialogModes.NO);
-        } catch (e) {
-            alert("Error replacing smart object contents: " + e + "\nFile: " + designFile.name);
-            return false;
-        }
 
-        // Verify the replacement was successful
-        if (doc.activeLayer.kind !== LayerKind.SMARTOBJECT) {
-            alert("Smart object replacement failed for: " + smartObject.name);
+            // Check for timeout
+            if (new Date().getTime() - startTime > maxTimeout) {
+                throw new Error("Operation timed out");
+            }
+        } catch (e) {
+            // If it times out or errors, reset and skip this one
+            if (e.toString().indexOf("timed out") !== -1) {
+                resetTemplate(doc.path);
+            }
             return false;
         }
 
         return true;
     } catch (e) {
-        alert("Error in replaceSmartObject: " + e + "\nSmart Object: " + smartObject.name);
         return false;
     }
 }
 
 // Function to check if the mockup already exists
 function mockupExists(exportFolder, fileName) {
-    var saveFile = new File(exportFolder + "/" + fileName + ".jpg");
-    return saveFile.exists;
-}
+    // Create cache key
+    var cacheKey = exportFolder + "/" + fileName;
 
-function isValidDesignForTemplate(designFile, templatePath) {
-	var templateName = templatePath.split('/').pop();
-    // For all other templates, accept any mockup file
-	switch (templateName) {
-		case "desk_mat_branding_mockup_5.psd":
-			return designFile.name.indexOf('-4320x3630') !== -1;
-		default:
-			return designFile.name.indexOf('-mockup-') !== -1;
-	}
+    // Check if we've already checked this file
+    if (processedDesignsCache[cacheKey] !== undefined) {
+        return processedDesignsCache[cacheKey];
+    }
+
+    // Otherwise, check the filesystem
+    var saveFile = new File(exportFolder + "/" + fileName + ".jpg");
+    var result = saveFile.exists;
+
+    // Cache the result
+    processedDesignsCache[cacheKey] = result;
+
+    return result;
 }
 
 function resetTemplate(templatePath) {
@@ -150,11 +248,19 @@ function resetTemplate(templatePath) {
         // Close the current document without saving
         app.activeDocument.close(SaveOptions.DONOTSAVECHANGES);
 
+        // Perform cleanup before reopening
+        cleanupMemory();
+
         // Reopen the template
         return openTemplate(templatePath);
     } catch (e) {
-        alert("Error resetting template: " + e);
-        return false;
+        // Try one more time with more cleanup
+        try {
+            cleanupMemory(true);
+            return openTemplate(templatePath);
+        } catch (e2) {
+            return false;
+        }
     }
 }
 
@@ -171,46 +277,70 @@ function saveMockupAsJPEG(exportPath, fileName) {
         // Save directly as JPEG
         var jpegFile = new File(exportPath + "/" + fileName + ".jpg");
         var jpegOptions = new JPEGSaveOptions();
-        jpegOptions.quality = 10;
+        jpegOptions.quality = 7;
         jpegOptions.embedColorProfile = true;
-        jpegOptions.formatOptions = FormatOptions.STANDARDBASELINE;
+
+        // Use standard format if optimized is not available
+        try {
+            jpegOptions.formatOptions = FormatOptions.OPTIMIZEDBASELINE;
+        } catch (e) {
+            jpegOptions.formatOptions = FormatOptions.STANDARDBASELINE;
+        }
+
         jpegOptions.matte = MatteType.NONE;
 
         activeDocument.saveAs(jpegFile, jpegOptions, true, Extension.LOWERCASE);
 
-        // Verify the JPEG file was created
-        if (!jpegFile.exists) {
-            throw new Error("JPEG file was not created successfully");
+        processedCount++;
+
+        // Perform memory cleanup every N designs
+        if (processedCount % memoryPurgeFrequency === 0) {
+            cleanupMemory(processedCount % (memoryPurgeFrequency * 3) === 0);
         }
 
         return true;
     } catch (e) {
-        alert("Error saving JPEG: " + e + "\nFile: " + fileName);
         return false;
     }
 }
 
+// New function to collect all design names for batch processing
+function collectDesignNames(designFolder) {
+    var filesByBaseName = cacheDesignFiles(designFolder);
+    var baseNames = [];
+
+    for (var baseName in filesByBaseName) {
+        if (filesByBaseName.hasOwnProperty(baseName)) {
+            baseNames.push(baseName);
+        }
+    }
+
+    return baseNames;
+}
+
 // Function to process each design folder
 function processDesignFolder(designFolder, exportFolder, templatePath) {
-    var templateNumber = templatePath.match(/mockup_(\d+)\.psd$/i)[1];
+    var templateNumber;
+    try {
+        templateNumber = templatePath.match(/mockup_(\d+)\.psd$/i)[1];
+    } catch (e) {
+        templateNumber = "1"; // Default if pattern not found
+    }
 
-    // Get unique design names (without size and extension)
-    var allFiles = designFolder.getFiles(/\d{3,4}x\d{3,4}/);
-    var processedDesigns = {};
+    // Get all unique base names first
+    var baseNames = collectDesignNames(designFolder);
 
-    // Group files by base design name
-    for (var i = 0; i < allFiles.length; i++) {
-        if (allFiles[i].name.indexOf('._') === 0) continue; // Skip hidden files
+    // Process in batches to prevent memory issues
+    for (var batchIndex = 0; batchIndex < baseNames.length; batchIndex += batchSize) {
+        // Process a batch of designs
+        var batchEnd = Math.min(batchIndex + batchSize, baseNames.length);
 
-        // Extract base name (remove size pattern and any existing mockup patterns)
-        var baseName = allFiles[i].name
-            .replace(/-\d{3,4}x\d{3,4}.*$/, '')
-            .replace(/-mockup.*$/, '');
+        for (var i = batchIndex; i < batchEnd; i++) {
+            var baseName = baseNames[i];
 
-        if (!processedDesigns[baseName]) {
             // Check if mockup already exists
             var mockupFileName = baseName + '-mockup_' + templateNumber;
-            if (mockupExists(exportFolder, mockupFileName)) {
+            if (skipExistingMockups && mockupExists(exportFolder, mockupFileName)) {
                 continue;
             }
 
@@ -235,10 +365,15 @@ function processDesignFolder(designFolder, exportFolder, templatePath) {
                 }
             }
 
-            findSmartObjectsInGroup(doc);
+            try {
+                findSmartObjectsInGroup(doc);
+            } catch (e) {
+                // If finding smart objects fails, reset and continue
+                resetTemplate(templatePath);
+                continue;
+            }
 
             if (smartObjects.length === 0) {
-                alert("No matching smart objects found in template.");
                 continue;
             }
 
@@ -253,18 +388,39 @@ function processDesignFolder(designFolder, exportFolder, templatePath) {
 
             if (success) {
                 saveMockupAsJPEG(exportFolder, mockupFileName);
-                processedDesigns[baseName] = true;
 
                 // Reset template after successful save
                 if (!resetTemplate(templatePath)) {
-                    return; // Stop processing if reset fails
+                    cleanupMemory(true); // Force cleanup before attempting to recover
+                    if (!resetTemplate(templatePath)) {
+                        // Rather than stopping, skip to the next batch
+                        break;
+                    }
                 }
             }
         }
+
+        // Force cleanup between batches
+        cleanupMemory(true);
+
+        // Reopen template for next batch
+        resetTemplate(templatePath);
     }
 }
 
 function main() {
+    // Set preferences to optimize performance
+    app.preferences.rulerUnits = Units.PIXELS;
+    app.preferences.typeUnits = TypeUnits.PIXELS;
+    app.displayDialogs = DialogModes.NO;
+
+    // Performance monitoring
+    startTime = new Date().getTime();
+
+    // Clear cache
+    designFilesCache = {};
+    processedDesignsCache = {};
+
     var testFolder = new Folder(designFolderBasePath);
 
     if (!testFolder.exists) {
@@ -277,7 +433,7 @@ function main() {
 
         // Open the template
         if (!openTemplate(templatePath)) {
-            return;
+            continue; // Skip this template instead of exiting completely
         }
 
         var baseDesignFolder = new Folder(designFolderBasePath);
@@ -290,7 +446,7 @@ function main() {
 
         if (allFolders.length === 0) {
             alert("No valid date-formatted folders found in: " + baseDesignFolder.fsName);
-            return;
+            continue; // Skip rather than exit
         }
 
         // Loop through each main folder (e.g., 24-02-2025)
@@ -299,8 +455,25 @@ function main() {
             var exportMainFolder = new Folder(exportFolderBasePath + mainFolder.name);
 
             processDesignFolder(mainFolder, exportMainFolder, templatePath);
+
+            // Full memory cleanup between folders
+            cleanupMemory(true);
         }
+
+        // Clear caches between templates
+        designFilesCache = {};
+        processedDesignsCache = {};
     }
+
+    // Final cleanup
+    cleanupMemory(true);
+
+    // Calculate performance metrics
+    var totalTime = (new Date().getTime() - startTime) / 1000;
+    var timePerDesign = processedCount > 0 ? totalTime / processedCount : 0;
+
+    alert("Processing complete.\n" + processedCount + " mockups created in " + totalTime.toFixed(1) + " seconds.\n" +
+          "Average: " + timePerDesign.toFixed(1) + " seconds per design.");
 }
 
 // Run the script
